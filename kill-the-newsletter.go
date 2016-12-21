@@ -292,7 +292,7 @@ func template(view string) string {
 
       <h1>Fair Play</h1>
 
-      <p>There’s nothing technical preventing the use of ` + name + ` as disposable email inboxes. But the service exists for a single, well-defined purpose: to transform email newsletters into Atom feeds. Any other use isn’t welcome and abuse is going to result in shutting down the service for everyone. Please help keep ` + name + ` alive by using <a href="https://www.mailinator.com/">Mailinator</a>, <a href="https://www.guerrillamail.com/">Guerrilla Mail</a> and others for your disposable-email needs.</p>
+      <p>There’s nothing technical preventing the use of ` + name + ` as disposable email inboxes. But the service exists for a single, well-defined purpose: to transform email newsletters into Atom feeds. Any other use isn’t welcome and abuse is going to result in service shutdown for everyone, which is sad. Please help keep ` + name + ` alive by using <a href="https://www.mailinator.com/">Mailinator</a>, <a href="https://www.guerrillamail.com/">Guerrilla Mail</a> and others for your disposable-email needs.</p>
 
       <h1>License</h1>
 
