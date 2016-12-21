@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/jhillyerd/enmime"
 	"github.com/mhale/smtpd"
@@ -17,23 +18,57 @@ import (
 	"time"
 )
 
-const server = ":80"
-const emailServer = ":25"
-const feedsPath = "/var/www/www.kill-the-newsletter.com/feeds/"
-const host = "https://www.kill-the-newsletter.com"
-const emailHost = "kill-the-newsletter.com"
-const feedsURI = "/feeds/"
-const rootURI = "/"
-const URN = "kill-the-newsletter"
-const name = "Kill the Newsletter!"
-const feedsSuffix = ".xml"
-const systemAdministrator = "mailto:kill-the-newsletter@leafac.com"
+var Configuration struct {
+	Name          string
+	Administrator string
+	Web           struct {
+		Server string
+		URL    string
+		URIs   struct {
+			Root  string
+			Feeds string
+		}
+	}
+	Email struct {
+		Server string
+		Host   string
+	}
+	Feed struct {
+		Path   string
+		Suffix string
+		URN    string
+	}
+	Token struct {
+		Length     int
+		Characters string
+	}
+}
 
-const tokenLength = 20
-const tokenCharacters = "abcdefghijklmnopqrstuvwxyz0123456789"
+// type Feed struct {
+// 	Title string
+// 	Token string
+// }
+
+// type Entry struct {
+// 	...
+// }
 
 func main() {
-	http.HandleFunc(rootURI, func(w http.ResponseWriter, r *http.Request) {
+	configurationFile, configurationFileError := ioutil.ReadFile("./kill-the-newsletter.json")
+	if configurationFileError != nil {
+		log.Fatal("Failed to read configuration file: " + configurationFileError.Error())
+	}
+	configurationParsingError := json.Unmarshal(configurationFile, &Configuration)
+	if configurationParsingError != nil {
+		log.Fatal("Failed to parse configuration file: " + configurationParsingError.Error())
+	}
+	log.Printf("Configuration: %+v", Configuration)
+	_, feedPathError := ioutil.ReadDir(Configuration.Feed.Path)
+	if feedPathError != nil {
+		log.Fatal("Feed directory error: " + feedPathError.Error())
+	}
+
+	http.HandleFunc(Configuration.Web.URIs.Root, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			fmt.Fprint(w, template(""))
 			return
@@ -44,16 +79,16 @@ func main() {
 			return
 		}
 		token := newToken()
-		feedBasename := token + feedsSuffix
-		feedPath := feedsPath + feedBasename
-		feedURL := host + feedsURI + feedBasename
-		email := token + "@" + emailHost
+		feedBasename := token + Configuration.Feed.Suffix
+		feedPath := Configuration.Feed.Path + feedBasename
+		feedURL := Configuration.Web.URL + Configuration.Web.URIs.Feeds + feedBasename
+		email := token + "@" + Configuration.Email.Host
 		messageTitle := `Created feed “` + html.EscapeString(title) + `”`
 		message := `
 <p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feedURL + `" target="_blank">` + feedURL + `</a></p>
 <p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + email + `" target="_blank">` + email + `</a></p>
 <p>Emails sent to this email address show up as entries on the Atom feed.</p>
-<p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + name + ` and let people create their own feeds.</p>
+<p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + Configuration.Name + ` and let people create their own feeds.</p>
 <p><em>Enjoy your readings!</em></p>`
 
 		feedError := ioutil.WriteFile(
@@ -61,11 +96,11 @@ func main() {
 			[]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <link rel="self" type="application/atom+xml" href="`+feedURL+`"/>
-  <link rel="alternate" type="text/html" href="`+host+rootURI+`"/>
+  <link rel="alternate" type="text/html" href="`+Configuration.Web.URL+Configuration.Web.URIs.Root+`"/>
   <title>`+html.EscapeString(title)+`</title>
-  <subtitle>`+name+` inbox “`+email+`”.</subtitle>
-  <id>urn:`+URN+`:`+token+`</id>
-`+entry(messageTitle, name, message)+`
+  <subtitle>`+Configuration.Name+` inbox “`+email+`”.</subtitle>
+  <id>urn:`+Configuration.Feed.URN+`:`+token+`</id>
+`+entry(messageTitle, Configuration.Name, message)+`
 </feed>`),
 			0644)
 
@@ -80,7 +115,7 @@ Error: “` + feedError.Error() + `”`)
 			fmt.Fprint(w, template(`
 <div class="error">
   <p><em>Failed to create feed for “`+title+`”!</em></p>
-  <p>Please contact the <a href="`+systemAdministrator+`">system administrator</a> and report the issue with the token “`+token+`”.</p>
+  <p>Please contact the <a href="`+Configuration.Administrator+`">system administrator</a> and report the issue with the token “`+token+`”.</p>
 </div>`))
 			return
 		}
@@ -96,13 +131,13 @@ Email: “` + email + `”`)
 	})
 
 	rand.Seed(time.Now().UTC().UnixNano())
-	log.Print(name + " web server starting on “" + server + "”.")
-	go func() { log.Fatal(http.ListenAndServe(server, nil)) }()
-	log.Print(name + " email server starting on “" + emailServer + "” for email host “" + emailHost + "”.")
-	log.Fatal(smtpd.ListenAndServe(emailServer, func(origin net.Addr, from string, to []string, data []byte) {
+	log.Print("Starting web server.")
+	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
+	log.Print("Starting email server.")
+	log.Fatal(smtpd.ListenAndServe(Configuration.Email.Server, func(origin net.Addr, from string, to []string, data []byte) {
 		for _, thisTo := range to {
 			sanitizedTo := strings.ToLower(thisTo)
-			matchedTo, errTo := regexp.MatchString("^["+tokenCharacters+"]+@"+emailHost+"$", sanitizedTo)
+			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", sanitizedTo)
 			if errTo != nil {
 				log.Print("Email discarded: regular expression match failed for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
@@ -111,9 +146,9 @@ Email: “` + email + `”`)
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
-			token := sanitizedTo[:len(sanitizedTo)-len("@"+emailHost)]
-			feedBasename := token + feedsSuffix
-			feedPath := feedsPath + feedBasename
+			token := sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)]
+			feedBasename := token + Configuration.Feed.Suffix
+			feedPath := Configuration.Feed.Path + feedBasename
 			if _, err := os.Stat(feedPath); os.IsNotExist(err) {
 				log.Print("Email discarded: feed “" + feedPath + "” not found for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
@@ -152,13 +187,13 @@ Email: “` + email + `”`)
 
 			log.Print("Email received from “" + from + "” to “" + sanitizedTo + "” on feed “" + feedPath + "”.")
 		}
-	}, name, name))
+	}, Configuration.Name, Configuration.Name))
 }
 
 func newToken() string {
-	tokenBuffer := make([]byte, tokenLength)
-	for i := 0; i < tokenLength; i++ {
-		tokenBuffer[i] = tokenCharacters[rand.Intn(len(tokenCharacters))]
+	tokenBuffer := make([]byte, Configuration.Token.Length)
+	for i := 0; i < Configuration.Token.Length; i++ {
+		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
 	}
 	return string(tokenBuffer)
 }
@@ -174,7 +209,7 @@ func template(view string) string {
 <!DOCTYPE html>
 <html>
   <head>
-    <title>` + name + `</title>
+    <title>` + Configuration.Name + `</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Convert email newsletters into Atom feeds." />
@@ -259,12 +294,12 @@ func template(view string) string {
   </head>
   <body>
     <header>
-      <h1>` + name + `</h1>
+      <h1>` + Configuration.Name + `</h1>
       <p>Convert email newsletters into Atom feeds.</p>
     </header>
     <section>
       ` + view + `
-      <form method="POST" action="` + host + rootURI + `">
+      <form method="POST" action="` + Configuration.Web.URL + Configuration.Web.URIs.Root + `">
         <p><input type="text" name="title" placeholder="Feed title…" autofocus="autofocus" /></p>
         <p><input type="submit" value="Create feed" /></p>
       </form>
@@ -292,11 +327,11 @@ func template(view string) string {
 
       <h1>Fair Play</h1>
 
-      <p>There’s nothing technical preventing the use of ` + name + ` as disposable email inboxes. But the service exists for a single, well-defined purpose: to transform email newsletters into Atom feeds. Any other use isn’t welcome and abuse is going to result in service shutdown for everyone, which is sad. Please help keep ` + name + ` alive by using <a href="https://www.mailinator.com/">Mailinator</a>, <a href="https://www.guerrillamail.com/">Guerrilla Mail</a> and others for your disposable-email needs.</p>
+      <p>There’s nothing technical preventing the use of ` + Configuration.Name + ` as disposable email inboxes. But the service exists for a single, well-defined purpose: to transform email newsletters into Atom feeds. Any other use isn’t welcome and abuse is going to result in service shutdown for everyone, which is sad. Please help keep ` + Configuration.Name + ` alive by using <a href="https://www.mailinator.com/">Mailinator</a>, <a href="https://www.guerrillamail.com/">Guerrilla Mail</a> and others for your disposable-email needs.</p>
 
       <h1>License</h1>
 
-      <p>The contents of the feeds belong to the publishers, of course. ` + name + ` only transforms the emails into a different format. The code for the service is free software under the <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a> license. It is publicly <a href="https://git.leafac.com/kill-the-newsletter">available</a> and anyone can contribute or self-host their own instances.</p>
+      <p>The contents of the feeds belong to the publishers, of course. ` + Configuration.Name + ` only transforms the emails into a different format. The code for the service is free software under the <a href="https://www.gnu.org/licenses/gpl.html">GPL v3</a> license. It is publicly <a href="https://git.leafac.com/kill-the-newsletter">available</a> and anyone can contribute or self-host their own instances.</p>
     </section>
 
     <footer>
@@ -315,7 +350,7 @@ func entry(title, author, content string) string {
   <author>
     <name>` + html.EscapeString(author) + `</name>
   </author>
-  <id>urn:` + URN + `:` + newToken() + `</id>
+  <id>urn:` + Configuration.Feed.URN + `:` + newToken() + `</id>
   <updated>` + now() + `</updated>
   <content type="html">` + html.EscapeString(content) + `</content>
 </entry>
