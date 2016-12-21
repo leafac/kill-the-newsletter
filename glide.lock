@@ -1,0 +1,30 @@
+hash: 4701af0831168c8ec42ebd0a023b7a8194c0a2390c763f1e345e1c869c1b56fe
+updated: 2016-12-21T14:02:12.340132289-05:00
+imports:
+- name: github.com/jaytaylor/html2text
+  version: 4b9124c9b0a2279e2092c4a9aaf1c83bbd2dcffc
+- name: github.com/jhillyerd/enmime
+  version: fd87f752711111ccfa856d65a9e7e2acf10b14a2
+- name: github.com/mhale/smtpd
+  version: 7ffbdfd028f54ca78b0f6265e5f4bc8a8dcf562f
+- name: golang.org/x/net
+  version: 45e771701b814666a7eb299e6c7a57d0b1799e91
+  subpackages:
+  - html
+  - html/atom
+- name: golang.org/x/text
+  version: a49bea13b776691cb1b49873e5d8df96ec74831a
+  subpackages:
+  - encoding
+  - encoding/charmap
+  - encoding/internal
+  - encoding/internal/identifier
+  - encoding/japanese
+  - encoding/korean
+  - encoding/simplifiedchinese
+  - encoding/traditionalchinese
+  - encoding/unicode
+  - internal/utf8internal
+  - runes
+  - transform
+testImports: []
