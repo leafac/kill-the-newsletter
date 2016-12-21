@@ -67,7 +67,7 @@ func main() {
   <id>urn:`+URN+`:`+token+`</id>
 `+entry(messageTitle, name, message)+`
 </feed>`),
-			0600)
+			0644)
 
 		if feedError != nil {
 			log.Print(`Failed to create feed:
@@ -144,7 +144,7 @@ Email: “` + email + `”`)
 			}
 			feedWriteError := ioutil.WriteFile(feedPath,
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
-				0600)
+				0644)
 			if feedWriteError != nil {
 				log.Print("Email discarded: couldn’t write on feed “" + feedPath + "” for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
