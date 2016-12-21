@@ -300,7 +300,7 @@ func template(view string) string {
     </section>
 
     <footer>
-      <p>Created by <a href="https://leafac.com">Leandro Facchinetti</a>.</p>
+      <p>Created by <a href="https://www.leafac.com">Leandro Facchinetti</a>.</p>
     </footer>
   </body>
 </html>
