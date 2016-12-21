@@ -50,8 +50,8 @@ func main() {
 		email := token + "@" + emailHost
 		messageTitle := `Created feed “` + html.EscapeString(title) + `”`
 		message := `
-<p>Subscribe to the Atom feed “` + feedURL + `” on a feed reader.</p>
-<p>Sign up for a newsletter with the email address “` + email + `”.</p>
+<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feedURL + `" target="_blank">` + feedURL + `</a></p>
+<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + email + `" target="_blank">` + email + `</a></p>
 <p>Emails sent to this email address show up as entries on the Atom feed.</p>
 <p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + name + ` and let people create their own feeds.</p>
 <p><em>Enjoy your readings!</em></p>`
