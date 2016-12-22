@@ -45,32 +45,30 @@ var Configuration struct {
 }
 
 type Feed struct {
-	Title string
-	Token string
+	Title    string
+	Token    string
+	Basename string
+	Path     string
+	URL      string
+	URN      string
+	Email    string
 }
 
-func (feed Feed) Basename() string {
-	return feed.Token + Configuration.Feed.Suffix
-}
-
-func (feed Feed) Path() string {
-	return Configuration.Feed.Path + feed.Basename()
-}
-
-func (feed Feed) URL() string {
-	return Configuration.Web.URL + Configuration.Web.URIs.Feeds + feed.Basename()
-}
-
-func (feed Feed) URN() string {
-	return "urn:" + Configuration.Feed.URN + ":" + feed.Token
-}
-
-func (feed Feed) Email() string {
-	return feed.Token + "@" + Configuration.Email.Host
+func newFeed(title, token string) Feed {
+	basename := token + Configuration.Feed.Suffix
+	return Feed{
+		Title:    title,
+		Token:    token,
+		Basename: basename,
+		Path:     Configuration.Feed.Path + basename,
+		URL:      Configuration.Web.URL + Configuration.Web.URIs.Feeds + basename,
+		URN:      URN(token),
+		Email:    token + "@" + Configuration.Email.Host,
+	}
 }
 
 func (feed Feed) Text() ([]byte, error) {
-	return ioutil.ReadFile(feed.Path())
+	return ioutil.ReadFile(feed.Path)
 }
 
 // type Email struct {
@@ -80,6 +78,10 @@ func (feed Feed) Text() ([]byte, error) {
 // type Entry struct {
 // 	...
 // }
+
+func URN(token string) string {
+	return "urn:" + Configuration.Feed.URN + ":" + token
+}
 
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -103,28 +105,28 @@ func main() {
 			fmt.Fprint(w, template(""))
 			return
 		}
-		feed := Feed{Title: r.FormValue("title"), Token: newToken()}
+		feed := newFeed(r.FormValue("title"), newToken())
 		if feed.Title == "" {
 			fmt.Fprint(w, template(`<p class="error">Give the feed a title.</p>`))
 			return
 		}
 		messageTitle := `Created feed “` + html.EscapeString(feed.Title) + `”`
 		message := `
-<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feed.URL() + `" target="_blank">` + feed.URL() + `</a></p>
-<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + feed.Email() + `" target="_blank">` + feed.Email() + `</a></p>
+<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feed.URL + `" target="_blank">` + feed.URL + `</a></p>
+<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + feed.Email + `" target="_blank">` + feed.Email + `</a></p>
 <p>Emails sent to this email address show up as entries on the Atom feed.</p>
 <p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + Configuration.Name + ` and let people create their own feeds.</p>
 <p><em>Enjoy your readings!</em></p>`
 
 		feedError := ioutil.WriteFile(
-			feed.Path(),
+			feed.Path,
 			[]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <link rel="self" type="application/atom+xml" href="`+feed.URL()+`"/>
+  <link rel="self" type="application/atom+xml" href="`+feed.URL+`"/>
   <link rel="alternate" type="text/html" href="`+Configuration.Web.URL+Configuration.Web.URIs.Root+`"/>
   <title>`+html.EscapeString(feed.Title)+`</title>
-  <subtitle>`+Configuration.Name+` inbox “`+feed.Email()+`”.</subtitle>
-  <id>`+feed.URN()+`</id>
+  <subtitle>`+Configuration.Name+` inbox “`+feed.Email+`”.</subtitle>
+  <id>`+feed.URN+`</id>
 `+entry(messageTitle, Configuration.Name, message)+`
 </feed>`),
 			0644)
@@ -159,8 +161,8 @@ func main() {
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
-			feed := Feed{Token: sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)]}
-			if _, err := os.Stat(feed.Path()); os.IsNotExist(err) {
+			feed := newFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
+			if _, err := os.Stat(feed.Path); os.IsNotExist(err) {
 				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
@@ -188,7 +190,7 @@ func main() {
 			if content == "" {
 				content = message.Text
 			}
-			feedWriteError := ioutil.WriteFile(feed.Path(),
+			feedWriteError := ioutil.WriteFile(feed.Path,
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
@@ -361,7 +363,7 @@ func entry(title, author, content string) string {
   <author>
     <name>` + html.EscapeString(author) + `</name>
   </author>
-  <id>urn:` + Configuration.Feed.URN + `:` + newToken() + `</id>
+  <id>` + URN(newToken()) + `</id>
   <updated>` + now() + `</updated>
   <content type="html">` + html.EscapeString(content) + `</content>
 </entry>
