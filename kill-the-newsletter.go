@@ -18,6 +18,21 @@ import (
 	"time"
 )
 
+func main() {
+	SeedRandomNumberGenerator()
+	LoadConfiguration()
+	WebServer()
+	EmailServer()
+}
+
+// ---------------------------------------------------------------------------------------------------
+
+func SeedRandomNumberGenerator() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
+
+// ---------------------------------------------------------------------------------------------------
+
 var Configuration struct {
 	Name          string
 	Administrator string
@@ -43,6 +58,42 @@ var Configuration struct {
 		Characters string
 	}
 }
+
+func ConfigurationDefaults() {
+	Configuration.Name = "Kill the Newsletter!"
+	Configuration.Administrator = "mailto:administrator@example.com"
+	Configuration.Web.Server = ":8080"
+	Configuration.Web.URL = "http://localhost:8080"
+	Configuration.Web.URIs.Root = "/"
+	Configuration.Web.URIs.Feeds = "/feeds/"
+	Configuration.Email.Server = ":2525"
+	Configuration.Email.Host = "localhost"
+	Configuration.Feed.Path = "./feeds/"
+	Configuration.Feed.Suffix = ".xml"
+	Configuration.Feed.URN = "kill-the-newsletter"
+	Configuration.Token.Length = 20
+	Configuration.Token.Characters = "abcdefghijklmnopqrstuvwxyz0123456789"
+}
+
+func LoadConfiguration() {
+	ConfigurationDefaults()
+	configurationFile, configurationFileError := ioutil.ReadFile("./kill-the-newsletter.json")
+	if configurationFileError != nil {
+		log.Print("Failed to read configuration file, using default configuration: " + configurationFileError.Error())
+	} else {
+		configurationParsingError := json.Unmarshal(configurationFile, &Configuration)
+		if configurationParsingError != nil {
+			log.Fatal("Failed to parse configuration file: " + configurationParsingError.Error())
+		}
+	}
+	log.Printf("Configuration: %+v", Configuration)
+	_, feedPathError := ioutil.ReadDir(Configuration.Feed.Path)
+	if feedPathError != nil {
+		log.Fatal("Feed directory error: " + feedPathError.Error())
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------
 
 type Feed struct {
 	Title    string
@@ -71,6 +122,8 @@ func (feed Feed) Text() ([]byte, error) {
 	return ioutil.ReadFile(feed.Path)
 }
 
+// ---------------------------------------------------------------------------------------------------
+
 // type Email struct {
 // 	...
 // }
@@ -79,26 +132,10 @@ func (feed Feed) Text() ([]byte, error) {
 // 	...
 // }
 
-func URN(token string) string {
-	return "urn:" + Configuration.Feed.URN + ":" + token
-}
+// ---------------------------------------------------------------------------------------------------
 
-func main() {
-	rand.Seed(time.Now().UTC().UnixNano())
-
-	configurationFile, configurationFileError := ioutil.ReadFile("./kill-the-newsletter.json")
-	if configurationFileError != nil {
-		log.Fatal("Failed to read configuration file: " + configurationFileError.Error())
-	}
-	configurationParsingError := json.Unmarshal(configurationFile, &Configuration)
-	if configurationParsingError != nil {
-		log.Fatal("Failed to parse configuration file: " + configurationParsingError.Error())
-	}
-	log.Printf("Configuration: %+v", Configuration)
-	_, feedPathError := ioutil.ReadDir(Configuration.Feed.Path)
-	if feedPathError != nil {
-		log.Fatal("Feed directory error: " + feedPathError.Error())
-	}
+func WebServer() {
+	log.Print("Starting web server.")
 
 	http.HandleFunc(Configuration.Web.URIs.Root, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
@@ -146,9 +183,14 @@ func main() {
 		fmt.Fprint(w, template(`<div class="success"><p><em>`+messageTitle+`.</em></p>`+message+`</div>`))
 	})
 
-	log.Print("Starting web server.")
 	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
+}
+
+// ---------------------------------------------------------------------------------------------------
+
+func EmailServer() {
 	log.Print("Starting email server.")
+
 	log.Fatal(smtpd.ListenAndServe(Configuration.Email.Server, func(origin net.Addr, from string, to []string, data []byte) {
 		for _, thisTo := range to {
 			sanitizedTo := strings.ToLower(thisTo)
@@ -203,12 +245,18 @@ func main() {
 	}, Configuration.Name, Configuration.Name))
 }
 
+// ---------------------------------------------------------------------------------------------------
+
 func newToken() string {
 	tokenBuffer := make([]byte, Configuration.Token.Length)
 	for i := 0; i < Configuration.Token.Length; i++ {
 		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
 	}
 	return string(tokenBuffer)
+}
+
+func URN(token string) string {
+	return "urn:" + Configuration.Feed.URN + ":" + token
 }
 
 func now() string {
