@@ -105,7 +105,7 @@ type Feed struct {
 	Email    string
 }
 
-func newFeed(title, token string) Feed {
+func NewFeed(title, token string) Feed {
 	basename := token + Configuration.Feed.Suffix
 	return Feed{
 		Title:    title,
@@ -139,12 +139,12 @@ func WebServer() {
 
 	http.HandleFunc(Configuration.Web.URIs.Root, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
-			fmt.Fprint(w, template(""))
+			fmt.Fprint(w, Template(""))
 			return
 		}
-		feed := newFeed(r.FormValue("title"), newToken())
+		feed := NewFeed(r.FormValue("title"), NewToken())
 		if feed.Title == "" {
-			fmt.Fprint(w, template(`<p class="error">Give the feed a title.</p>`))
+			fmt.Fprint(w, Template(`<p class="error">Give the feed a title.</p>`))
 			return
 		}
 		messageTitle := `Created feed “` + html.EscapeString(feed.Title) + `”`
@@ -164,13 +164,13 @@ func WebServer() {
   <title>`+html.EscapeString(feed.Title)+`</title>
   <subtitle>`+Configuration.Name+` inbox “`+feed.Email+`”.</subtitle>
   <id>`+feed.URN+`</id>
-`+entry(messageTitle, Configuration.Name, message)+`
+`+Entry(messageTitle, Configuration.Name, message)+`
 </feed>`),
 			0644)
 
 		if feedError != nil {
 			log.Printf("Failed to create feed: %+v", feed)
-			fmt.Fprint(w, template(`
+			fmt.Fprint(w, Template(`
 <div class="error">
   <p><em>Failed to create feed “`+feed.Title+`”!</em></p>
   <p>Please contact the <a href="`+Configuration.Administrator+`">system administrator</a> and report the issue with the token “`+feed.Token+`”.</p>
@@ -180,7 +180,7 @@ func WebServer() {
 
 		log.Printf("Created feed: %+v", feed)
 
-		fmt.Fprint(w, template(`<div class="success"><p><em>`+messageTitle+`.</em></p>`+message+`</div>`))
+		fmt.Fprint(w, Template(`<div class="success"><p><em>`+messageTitle+`.</em></p>`+message+`</div>`))
 	})
 
 	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
@@ -203,7 +203,7 @@ func EmailServer() {
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
-			feed := newFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
+			feed := NewFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
 			if _, err := os.Stat(feed.Path); os.IsNotExist(err) {
 				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
@@ -233,7 +233,7 @@ func EmailServer() {
 				content = message.Text
 			}
 			feedWriteError := ioutil.WriteFile(feed.Path,
-				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
+				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+Entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
 				log.Printf("Email discarded: couldn’t write on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
@@ -247,7 +247,7 @@ func EmailServer() {
 
 // ---------------------------------------------------------------------------------------------------
 
-func newToken() string {
+func NewToken() string {
 	tokenBuffer := make([]byte, Configuration.Token.Length)
 	for i := 0; i < Configuration.Token.Length; i++ {
 		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
@@ -259,13 +259,13 @@ func URN(token string) string {
 	return "urn:" + Configuration.Feed.URN + ":" + token
 }
 
-func now() string {
+func Now() string {
 	return time.Now().Format(time.RFC3339)
 }
 
 // ---------------------------------------------------------------------------------------------------
 
-func template(view string) string {
+func Template(view string) string {
 	return `
 <!DOCTYPE html>
 <html>
@@ -403,16 +403,17 @@ func template(view string) string {
 `
 }
 
-func entry(title, author, content string) string {
+func Entry(title, author, content string) string {
+	now := Now()
 	return `
-<updated>` + now() + `</updated>
+<updated>` + now + `</updated>
 <entry>
   <title>` + html.EscapeString(title) + `</title>
   <author>
     <name>` + html.EscapeString(author) + `</name>
   </author>
-  <id>` + URN(newToken()) + `</id>
-  <updated>` + now() + `</updated>
+  <id>` + URN(NewToken()) + `</id>
+  <updated>` + now + `</updated>
   <content type="html">` + html.EscapeString(content) + `</content>
 </entry>
 `
