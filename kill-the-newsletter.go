@@ -70,7 +70,7 @@ func ConfigurationDefaults() {
 	Configuration.Email.Host = "localhost"
 	Configuration.Feed.Path = "./feeds/"
 	Configuration.Feed.Suffix = ".xml"
-	Configuration.Feed.URN = "kill-the-newsletter"
+	Configuration.Feed.URN = "localhost"
 	Configuration.Token.Length = 20
 	Configuration.Token.Characters = "abcdefghijklmnopqrstuvwxyz0123456789"
 }
