@@ -44,9 +44,37 @@ var Configuration struct {
 	}
 }
 
-// type Feed struct {
-// 	Title string
-// 	Token string
+type Feed struct {
+	Title string
+	Token string
+}
+
+func (feed Feed) Basename() string {
+	return feed.Token + Configuration.Feed.Suffix
+}
+
+func (feed Feed) Path() string {
+	return Configuration.Feed.Path + feed.Basename()
+}
+
+func (feed Feed) URL() string {
+	return Configuration.Web.URL + Configuration.Web.URIs.Feeds + feed.Basename()
+}
+
+func (feed Feed) URN() string {
+	return "urn:" + Configuration.Feed.URN + ":" + feed.Token
+}
+
+func (feed Feed) Email() string {
+	return feed.Token + "@" + Configuration.Email.Host
+}
+
+func (feed Feed) Text() ([]byte, error) {
+	return ioutil.ReadFile(feed.Path())
+}
+
+// type Email struct {
+// 	...
 // }
 
 // type Entry struct {
@@ -54,6 +82,8 @@ var Configuration struct {
 // }
 
 func main() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	configurationFile, configurationFileError := ioutil.ReadFile("./kill-the-newsletter.json")
 	if configurationFileError != nil {
 		log.Fatal("Failed to read configuration file: " + configurationFileError.Error())
@@ -73,64 +103,47 @@ func main() {
 			fmt.Fprint(w, template(""))
 			return
 		}
-		title := r.FormValue("title")
-		if title == "" {
+		feed := Feed{Title: r.FormValue("title"), Token: newToken()}
+		if feed.Title == "" {
 			fmt.Fprint(w, template(`<p class="error">Give the feed a title.</p>`))
 			return
 		}
-		token := newToken()
-		feedBasename := token + Configuration.Feed.Suffix
-		feedPath := Configuration.Feed.Path + feedBasename
-		feedURL := Configuration.Web.URL + Configuration.Web.URIs.Feeds + feedBasename
-		email := token + "@" + Configuration.Email.Host
-		messageTitle := `Created feed “` + html.EscapeString(title) + `”`
+		messageTitle := `Created feed “` + html.EscapeString(feed.Title) + `”`
 		message := `
-<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feedURL + `" target="_blank">` + feedURL + `</a></p>
-<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + email + `" target="_blank">` + email + `</a></p>
+<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feed.URL() + `" target="_blank">` + feed.URL() + `</a></p>
+<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + feed.Email() + `" target="_blank">` + feed.Email() + `</a></p>
 <p>Emails sent to this email address show up as entries on the Atom feed.</p>
 <p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + Configuration.Name + ` and let people create their own feeds.</p>
 <p><em>Enjoy your readings!</em></p>`
 
 		feedError := ioutil.WriteFile(
-			feedPath,
+			feed.Path(),
 			[]byte(`<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <link rel="self" type="application/atom+xml" href="`+feedURL+`"/>
+  <link rel="self" type="application/atom+xml" href="`+feed.URL()+`"/>
   <link rel="alternate" type="text/html" href="`+Configuration.Web.URL+Configuration.Web.URIs.Root+`"/>
-  <title>`+html.EscapeString(title)+`</title>
-  <subtitle>`+Configuration.Name+` inbox “`+email+`”.</subtitle>
-  <id>urn:`+Configuration.Feed.URN+`:`+token+`</id>
+  <title>`+html.EscapeString(feed.Title)+`</title>
+  <subtitle>`+Configuration.Name+` inbox “`+feed.Email()+`”.</subtitle>
+  <id>`+feed.URN()+`</id>
 `+entry(messageTitle, Configuration.Name, message)+`
 </feed>`),
 			0644)
 
 		if feedError != nil {
-			log.Print(`Failed to create feed:
-Title: “` + title + `”
-Token: “` + token + `”
-Path: “` + feedPath + `”
-URL: “` + feedURL + `”
-Email: “` + email + `”
-Error: “` + feedError.Error() + `”`)
+			log.Printf("Failed to create feed: %+v", feed)
 			fmt.Fprint(w, template(`
 <div class="error">
-  <p><em>Failed to create feed for “`+title+`”!</em></p>
-  <p>Please contact the <a href="`+Configuration.Administrator+`">system administrator</a> and report the issue with the token “`+token+`”.</p>
+  <p><em>Failed to create feed “`+feed.Title+`”!</em></p>
+  <p>Please contact the <a href="`+Configuration.Administrator+`">system administrator</a> and report the issue with the token “`+feed.Token+`”.</p>
 </div>`))
 			return
 		}
 
-		log.Print(`Creating feed:
-Title: “` + title + `”
-Token: “` + token + `”
-Path: “` + feedPath + `”
-URL: “` + feedURL + `”
-Email: “` + email + `”`)
+		log.Printf("Created feed: %+v", feed)
 
 		fmt.Fprint(w, template(`<div class="success"><p><em>`+messageTitle+`.</em></p>`+message+`</div>`))
 	})
 
-	rand.Seed(time.Now().UTC().UnixNano())
 	log.Print("Starting web server.")
 	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
 	log.Print("Starting email server.")
@@ -146,16 +159,14 @@ Email: “` + email + `”`)
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
-			token := sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)]
-			feedBasename := token + Configuration.Feed.Suffix
-			feedPath := Configuration.Feed.Path + feedBasename
-			if _, err := os.Stat(feedPath); os.IsNotExist(err) {
-				log.Print("Email discarded: feed “" + feedPath + "” not found for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+			feed := Feed{Token: sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)]}
+			if _, err := os.Stat(feed.Path()); os.IsNotExist(err) {
+				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
-			feedText, feedTextError := ioutil.ReadFile(feedPath)
+			feedText, feedTextError := feed.Text()
 			if feedTextError != nil {
-				log.Print("Email discarded: failed to read feed “" + feedPath + "” for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: failed to read feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
@@ -170,22 +181,22 @@ Email: “` + email + `”`)
 			}
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
-				log.Print("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed “" + feedPath + "” for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
 			content := message.HTML
 			if content == "" {
 				content = message.Text
 			}
-			feedWriteError := ioutil.WriteFile(feedPath,
+			feedWriteError := ioutil.WriteFile(feed.Path(),
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
-				log.Print("Email discarded: couldn’t write on feed “" + feedPath + "” for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: couldn’t write on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
 
-			log.Print("Email received from “" + from + "” to “" + sanitizedTo + "” on feed “" + feedPath + "”.")
+			log.Printf("Email received from “"+from+"” to “"+sanitizedTo+"” on feed %+v.", feed)
 		}
 	}, Configuration.Name, Configuration.Name))
 }
