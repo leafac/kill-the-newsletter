@@ -433,6 +433,18 @@ func (feed Feed) CreatedEntry() Entry {
 <p><em>Enjoy your readings!</em></p>`)
 }
 
+func (feed Feed) Atom() string {
+	return `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link rel="self" type="application/atom+xml" href="` + feed.URL + `"/>
+  <link rel="alternate" type="text/html" href="` + Configuration.Web.URL + Configuration.Web.URIs.Root + `"/>
+  <title>` + html.EscapeString(feed.Title) + `</title>
+  <subtitle>` + Configuration.Name + ` inbox “` + feed.Email + `”.</subtitle>
+  <id>` + feed.URN + `</id>
+` + feed.CreatedEntry().Atom() + `
+</feed>`
+}
+
 func (entry Entry) Atom() string {
 	updatedString := entry.Updated.Format(time.RFC3339)
 	return `
@@ -447,16 +459,4 @@ func (entry Entry) Atom() string {
   <content type="html">` + html.EscapeString(entry.Content) + `</content>
 </entry>
 `
-}
-
-func (feed Feed) Atom() string {
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <link rel="self" type="application/atom+xml" href="` + feed.URL + `"/>
-  <link rel="alternate" type="text/html" href="` + Configuration.Web.URL + Configuration.Web.URIs.Root + `"/>
-  <title>` + html.EscapeString(feed.Title) + `</title>
-  <subtitle>` + Configuration.Name + ` inbox “` + feed.Email + `”.</subtitle>
-  <id>` + feed.URN + `</id>
-` + feed.CreatedEntry().Atom() + `
-</feed>`
 }
