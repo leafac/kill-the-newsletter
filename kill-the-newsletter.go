@@ -196,7 +196,7 @@ func WebServer() {
 func EmailServer() {
 	log.Print("Starting email server.")
 
-	log.Fatal(smtpd.ListenAndServe(Configuration.Email.Server, func(origin net.Addr, from string, to []string, data []byte) {
+	handler := func(origin net.Addr, from string, to []string, data []byte) {
 		for _, thisTo := range to {
 			sanitizedTo := strings.ToLower(thisTo)
 			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", sanitizedTo)
@@ -247,7 +247,9 @@ func EmailServer() {
 
 			log.Printf("Email received from “"+from+"” to “"+sanitizedTo+"” on feed %+v.", feed)
 		}
-	}, Configuration.Name, Configuration.Name))
+	}
+
+	log.Fatal(smtpd.ListenAndServe(Configuration.Email.Server, handler, Configuration.Name, Configuration.Name))
 }
 
 // ---------------------------------------------------------------------------------------------------
