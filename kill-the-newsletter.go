@@ -177,18 +177,7 @@ func WebServer() {
 		}
 		createdEntry := feed.CreatedEntry()
 
-		feedError := ioutil.WriteFile(
-			feed.Path,
-			[]byte(`<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <link rel="self" type="application/atom+xml" href="`+feed.URL+`"/>
-  <link rel="alternate" type="text/html" href="`+Configuration.Web.URL+Configuration.Web.URIs.Root+`"/>
-  <title>`+html.EscapeString(feed.Title)+`</title>
-  <subtitle>`+Configuration.Name+` inbox “`+feed.Email+`”.</subtitle>
-  <id>`+feed.URN+`</id>
-`+createdEntry.Atom()+`
-</feed>`),
-			0644)
+		feedError := ioutil.WriteFile(feed.Path, []byte(feed.Atom()), 0644)
 
 		if feedError != nil {
 			log.Printf("Failed to create feed: %+v", feed)
@@ -433,4 +422,16 @@ func (entry Entry) Atom() string {
   <content type="html">` + html.EscapeString(entry.Content) + `</content>
 </entry>
 `
+}
+
+func (feed Feed) Atom() string {
+	return `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link rel="self" type="application/atom+xml" href="` + feed.URL + `"/>
+  <link rel="alternate" type="text/html" href="` + Configuration.Web.URL + Configuration.Web.URIs.Root + `"/>
+  <title>` + html.EscapeString(feed.Title) + `</title>
+  <subtitle>` + Configuration.Name + ` inbox “` + feed.Email + `”.</subtitle>
+  <id>` + feed.URN + `</id>
+` + feed.CreatedEntry().Atom() + `
+</feed>`
 }
