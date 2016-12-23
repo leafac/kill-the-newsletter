@@ -154,22 +154,6 @@ func NewEntry(title, author, content string) Entry {
 	}
 }
 
-func (entry Entry) Atom() string {
-	updatedString := entry.Updated.Format(time.RFC3339)
-	return `
-<updated>` + updatedString + `</updated>
-<entry>
-  <id>` + entry.Id + `</id>
-  <updated>` + updatedString + `</updated>
-  <title>` + html.EscapeString(entry.Title) + `</title>
-  <author>
-    <name>` + html.EscapeString(entry.Author) + `</name>
-  </author>
-  <content type="html">` + html.EscapeString(entry.Content) + `</content>
-</entry>
-`
-}
-
 // ---------------------------------------------------------------------------------------------------
 
 // type Email struct {
@@ -191,13 +175,7 @@ func WebServer() {
 			fmt.Fprint(w, Template(`<p class="error">Give the feed a title.</p>`))
 			return
 		}
-		messageTitle := `Created feed “` + html.EscapeString(feed.Title) + `”`
-		message := `
-<p>Subscribe to the Atom feed on a feed reader:<br /><a href="` + feed.URL + `" target="_blank">` + feed.URL + `</a></p>
-<p>Sign up for a newsletter with the email address:<br /><a href="mailto:` + feed.Email + `" target="_blank">` + feed.Email + `</a></p>
-<p>Emails sent to this email address show up as entries on the Atom feed.</p>
-<p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share ` + Configuration.Name + ` and let people create their own feeds.</p>
-<p><em>Enjoy your readings!</em></p>`
+		createdEntry := feed.CreatedEntry()
 
 		feedError := ioutil.WriteFile(
 			feed.Path,
@@ -208,7 +186,7 @@ func WebServer() {
   <title>`+html.EscapeString(feed.Title)+`</title>
   <subtitle>`+Configuration.Name+` inbox “`+feed.Email+`”.</subtitle>
   <id>`+feed.URN+`</id>
-`+NewEntry(messageTitle, Configuration.Name, message).Atom()+`
+`+createdEntry.Atom()+`
 </feed>`),
 			0644)
 
@@ -224,7 +202,7 @@ func WebServer() {
 
 		log.Printf("Created feed: %+v", feed)
 
-		fmt.Fprint(w, Template(`<div class="success"><p><em>`+messageTitle+`.</em></p>`+message+`</div>`))
+		fmt.Fprint(w, Template(`<div class="success"><p><em>`+createdEntry.Title+`.</em></p>`+createdEntry.Content+`</div>`))
 	})
 
 	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
@@ -426,5 +404,33 @@ func Template(view string) string {
     </footer>
   </body>
 </html>
+`
+}
+
+func (feed Feed) CreatedEntry() Entry {
+	return NewEntry(
+		`Created feed “`+html.EscapeString(feed.Title)+`”`,
+		Configuration.Name,
+		`
+<p>Subscribe to the Atom feed on a feed reader:<br /><a href="`+feed.URL+`" target="_blank">`+feed.URL+`</a></p>
+<p>Sign up for a newsletter with the email address:<br /><a href="mailto:`+feed.Email+`" target="_blank">`+feed.Email+`</a></p>
+<p>Emails sent to this email address show up as entries on the Atom feed.</p>
+<p>Both addresses contain a security token, so don’t share them! Otherwise, people would be able to spam the feed or unsubscribe from the newsletter. Instead, share `+Configuration.Name+` and let people create their own feeds.</p>
+<p><em>Enjoy your readings!</em></p>`)
+}
+
+func (entry Entry) Atom() string {
+	updatedString := entry.Updated.Format(time.RFC3339)
+	return `
+<updated>` + updatedString + `</updated>
+<entry>
+  <id>` + entry.Id + `</id>
+  <updated>` + updatedString + `</updated>
+  <title>` + html.EscapeString(entry.Title) + `</title>
+  <author>
+    <name>` + html.EscapeString(entry.Author) + `</name>
+  </author>
+  <content type="html">` + html.EscapeString(entry.Content) + `</content>
+</entry>
 `
 }
