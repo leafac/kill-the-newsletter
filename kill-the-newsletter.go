@@ -199,6 +199,7 @@ func EmailServer() {
 	handler := func(origin net.Addr, from string, to []string, data []byte) {
 		for _, thisTo := range to {
 			sanitizedTo := strings.ToLower(thisTo)
+
 			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", sanitizedTo)
 			if errTo != nil {
 				log.Print("Email discarded: regular expression match failed for email coming from “" + from + "” to “" + sanitizedTo + "”.")
@@ -208,35 +209,42 @@ func EmailServer() {
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
+
 			feed := NewFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
 			if _, err := os.Stat(feed.Path); os.IsNotExist(err) {
 				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
+
 			feedText, feedTextError := feed.Text()
 			if feedTextError != nil {
 				log.Printf("Email discarded: failed to read feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
+
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
 			if messageError != nil {
 				log.Print("Email discarded: failed to read message for email coming from “" + from + "” to “" + sanitizedTo + "”.")
 				return
 			}
+
 			title := message.GetHeader("Subject")
 			author := message.GetHeader("From")
 			if author == "" {
 				author = from
 			}
+
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
 				log.Printf("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
 				return
 			}
+
 			content := message.HTML
 			if content == "" {
 				content = message.Text
 			}
+
 			feedWriteError := ioutil.WriteFile(feed.Path,
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+NewEntry(title, author, string(content)).Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
