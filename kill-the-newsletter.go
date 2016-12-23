@@ -167,31 +167,25 @@ func WebServer() {
 
 	http.HandleFunc(Configuration.Web.URIs.Root, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
-			fmt.Fprint(w, Template(""))
+			fmt.Fprint(w, ViewIndex())
 			return
 		}
+
 		feed := NewFeed(r.FormValue("title"), NewToken())
 		if feed.Title == "" {
-			fmt.Fprint(w, Template(`<p class="error">Give the feed a title.</p>`))
+			fmt.Fprint(w, ViewErrorEmptyTitle())
 			return
 		}
-		createdEntry := feed.CreatedEntry()
 
 		feedError := ioutil.WriteFile(feed.Path, []byte(feed.Atom()), 0644)
-
 		if feedError != nil {
 			log.Printf("Failed to create feed: %+v", feed)
-			fmt.Fprint(w, Template(`
-<div class="error">
-  <p><em>Failed to create feed “`+feed.Title+`”!</em></p>
-  <p>Please contact the <a href="`+Configuration.Administrator+`">system administrator</a> and report the issue with the token “`+feed.Token+`”.</p>
-</div>`))
+			fmt.Fprint(w, ViewErrorFeedCreation(feed))
 			return
 		}
-
 		log.Printf("Created feed: %+v", feed)
 
-		fmt.Fprint(w, Template(`<div class="success"><p><em>`+createdEntry.Title+`.</em></p>`+createdEntry.Content+`</div>`))
+		fmt.Fprint(w, ViewFeedCreated(feed))
 	})
 
 	go func() { log.Fatal(http.ListenAndServe(Configuration.Web.Server, nil)) }()
@@ -394,6 +388,27 @@ func Template(view string) string {
   </body>
 </html>
 `
+}
+
+func ViewIndex() string {
+	return Template("")
+}
+
+func ViewErrorEmptyTitle() string {
+	return Template(`<p class="error">Give the feed a title.</p>`)
+}
+
+func ViewErrorFeedCreation(feed Feed) string {
+	return Template(`
+<div class="error">
+  <p><em>Failed to create feed “` + feed.Title + `”!</em></p>
+  <p>Please contact the <a href="` + Configuration.Administrator + `">system administrator</a> and report the issue with the token “` + feed.Token + `”.</p>
+</div>`)
+}
+
+func ViewFeedCreated(feed Feed) string {
+	createdEntry := feed.CreatedEntry()
+	return Template(`<div class="success"><p><em>` + createdEntry.Title + `.</em></p>` + createdEntry.Content + `</div>`)
 }
 
 func (feed Feed) CreatedEntry() Entry {
