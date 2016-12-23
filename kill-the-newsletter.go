@@ -122,13 +122,57 @@ func (feed Feed) Text() ([]byte, error) {
 	return ioutil.ReadFile(feed.Path)
 }
 
+func NewToken() string {
+	tokenBuffer := make([]byte, Configuration.Token.Length)
+	for i := 0; i < Configuration.Token.Length; i++ {
+		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
+	}
+	return string(tokenBuffer)
+}
+
+func URN(token string) string {
+	return "urn:" + Configuration.Feed.URN + ":" + token
+}
+
+// ---------------------------------------------------------------------------------------------------
+
+type Entry struct {
+	Id      string
+	Updated time.Time
+	Title   string
+	Author  string
+	Content string
+}
+
+func NewEntry(title, author, content string) Entry {
+	return Entry{
+		Id:      URN(NewToken()),
+		Updated: time.Now(),
+		Title:   title,
+		Author:  author,
+		Content: content,
+	}
+}
+
+func (entry Entry) Atom() string {
+	updatedString := entry.Updated.Format(time.RFC3339)
+	return `
+<updated>` + updatedString + `</updated>
+<entry>
+  <id>` + entry.Id + `</id>
+  <updated>` + updatedString + `</updated>
+  <title>` + html.EscapeString(entry.Title) + `</title>
+  <author>
+    <name>` + html.EscapeString(entry.Author) + `</name>
+  </author>
+  <content type="html">` + html.EscapeString(entry.Content) + `</content>
+</entry>
+`
+}
+
 // ---------------------------------------------------------------------------------------------------
 
 // type Email struct {
-// 	...
-// }
-
-// type Entry struct {
 // 	...
 // }
 
@@ -164,7 +208,7 @@ func WebServer() {
   <title>`+html.EscapeString(feed.Title)+`</title>
   <subtitle>`+Configuration.Name+` inbox “`+feed.Email+`”.</subtitle>
   <id>`+feed.URN+`</id>
-`+Entry(messageTitle, Configuration.Name, message)+`
+`+NewEntry(messageTitle, Configuration.Name, message).Atom()+`
 </feed>`),
 			0644)
 
@@ -233,7 +277,7 @@ func EmailServer() {
 				content = message.Text
 			}
 			feedWriteError := ioutil.WriteFile(feed.Path,
-				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+Entry(title, author, string(content))+string(feedText[updatedRegularExpressionResult[1]:])),
+				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+NewEntry(title, author, string(content)).Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
 				log.Printf("Email discarded: couldn’t write on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
@@ -243,24 +287,6 @@ func EmailServer() {
 			log.Printf("Email received from “"+from+"” to “"+sanitizedTo+"” on feed %+v.", feed)
 		}
 	}, Configuration.Name, Configuration.Name))
-}
-
-// ---------------------------------------------------------------------------------------------------
-
-func NewToken() string {
-	tokenBuffer := make([]byte, Configuration.Token.Length)
-	for i := 0; i < Configuration.Token.Length; i++ {
-		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
-	}
-	return string(tokenBuffer)
-}
-
-func URN(token string) string {
-	return "urn:" + Configuration.Feed.URN + ":" + token
-}
-
-func Now() string {
-	return time.Now().Format(time.RFC3339)
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -400,21 +426,5 @@ func Template(view string) string {
     </footer>
   </body>
 </html>
-`
-}
-
-func Entry(title, author, content string) string {
-	now := Now()
-	return `
-<updated>` + now + `</updated>
-<entry>
-  <title>` + html.EscapeString(title) + `</title>
-  <author>
-    <name>` + html.EscapeString(author) + `</name>
-  </author>
-  <id>` + URN(NewToken()) + `</id>
-  <updated>` + now + `</updated>
-  <content type="html">` + html.EscapeString(content) + `</content>
-</entry>
 `
 }
