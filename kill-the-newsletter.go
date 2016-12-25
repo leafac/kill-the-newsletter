@@ -156,9 +156,14 @@ func NewEntry(title, author, content string) Entry {
 
 // ---------------------------------------------------------------------------------------------------
 
-// type Email struct {
-// 	...
-// }
+type Email struct {
+	From string
+	To   string
+}
+
+func NewEmail(from, to string) Email {
+	return Email{From: from, To: strings.ToLower(to)}
+}
 
 // ---------------------------------------------------------------------------------------------------
 
@@ -196,42 +201,42 @@ func WebServer() {
 func EmailServer() {
 	log.Print("Starting email server.")
 
-	handler := func(origin net.Addr, from string, to []string, data []byte) {
-		for _, thisTo := range to {
-			sanitizedTo := strings.ToLower(thisTo)
+	handler := func(origin net.Addr, from string, tos []string, data []byte) {
+		for _, to := range tos {
+			email := NewEmail(from, to)
 
-			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", sanitizedTo)
+			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", email.To)
 			if errTo != nil {
-				log.Print("Email discarded: regular expression match failed for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: regular expression match failed for email %+v", email)
 				continue
 			}
 			if !matchedTo {
-				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: invalid destination email address for email  %+v", email)
 				continue
 			}
 
-			feed := NewFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
+			feed := NewFeed("", email.To[:len(email.To)-len("@"+Configuration.Email.Host)])
 			if _, err := os.Stat(feed.Path); os.IsNotExist(err) {
-				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
+				log.Printf("Email discarded: feed %+v not found for email %+v", feed, email)
 				continue
 			}
 
 			feedText, feedTextError := feed.Text()
 			if feedTextError != nil {
-				log.Printf("Email discarded: failed to read feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
+				log.Printf("Email discarded: failed to read feed %+v for email  %+v", feed, email)
 				continue
 			}
 
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
 			if messageError != nil {
-				log.Print("Email discarded: failed to read message for email coming from “" + from + "” to “" + sanitizedTo + "”.")
+				log.Printf("Email discarded: failed to read message for email %+v", email)
 				continue
 			}
 
 			title := message.GetHeader("Subject")
 			author := message.GetHeader("From")
 			if author == "" {
-				author = from
+				author = email.From
 			}
 			content := message.HTML
 			if content == "" {
@@ -240,7 +245,7 @@ func EmailServer() {
 
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
-				log.Printf("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
+				log.Printf("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed %+v for email %+v", feed, email)
 				continue
 			}
 
@@ -248,11 +253,11 @@ func EmailServer() {
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+NewEntry(title, author, string(content)).Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
-				log.Printf("Email discarded: couldn’t write on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
+				log.Printf("Email discarded: couldn’t write on feed %+v for email %+v", feed, email)
 				continue
 			}
 
-			log.Printf("Email received from “"+from+"” to “"+sanitizedTo+"” on feed %+v.", feed)
+			log.Printf("Email %+v received on feed %+v.", email, feed)
 		}
 	}
 
