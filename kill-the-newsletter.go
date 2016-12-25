@@ -154,7 +154,13 @@ func NewToken() string {
 	for i := 0; i < Configuration.Token.Length; i++ {
 		tokenBuffer[i] = Configuration.Token.Characters[rand.Intn(len(Configuration.Token.Characters))]
 	}
-	return string(tokenBuffer)
+	token := string(tokenBuffer)
+	feed := NewFeed("", token)
+	if _, feedPathError := os.Stat(feed.Path); feedPathError == nil {
+		log.Printf("Improbability drive broken: Reused token: %v", token)
+		return NewToken()
+	}
+	return token
 }
 
 func URN(token string) string {
