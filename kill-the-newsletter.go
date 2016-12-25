@@ -120,6 +120,10 @@ func NewFeed(title, token string) Feed {
 	}
 }
 
+func (feed Feed) Create() error {
+	return ioutil.WriteFile(feed.Path, []byte(feed.Atom()), 0644)
+}
+
 func (feed Feed) Text() ([]byte, error) {
 	return ioutil.ReadFile(feed.Path)
 }
@@ -212,7 +216,7 @@ func WebServer() {
 			return
 		}
 
-		feedCreationError := ioutil.WriteFile(feed.Path, []byte(feed.Atom()), 0644)
+		feedCreationError := feed.Create()
 		if feedCreationError != nil {
 			log.Printf("Failed to create feed %+v: %v", feed, feedCreationError)
 			fmt.Fprint(w, ViewErrorFeedCreation(feed))
