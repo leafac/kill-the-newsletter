@@ -79,17 +79,17 @@ func LoadConfiguration() {
 	ConfigurationDefaults()
 	configurationFile, configurationFileError := ioutil.ReadFile("./kill-the-newsletter.json")
 	if configurationFileError != nil {
-		log.Print("Failed to read configuration file, using default configuration: " + configurationFileError.Error())
+		log.Printf("Using default configuration. Failed to read configuration file: %v", configurationFileError)
 	} else {
 		configurationParsingError := json.Unmarshal(configurationFile, &Configuration)
 		if configurationParsingError != nil {
-			log.Fatal("Failed to parse configuration file: " + configurationParsingError.Error())
+			log.Fatalf("Failed to parse configuration file: %v", configurationParsingError)
 		}
 	}
 	log.Printf("Configuration: %+v", Configuration)
 	_, feedPathError := ioutil.ReadDir(Configuration.Feed.Path)
 	if feedPathError != nil {
-		log.Fatal("Feed directory error: " + feedPathError.Error())
+		log.Fatalf("Feed path error: %v", feedPathError)
 	}
 }
 
@@ -185,7 +185,7 @@ func (email Email) Entry(data []byte) (*Entry, error) {
 // ---------------------------------------------------------------------------------------------------
 
 func WebServer() {
-	log.Print("Starting web server.")
+	log.Printf("Starting web server.")
 
 	http.HandleFunc(Configuration.Web.URIs.Root, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
@@ -216,7 +216,7 @@ func WebServer() {
 // ---------------------------------------------------------------------------------------------------
 
 func EmailServer() {
-	log.Print("Starting email server.")
+	log.Printf("Starting email server.")
 
 	handler := func(origin net.Addr, from string, tos []string, data []byte) {
 		for _, to := range tos {
@@ -228,7 +228,7 @@ func EmailServer() {
 				continue
 			}
 			if !matchedTo {
-				log.Printf("Email discarded: invalid destination email address for email  %+v", email)
+				log.Printf("Email discarded: invalid destination email address for email %+v", email)
 				continue
 			}
 
@@ -240,7 +240,7 @@ func EmailServer() {
 
 			feedText, feedTextError := feed.Text()
 			if feedTextError != nil {
-				log.Printf("Email discarded: failed to read feed %+v for email  %+v", feed, email)
+				log.Printf("Email discarded: failed to read feed %+v for email %+v", feed, email)
 				continue
 			}
 
