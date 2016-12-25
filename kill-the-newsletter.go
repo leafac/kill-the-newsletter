@@ -203,29 +203,29 @@ func EmailServer() {
 			matchedTo, errTo := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", sanitizedTo)
 			if errTo != nil {
 				log.Print("Email discarded: regular expression match failed for email coming from “" + from + "” to “" + sanitizedTo + "”.")
-				return
+				continue
 			}
 			if !matchedTo {
 				log.Print("Email discarded: invalid email address for email coming from “" + from + "” to “" + sanitizedTo + "”.")
-				return
+				continue
 			}
 
 			feed := NewFeed("", sanitizedTo[:len(sanitizedTo)-len("@"+Configuration.Email.Host)])
 			if _, err := os.Stat(feed.Path); os.IsNotExist(err) {
 				log.Printf("Email discarded: feed %+v not found for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
-				return
+				continue
 			}
 
 			feedText, feedTextError := feed.Text()
 			if feedTextError != nil {
 				log.Printf("Email discarded: failed to read feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
-				return
+				continue
 			}
 
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
 			if messageError != nil {
 				log.Print("Email discarded: failed to read message for email coming from “" + from + "” to “" + sanitizedTo + "”.")
-				return
+				continue
 			}
 
 			title := message.GetHeader("Subject")
@@ -233,16 +233,15 @@ func EmailServer() {
 			if author == "" {
 				author = from
 			}
+			content := message.HTML
+			if content == "" {
+				content = message.Text
+			}
 
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
 				log.Printf("Email discarded: couldn’t find where to add new entry (“<updated>” tag) on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
-				return
-			}
-
-			content := message.HTML
-			if content == "" {
-				content = message.Text
+				continue
 			}
 
 			feedWriteError := ioutil.WriteFile(feed.Path,
@@ -250,7 +249,7 @@ func EmailServer() {
 				0644)
 			if feedWriteError != nil {
 				log.Printf("Email discarded: couldn’t write on feed %+v for email coming from “"+from+"” to “"+sanitizedTo+"”.", feed)
-				return
+				continue
 			}
 
 			log.Printf("Email received from “"+from+"” to “"+sanitizedTo+"” on feed %+v.", feed)
