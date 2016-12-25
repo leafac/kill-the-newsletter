@@ -161,10 +161,26 @@ func NewEntry(title, author, content string) Entry {
 type Email struct {
 	From string
 	To   string
+	Feed Feed
 }
 
-func NewEmail(from, to string) Email {
-	return Email{From: from, To: strings.ToLower(to)}
+func NewEmail(from, to string) (Email, error) {
+	email := Email{From: from, To: strings.ToLower(to)}
+
+	matchedTo, matchedToError := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", email.To)
+	if matchedToError != nil {
+		return email, fmt.Errorf("Regular expression match failed: %v", matchedToError)
+	}
+	if !matchedTo {
+		return email, fmt.Errorf("Invalid destination email address")
+	}
+
+	email.Feed = NewFeed("", email.To[:len(email.To)-len("@"+Configuration.Email.Host)])
+	if _, feedPathError := os.Stat(email.Feed.Path); feedPathError != nil {
+		return email, fmt.Errorf("Feed path error: %v", feedPathError)
+	}
+
+	return email, nil
 }
 
 func (email Email) Entry(message *enmime.Envelope) Entry {
@@ -217,33 +233,21 @@ func EmailServer() {
 
 	handler := func(origin net.Addr, from string, tos []string, data []byte) {
 		for _, to := range tos {
-			email := NewEmail(from, to)
-
-			matchedTo, matchedToError := regexp.MatchString("^["+Configuration.Token.Characters+"]+@"+Configuration.Email.Host+"$", email.To)
-			if matchedToError != nil {
-				log.Printf("Email discarded %+v: Regular expression match failed: %v", email, matchedToError)
-				continue
-			}
-			if !matchedTo {
-				log.Printf("Email discarded %+v: Invalid destination email address", email)
+			email, emailError := NewEmail(from, to)
+			if emailError != nil {
+				log.Printf("Email discarded %+v: %v", email, emailError)
 				continue
 			}
 
-			feed := NewFeed("", email.To[:len(email.To)-len("@"+Configuration.Email.Host)])
-			if _, feedPathError := os.Stat(feed.Path); feedPathError != nil {
-				log.Printf("Email discarded %+v: Feed path error %+v: %v", email, feed, feedPathError)
-				continue
-			}
-
-			feedText, feedTextError := feed.Text()
+			feedText, feedTextError := email.Feed.Text()
 			if feedTextError != nil {
-				log.Printf("Email discarded %+v: Failed to read feed %+v: %v", email, feed, feedTextError)
+				log.Printf("Email discarded %+v: Failed to read feed: %v", email, feedTextError)
 				continue
 			}
 
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
 			if messageError != nil {
-				log.Printf("Email discarded: Failed to read message: %v", messageError)
+				log.Printf("Email discarded %+v: Failed to read message: %v", email, messageError)
 				continue
 			}
 
@@ -251,19 +255,19 @@ func EmailServer() {
 
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
-				log.Printf("Email discarded %+v: Couldn’t find where to add new entry (“<updated>” tag) on feed %+v", email, feed)
+				log.Printf("Email discarded %+v: Couldn’t find where to add new entry (“<updated>” tag)", email)
 				continue
 			}
 
-			feedWriteError := ioutil.WriteFile(feed.Path,
+			feedWriteError := ioutil.WriteFile(email.Feed.Path,
 				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry.Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
-				log.Printf("Email discarded %+v: Couldn’t write on feed %+v: %v", email, feed, feedWriteError)
+				log.Printf("Email discarded %+v: Couldn’t write on feed: %v", email, feedWriteError)
 				continue
 			}
 
-			log.Printf("Email %+v received on feed %+v", email, feed)
+			log.Printf("Email received: %+v", email)
 		}
 	}
 
