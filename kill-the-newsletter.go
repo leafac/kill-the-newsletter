@@ -165,12 +165,7 @@ func NewEmail(from, to string) Email {
 	return Email{From: from, To: strings.ToLower(to)}
 }
 
-func (email Email) Entry(data []byte) (*Entry, error) {
-	message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
-	if messageError != nil {
-		return nil, fmt.Errorf("Failed to read message: %v", messageError)
-	}
-
+func (email Email) Entry(message *enmime.Envelope) Entry {
 	entry := NewEntry(message.GetHeader("Subject"), message.GetHeader("From"), message.HTML)
 	if entry.Author == "" {
 		entry.Author = email.From
@@ -179,7 +174,7 @@ func (email Email) Entry(data []byte) (*Entry, error) {
 		entry.Content = message.Text
 	}
 
-	return &entry, nil
+	return entry
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -244,11 +239,13 @@ func EmailServer() {
 				continue
 			}
 
-			entry, entryError := email.Entry(data)
-			if entryError != nil {
-				log.Printf("Email discarded: Failed to create entry for email %+v", email)
+			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
+			if messageError != nil {
+				log.Printf("Email discarded: Failed to read message: %v", messageError)
 				continue
 			}
+
+			entry := email.Entry(message)
 
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 			if updatedRegularExpressionResult == nil {
