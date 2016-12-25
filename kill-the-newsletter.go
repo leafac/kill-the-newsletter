@@ -257,19 +257,26 @@ func EmailServer() {
 	log.Printf("Starting email server")
 
 	handler := func(origin net.Addr, from string, tos []string, data []byte) {
+		emails := make([]Email, 0)
 		for _, to := range tos {
 			email, emailError := NewEmail(from, to)
 			if emailError != nil {
 				log.Printf("Email discarded %+v: %v", email, emailError)
 				continue
 			}
+			emails = append(emails, email)
+		}
+		if len(emails) == 0 {
+			return
+		}
 
-			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
-			if messageError != nil {
-				log.Printf("Email discarded %+v: Failed to read message: %v", email, messageError)
-				continue
-			}
+		message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
+		if messageError != nil {
+			log.Printf("Emails discarded %+v: Failed to read message: %v", emails, messageError)
+			return
+		}
 
+		for _, email := range emails {
 			feedUpdateError := email.Feed.Update(email.Entry(message))
 			if feedUpdateError != nil {
 				log.Printf("Email discarded %+v: %v", email, feedUpdateError)
