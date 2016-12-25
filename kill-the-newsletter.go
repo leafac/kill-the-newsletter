@@ -233,14 +233,12 @@ func EmailServer() {
 				continue
 			}
 
-			title := message.GetHeader("Subject")
-			author := message.GetHeader("From")
-			if author == "" {
-				author = email.From
+			entry := NewEntry(message.GetHeader("Subject"), message.GetHeader("From"), message.HTML)
+			if entry.Author == "" {
+				entry.Author = email.From
 			}
-			content := message.HTML
-			if content == "" {
-				content = message.Text
+			if entry.Content == "" {
+				entry.Content = message.Text
 			}
 
 			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
@@ -250,7 +248,7 @@ func EmailServer() {
 			}
 
 			feedWriteError := ioutil.WriteFile(feed.Path,
-				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+NewEntry(title, author, string(content)).Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
+				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry.Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
 				0644)
 			if feedWriteError != nil {
 				log.Printf("Email discarded: couldn’t write on feed %+v for email %+v", feed, email)
