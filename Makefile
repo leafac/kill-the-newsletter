@@ -3,7 +3,7 @@
 build: kill-the-newsletter
 
 kill-the-newsletter: kill-the-newsletter.go
-	env GOOS=linux GOARCH=amd64 go build
+	env GOOS=linux GOARCH=amd64 go build kill-the-newsletter.go
 
 deploy: build
 	ssh leafac.com 'cd leafac.com && docker-compose stop killthenewsletter'
