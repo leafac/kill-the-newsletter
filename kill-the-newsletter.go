@@ -124,6 +124,27 @@ func (feed Feed) Create() error {
 	return ioutil.WriteFile(feed.Path, []byte(feed.Atom()), 0644)
 }
 
+func (feed Feed) Update(entry Entry) error {
+	feedText, feedTextError := feed.Text()
+	if feedTextError != nil {
+		return fmt.Errorf("Failed to read feed: %v", feedTextError)
+	}
+
+	updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
+	if updatedRegularExpressionResult == nil {
+		return fmt.Errorf("Failed to find where to add new entry (“<updated>” tag)")
+	}
+
+	feedWriteError := ioutil.WriteFile(feed.Path,
+		[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry.Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
+		0644)
+	if feedWriteError != nil {
+		return fmt.Errorf("Failed to write on feed: %v", feedWriteError)
+	}
+
+	return nil
+}
+
 func (feed Feed) Text() ([]byte, error) {
 	return ioutil.ReadFile(feed.Path)
 }
@@ -222,7 +243,7 @@ func WebServer() {
 			fmt.Fprint(w, ViewErrorFeedCreation(feed))
 			return
 		}
-		log.Printf("Created feed %+v", feed)
+		log.Printf("Created feed: %+v", feed)
 
 		fmt.Fprint(w, ViewFeedCreated(feed))
 	})
@@ -243,31 +264,15 @@ func EmailServer() {
 				continue
 			}
 
-			feedText, feedTextError := email.Feed.Text()
-			if feedTextError != nil {
-				log.Printf("Email discarded %+v: Failed to read feed: %v", email, feedTextError)
-				continue
-			}
-
 			message, messageError := enmime.ReadEnvelope(bytes.NewReader(data))
 			if messageError != nil {
 				log.Printf("Email discarded %+v: Failed to read message: %v", email, messageError)
 				continue
 			}
 
-			entry := email.Entry(message)
-
-			updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
-			if updatedRegularExpressionResult == nil {
-				log.Printf("Email discarded %+v: Couldn’t find where to add new entry (“<updated>” tag)", email)
-				continue
-			}
-
-			feedWriteError := ioutil.WriteFile(email.Feed.Path,
-				[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry.Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
-				0644)
-			if feedWriteError != nil {
-				log.Printf("Email discarded %+v: Couldn’t write on feed: %v", email, feedWriteError)
+			feedUpdateError := email.Feed.Update(email.Entry(message))
+			if feedUpdateError != nil {
+				log.Printf("Email discarded %+v: %v", email, feedUpdateError)
 				continue
 			}
 
