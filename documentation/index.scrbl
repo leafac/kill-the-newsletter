@@ -10,7 +10,7 @@
 @tabular[#:style 'boxed
          #:sep @hspace[1]
          #:row-properties '(bottom-border)
-         `((, @bold{Documentation} , @hyperlink["https://www.leafac.com/projects/kill-the-newsletter"]{https://www.leafac.com/projects/kill-the-newsletter})
+         `((, @bold{Documentation} , @hyperlink["https://www.leafac.com/software/kill-the-newsletter"]{https://www.leafac.com/projects/kill-the-newsletter})
            (, @bold{License} , @hyperlink["https://gnu.org/licenses/gpl-3.0.txt"]{GNU General Public License Version 3})
            (, @bold{Code of Conduct} , @hyperlink["http://contributor-covenant.org/version/1/4/"]{Contributor Covenant v1.4.0})
            (, @bold{Source} , @hyperlink["https://git.leafac.com/kill-the-newsletter"]{https://git.leafac.com/kill-the-newsletter})
