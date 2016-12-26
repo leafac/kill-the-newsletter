@@ -19,11 +19,11 @@
 
 @section[#:tag "overview"]{Overview}
 
-@emph{Kill the Newsletter!} is an application that converts email newsletters into Atom feeds. It is written in @hyperlink["https://golang.org/"]{Go} and spins up a web server and an email server. The web server is the front-end that allows for the creation of new Atom feeds. The email server receives emails and saves them as Atom entries. The feeds are stored as files in the file system.
+@emph{Kill the Newsletter!} is an application that converts email newsletters into Atom feeds. It spins up a web server and an email server. The web server is the front-end that allows for the creation of new Atom feeds. The email server receives emails and saves them as Atom entries. The feeds are stored as files in the file system.
 
 @section[#:tag "dependencies"]{Dependencies}
 
-Use @hyperlink["https://glide.sh/"]{Glide} to install the packages on which @emph{Kill the Newsletter!} depends:
+@emph{Kill the Newsletter!} is written in @hyperlink["https://golang.org/"]{Go}. Use @hyperlink["https://glide.sh/"]{Glide} to install the package dependencies:
 
 
 @nested[#:style 'code-inset @verbatim{
