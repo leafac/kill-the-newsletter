@@ -19,7 +19,7 @@ compiled-documentation/index.html: documentation/kill-the-newsletter.scrbl
 	raco scribble --dest compiled-documentation/ --dest-name index -- documentation/kill-the-newsletter.scrbl
 
 documentation/deploy: documentation
-	rsync compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
+	rsync -av compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
 
 documentation/clean:
 	rm -rf compiled-documentation
