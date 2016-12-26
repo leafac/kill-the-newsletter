@@ -7,7 +7,7 @@ kill-the-newsletter: kill-the-newsletter.go
 
 deploy: build
 	ssh leafac.com 'cd leafac.com && docker-compose stop killthenewsletter'
-	scp kill-the-newsletter leafac.com:leafac.com/websites/www.kill-the-newsletter.com/kill-the-newsletter
+	rsync -av kill-the-newsletter leafac.com:leafac.com/websites/www.kill-the-newsletter.com/kill-the-newsletter
 	ssh leafac.com 'cd leafac.com && docker-compose start killthenewsletter'
 
 build/clean:
@@ -19,7 +19,7 @@ compiled-documentation/index.html: documentation/kill-the-newsletter.scrbl
 	raco scribble --dest compiled-documentation/ --dest-name index -- documentation/kill-the-newsletter.scrbl
 
 documentation/deploy: documentation
-	rsync -av compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
+	rsync -av --delete compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
 
 documentation/clean:
 	rm -rf compiled-documentation
