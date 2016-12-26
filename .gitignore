@@ -2,3 +2,6 @@
 /vendor
 /feeds/*
 !/feeds/.gitkeep
+/documentation/*.html
+/documentation/*.css
+/documentation/*.js
