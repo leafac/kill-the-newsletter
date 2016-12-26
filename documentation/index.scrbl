@@ -8,6 +8,7 @@
 @hyperlink["https://www.kill-the-newsletter.com/"]{https://www.kill-the-newsletter.com/}
 
 @tabular[#:style 'boxed
+         #:sep @hspace[1]
          #:row-properties '(bottom-border)
          `((, @bold{Documentation} , @hyperlink["https://www.leafac.com/projects/kill-the-newsletter"]{https://www.leafac.com/projects/kill-the-newsletter})
            (, @bold{License} , @hyperlink["https://gnu.org/licenses/gpl-3.0.txt"]{GNU General Public License Version 3})
