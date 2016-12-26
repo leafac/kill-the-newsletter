@@ -5,3 +5,4 @@
 /documentation/*.html
 /documentation/*.css
 /documentation/*.js
+/compiled-documentation/
