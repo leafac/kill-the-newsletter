@@ -130,10 +130,10 @@ Configure @emph{Kill the Newsletter!} with a file named @filepath{./kill-the-new
          #:sep @hspace[1]
          #:row-properties '(bottom-border)
          `((, @bold{Key} , @bold{Default} , @bold{Description})
-           ("Name" , @tt{Kill the Newsletter!} "The service name, shown in communication to the user.")
+           ("Name" , @tt{Kill the Newsletter!} "The service name, shown in communications to the user.")
            ("Administrator" , @tt|{mailto:administrator@example.com}| "The system administrator contact reference.")
            ("Web.Server" , @tt|{:8080}| "The network address on which the web server listens.")
-           ("Web.URL" , @tt|{http://localhost:8080}| "The URL for the application. Used as base for links, note the lack of a trailing slash.")
+           ("Web.URL" , @tt|{http://localhost:8080}| "The URL for the application. Used as base for links. Note the lack of a trailing slash.")
            ("Web.URIs.Root" , @tt|{/}| "The root URI for the application. Note the trailing slash.")
            ("Web.URIs.Feeds" , @tt|{/feeds/}| "The URI under which to find the feeds. Note the trailing slash.")
            ("Email.Server" , @tt|{:2525}| "The network address on which the email server listens.")
@@ -141,7 +141,7 @@ Configure @emph{Kill the Newsletter!} with a file named @filepath{./kill-the-new
            ("Feed.Path" , @tt|{./feeds/}| "The file system path in which to store the feeds as files.")
            ("Feed.Suffix" , @tt|{.xml}| "The suffix to use for feeds files.")
            ("Feed.URN" , @tt|{localhost}| "The URN to use when creating identifiers for feeds and entries.")
-           ("Token.Length" , @tt|{20}| "The length of the token that identifies feeds.")
+           ("Token.Length" , @tt|{20}| "The length of the tokens that identify feeds.")
            ("Token.Characters" , @tt|{abcdefghijklmnopqrstuvwxyz0123456789}| "The characters that form tokens."))]
 
 Example:
