@@ -80,7 +80,7 @@ killthenewsletter:
   restart: "always"
                           }|]]
 
-@seclink["configuration"]{Configure the application} and setup a web server that reverse proxies the calls to the application and serves the contents of the feeds folder as static files. The following is an example configuration for @hyperlink["http://nginx.org/"]{nginx}:
+@seclink["configuration"]{Configure the application} and setup a web server in front of it. This acts as reverse proxy and serves the contents of the feeds folder as static files. The following is an example configuration for @hyperlink["http://nginx.org/"]{nginx}:
 
 @margin-note{@bold{Do no enable listing the contents of the feeds directory!} The file names contain tokens which are sensitive information.}
 
