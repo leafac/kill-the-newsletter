@@ -122,7 +122,7 @@ server {
 
 @section[#:tag "configuration"]{Configuration}
 
-@margin-note{See the @hyperlink["https://git.leafac.com/leafac.com/"]{full configuration} for the official @bold{Kill the Newsletter!} deployed instance. It is more complex, including a reverse proxy in front of the email server.}
+@margin-note{See the @hyperlink["https://git.leafac.com/leafac.com/"]{full configuration} for the main @bold{Kill the Newsletter!} deployed instance. It is more complex, including a reverse proxy in front of the email server.}
 
 Configure @emph{Kill the Newsletter!} with a file named @filepath{./kill-the-newsletter.json} in JSON format. The following configuration keys are available:
 
