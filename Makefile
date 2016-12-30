@@ -1,4 +1,7 @@
-.PHONY: build deploy build/clean documentation documentation/deploy documentation/clean clean
+.PHONY: container build deploy build/clean documentation documentation/deploy documentation/clean clean
+
+container: build
+	docker build --tag kill-the-newsletter:latest .
 
 build: kill-the-newsletter
 
