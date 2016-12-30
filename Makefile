@@ -9,9 +9,9 @@ kill-the-newsletter: kill-the-newsletter.go
 	env GOOS=linux GOARCH=amd64 go build kill-the-newsletter.go
 
 deploy: build
-	ssh leafac.com 'cd leafac.com && docker-compose stop killthenewsletter'
+	ssh leafac.com 'cd leafac.com && docker-compose stop kill-the-newsletter'
 	rsync -av kill-the-newsletter leafac.com:leafac.com/websites/www.kill-the-newsletter.com/kill-the-newsletter
-	ssh leafac.com 'cd leafac.com && docker-compose start killthenewsletter'
+	ssh leafac.com 'cd leafac.com && docker-compose start kill-the-newsletter'
 
 build/clean:
 	rm -f kill-the-newsletter
