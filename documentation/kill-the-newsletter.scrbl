@@ -52,13 +52,13 @@ Visit @hyperlink["http://localhost:8080"]{http://localhost:8080}. Create feeds a
 Because it depends on the file system, it is not possible to deploy @bold{Kill the Newsletter!} to @hyperlink["https://www.heroku.com/"]{Heroku}.
 
 While the build step requires a Go compiler, the environment that runs the application does not need one.
+
+@bold{Do not enable listing the contents of the feeds directory!} The file names contain tokens which are sensitive information.
 }
 
 To deploy a self-hosted instance, the recommended environment is a @hyperlink["https://www.docker.com/"]{Docker} container. See the accompanying @tt{Makefile}, @tt{Dockerfile} and @tt{docker-compose.yml}.
 
 @seclink["configuration"]{Configure the application} and setup a web server in front of it. This acts as reverse proxy and serves the contents of the feeds folder as static files. The following is an example configuration for @hyperlink["http://nginx.org/"]{nginx}:
-
-@margin-note{@bold{Do no enable listing the contents of the feeds directory!} The file names contain tokens which are sensitive information.}
 
 @nested[#:style 'code-inset
         @filebox["/etc/nginx/nginx.conf"
