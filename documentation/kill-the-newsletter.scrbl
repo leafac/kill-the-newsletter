@@ -58,27 +58,7 @@ To deploy a self-hosted instance, start by compiling the application to the targ
 
 @margin-note{While the build step above requires a Go compiler, the environment that runs the application does not need one.}
 
-The recommended deployment environment is a @hyperlink["https://www.docker.com/"]{Docker} container. The following is an example @hyperlink["https://www.docker.com/products/docker-compose"]{Docker Compose} configuration:
-
-@nested[#:style 'code-inset
-        @filebox["docker-compose.yml"
-                 @verbatim|{
-killthenewsletter:
-  image: "alpine:3.4"
-  expose:
-    - "80"
-  ports:
-    - "25:25"
-  volumes:
-    - "./kill-the-newsletter:/kill-the-newsletter:ro"
-    - "./kill-the-newsletter.json:/kill-the-newsletter.json:ro"
-    - "./feeds:/feeds"
-    - "./log:/log"
-  working_dir: "/"
-  entrypoint: ["sh", "-c"]
-  command: ["./kill-the-newsletter >> /log/log.txt 2>&1"]
-  restart: "always"
-                          }|]]
+The recommended deployment environment is a @hyperlink["https://www.docker.com/"]{Docker} container. See the accompanying @tt{Dockerfile} and @tt{docker-compose.yml}.
 
 @seclink["configuration"]{Configure the application} and setup a web server in front of it. This acts as reverse proxy and serves the contents of the feeds folder as static files. The following is an example configuration for @hyperlink["http://nginx.org/"]{nginx}:
 
@@ -94,11 +74,11 @@ server {
   server_name www.kill-the-newsletter.com;
 
   location / {
-    proxy_pass http://killthenewsletter:80;
+    proxy_pass http://kill-the-newsletter:80;
   }
 
-  location /feeds/ {
-    alias /feeds/;
+  location /feeds {
+    root /var/www/www.kill-the-newsletter.com;
   }
 }
 

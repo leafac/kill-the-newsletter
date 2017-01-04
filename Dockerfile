@@ -1,8 +1,8 @@
 FROM scratch
 MAINTAINER Leandro Facchinetti <me@leafac.com>
 
-ADD kill-the-newsletter /
-ADD kill-the-newsletter.json /
+COPY kill-the-newsletter /
+COPY kill-the-newsletter.json /
 
 EXPOSE 2525
 EXPOSE 8080

@@ -6,6 +6,6 @@ services:
     ports:
       - "8080:8080"
       - "2525:2525"
-    volumes:
-      - "./feeds:/feeds"
-      # - "./kill-the-newsletter.json:/kill-the-newsletter.json" # Uncomment if customizing configuration.
+
+volumes:
+  kill-the-newsletter-feeds:
