@@ -48,17 +48,13 @@ Visit @hyperlink["http://localhost:8080"]{http://localhost:8080}. Create feeds a
 
 @section[#:tag "deployment"]{Deployment}
 
-@margin-note{Because it depends on the file system, it is not possible to deploy @bold{Kill the Newsletter!} to @hyperlink["https://www.heroku.com/"]{Heroku}.}
+@margin-note{
+Because it depends on the file system, it is not possible to deploy @bold{Kill the Newsletter!} to @hyperlink["https://www.heroku.com/"]{Heroku}.
 
-To deploy a self-hosted instance, start by compiling the application to the target architecture. For example, for Linux @tt{x86_64}:
+While the build step requires a Go compiler, the environment that runs the application does not need one.
+}
 
-@nested[#:style 'code-inset @verbatim{
-  $ env GOOS=linux GOARCH=amd64 go build kill-the-newsletter.go
-}]
-
-@margin-note{While the build step above requires a Go compiler, the environment that runs the application does not need one.}
-
-The recommended deployment environment is a @hyperlink["https://www.docker.com/"]{Docker} container. See the accompanying @tt{Dockerfile} and @tt{docker-compose.yml}.
+To deploy a self-hosted instance, the recommended environment is a @hyperlink["https://www.docker.com/"]{Docker} container. See the accompanying @tt{Makefile}, @tt{Dockerfile} and @tt{docker-compose.yml}.
 
 @seclink["configuration"]{Configure the application} and setup a web server in front of it. This acts as reverse proxy and serves the contents of the feeds folder as static files. The following is an example configuration for @hyperlink["http://nginx.org/"]{nginx}:
 
