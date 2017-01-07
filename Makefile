@@ -19,7 +19,7 @@ build/clean:
 documentation: compiled-documentation/index.html
 
 compiled-documentation/index.html: documentation/kill-the-newsletter.scrbl
-	raco scribble --dest compiled-documentation/ --dest-name index -- documentation/kill-the-newsletter.scrbl
+	cd documentation && raco scribble --dest ../compiled-documentation/ --dest-name index -- kill-the-newsletter.scrbl
 
 documentation/deploy: documentation
 	rsync -av --delete compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
