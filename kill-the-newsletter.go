@@ -18,7 +18,16 @@ import (
 	"time"
 )
 
+// ---------------------------------------------------------------------------------------------------
+
+func PrintVersion() {
+	log.Printf("Version: 0.0.1")
+}
+
+// ---------------------------------------------------------------------------------------------------
+
 func main() {
+	PrintVersion()
 	SeedRandomNumberGenerator()
 	LoadConfiguration()
 	WebServer()
