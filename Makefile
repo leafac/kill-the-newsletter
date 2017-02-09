@@ -1,4 +1,4 @@
-.PHONY: container build deploy build/clean documentation documentation/deploy documentation/clean clean
+.PHONY: container build deploy build/clean documentation documentation/deploy
 
 container: build
 	docker build --tag kill-the-newsletter:latest .
@@ -16,15 +16,14 @@ deploy: build
 build/clean:
 	rm -f kill-the-newsletter
 
-documentation: compiled-documentation/index.html
+################################################################################
 
-compiled-documentation/index.html: documentation/kill-the-newsletter.scrbl
-	cd documentation && raco scribble --dest ../compiled-documentation/ --dest-name index -- kill-the-newsletter.scrbl
+project = kill-the-newsletter
+
+documentation: documentation/index.html
+
+documentation/index.html: documentation/$(project).scrbl
+	cd documentation && raco scribble --dest-name index -- $(project).scrbl
 
 documentation/deploy: documentation
-	rsync -av --delete compiled-documentation/ leafac.com:leafac.com/websites/software/kill-the-newsletter/
-
-documentation/clean:
-	rm -rf compiled-documentation
-
-clean: build/clean documentation/clean
+	rsync -av --delete documentation/ leafac.com:leafac.com/websites/software/$(project)/

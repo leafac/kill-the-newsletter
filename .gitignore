@@ -2,7 +2,4 @@
 /vendor
 /feeds/*
 !/feeds/.gitkeep
-/documentation/*.html
-/documentation/*.css
-/documentation/*.js
-/compiled-documentation/
+/documentation/kill-the-newsletter.html
