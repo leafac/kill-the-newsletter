@@ -10,7 +10,7 @@
 @tabular[#:style 'boxed
          #:sep @hspace[1]
          #:row-properties '(bottom-border)
-         `((, @bold{Version} , @seclink["changelog/0.0.1"]{0.0.1})
+         `((, @bold{Version} , @seclink["changelog/0.0.2"]{0.0.2})
            (, @bold{Documentation} , @hyperlink["https://www.leafac.com/software/kill-the-newsletter"]{https://www.leafac.com/software/kill-the-newsletter})
            (, @bold{License} , @hyperlink["https://gnu.org/licenses/gpl-3.0.txt"]{GNU General Public License Version 3})
            (, @bold{Code of Conduct} , @hyperlink["http://contributor-covenant.org/version/1/4/"]{Contributor Covenant v1.4.0})
@@ -161,6 +161,13 @@ This section documents all notable changes to Kill the Newsletter! It follows re
 
  @subsubsection[#:tag "changelog/unreleased/security"]{Security}
 }
+
+@subsection[#:tag "changelog/0.0.2"]{0.0.2 · 2017-02-15}
+
+@subsubsection[#:tag "changelog/0.0.2/added"]{Added}
+
+@itemlist[
+ @item{Truncate large feeds. Thanks Abdulvahid Işık for the bug report.}]
 
 @subsection[#:tag "changelog/0.0.1"]{0.0.1 · 2017-02-09}
 
