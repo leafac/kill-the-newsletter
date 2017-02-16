@@ -58,9 +58,10 @@ var Configuration struct {
 		Host   string
 	}
 	Feed struct {
-		Path   string
-		Suffix string
-		URN    string
+		Path      string
+		Suffix    string
+		URN       string
+		SizeLimit int
 	}
 	Token struct {
 		Length     int
@@ -80,6 +81,7 @@ func ConfigurationDefaults() {
 	Configuration.Feed.Path = "./feeds/"
 	Configuration.Feed.Suffix = ".xml"
 	Configuration.Feed.URN = "localhost"
+	Configuration.Feed.SizeLimit = 1900000
 	Configuration.Token.Length = 20
 	Configuration.Token.Characters = "abcdefghijklmnopqrstuvwxyz0123456789"
 }
@@ -139,13 +141,42 @@ func (feed Feed) Update(entry Entry) error {
 		return fmt.Errorf("Failed to read feed: %v", feedTextError)
 	}
 
-	updatedRegularExpressionResult := regexp.MustCompile("<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
+	updatedRegularExpressionResult := regexp.MustCompile("\n<updated>.*?</updated>").FindReaderIndex(bytes.NewReader(feedText))
 	if updatedRegularExpressionResult == nil {
 		return fmt.Errorf("Failed to find where to add new entry (“<updated>” tag)")
 	}
 
 	feedWriteError := ioutil.WriteFile(feed.Path,
 		[]byte(string(feedText[:updatedRegularExpressionResult[0]])+entry.Atom()+string(feedText[updatedRegularExpressionResult[1]:])),
+		0644)
+	if feedWriteError != nil {
+		return fmt.Errorf("Failed to write on feed: %v", feedWriteError)
+	}
+
+	return nil
+}
+
+func (feed Feed) Truncate() error {
+	feedText, feedTextError := feed.Text()
+	if feedTextError != nil {
+		return fmt.Errorf("Failed to read feed: %v", feedTextError)
+	}
+	if len(feedText) <= Configuration.Feed.SizeLimit {
+		return nil
+	}
+
+	feedTextTruncated := feedText[:Configuration.Feed.SizeLimit]
+
+	entryEndRegularExpressionResult := regexp.MustCompile(".*</entry>").FindReaderIndex(bytes.NewReader(feedTextTruncated))
+	if entryEndRegularExpressionResult == nil {
+		entryEndRegularExpressionResult = regexp.MustCompile(".*?</updated>").FindReaderIndex(bytes.NewReader(feedTextTruncated))
+		if entryEndRegularExpressionResult == nil {
+			return fmt.Errorf("Failed to find where to truncate (“</entry>” closing tag or “<updated>” tag)")
+		}
+	}
+
+	feedWriteError := ioutil.WriteFile(feed.Path,
+		[]byte(string(feedTextTruncated[:entryEndRegularExpressionResult[1]])+"\n</feed>"),
 		0644)
 	if feedWriteError != nil {
 		return fmt.Errorf("Failed to write on feed: %v", feedWriteError)
@@ -299,6 +330,12 @@ func EmailServer() {
 			}
 
 			log.Printf("Email received: %+v", email)
+
+			feedTruncateError := email.Feed.Truncate()
+			if feedTruncateError != nil {
+				log.Printf("Failed to truncate feed %+v: %v", email, feedTruncateError)
+				continue
+			}
 		}
 	}
 
