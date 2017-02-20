@@ -118,6 +118,7 @@ Configure @emph{Kill the Newsletter!} with a file named @filepath{./kill-the-new
            ("Feed.Path" , @tt|{./feeds/}| "The file system path in which to store the feeds as files.")
            ("Feed.Suffix" , @tt|{.xml}| "The suffix to use for feeds files.")
            ("Feed.URN" , @tt|{localhost}| "The URN to use when creating identifiers for feeds and entries.")
+           ("Feed.SizeLimit" , @tt|{1900000}| "The maximum size (in bytes) for a feed. Larger feeds are truncated.")
            ("Token.Length" , @tt|{20}| "The length of the tokens that identify feeds.")
            ("Token.Characters" , @tt|{abcdefghijklmnopqrstuvwxyz0123456789}| "The characters that form tokens."))]
 
