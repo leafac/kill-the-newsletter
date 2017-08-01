@@ -1,19 +1,25 @@
 hash: 4701af0831168c8ec42ebd0a023b7a8194c0a2390c763f1e345e1c869c1b56fe
-updated: 2016-12-21T14:02:12.340132289-05:00
+updated: 2017-08-01T13:23:47.384371505-04:00
 imports:
 - name: github.com/jaytaylor/html2text
-  version: 4b9124c9b0a2279e2092c4a9aaf1c83bbd2dcffc
+  version: 7c7a33a7a158a5ce395c803d2b6a209b2bbc14c8
 - name: github.com/jhillyerd/enmime
-  version: fd87f752711111ccfa856d65a9e7e2acf10b14a2
+  version: b6ea5237e7d1fe39d470345ed9b2636a182bfece
+- name: github.com/mattn/go-runewidth
+  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
 - name: github.com/mhale/smtpd
-  version: 7ffbdfd028f54ca78b0f6265e5f4bc8a8dcf562f
+  version: 3d3140b2c002fb76f88ff731a7579029ed2a2888
+- name: github.com/olekukonko/tablewriter
+  version: be5337e7b39e64e5f91445ce7e721888dbab7387
+- name: github.com/ssor/bom
+  version: 6386211fdfcf24c0bfbdaceafd02849ed9a8a509
 - name: golang.org/x/net
-  version: 45e771701b814666a7eb299e6c7a57d0b1799e91
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
   subpackages:
   - html
   - html/atom
 - name: golang.org/x/text
-  version: a49bea13b776691cb1b49873e5d8df96ec74831a
+  version: 3bd178b88a8180be2df394a1fbb81313916f0e7b
   subpackages:
   - encoding
   - encoding/charmap
