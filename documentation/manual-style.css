@@ -26,17 +26,25 @@
 
 /* Monospace: */
 .maincolumn, .refpara, .refelem, .tocset, .stt, .hspace, .refparaleft, .refelemleft {
-    font-family: 'Source Code Pro', monospace;
+    font-family: 'Fira-Mono', monospace;
     white-space: inherit;
     font-size: 1rem;
 }
 
-.stt {
-    font-weight: 500;
+/* embolden the "Racket Guide" and "Racket Reference" links on the TOC */
+/* there isn't an obvious tag in the markup that designates the top TOC page, which is called "start.scrbl" */
+/* nor a tag that designates these two links as special */
+/* so we'll use this slightly tortured sibling selector that hooks onto the h2 tag */
+h2[x-source-module='(lib "scribblings/main/start.scrbl")'] ~ table a[href="guide/index.html"], 
+h2[x-source-module='(lib "scribblings/main/start.scrbl")'] ~ table a[href="reference/index.html"] {
+  font-weight: bold;
 }
 
+
 h2 .stt {
-    font-size: 2.7rem;
+    font-size: 2.3rem;
+    /* prevent automatic bolding from h2 */
+    font-weight: 400;
 }
 
 .toptoclink .stt {
@@ -48,7 +56,7 @@ h2 .stt {
 
 .RpackageSpec .stt {
     font-weight: 300;
-    font-family: 'Source Code Pro';
+    font-family: 'Fira-Mono', monospace;
     font-size: 0.9rem;
 }
 
@@ -61,8 +69,11 @@ h3 .stt, h4 .stt, h5 .stt {
 
 /* Serif: */
 .main, .refcontent, .tocview, .tocsub, .sroman, i {
-    font-family: 'Charter', serif;
+    font-family: 'Charter-Racket', serif;
     font-size: 1.18rem;
+/* Don't use font-feature-settings with Charter, 
+it fouls up loading for reasons mysterious */
+/*    font-feature-settings: 'tnum' 1, 'liga' 0; */
 }
 
 
@@ -70,9 +81,10 @@ h3 .stt, h4 .stt, h5 .stt {
 .version, .versionNoNav, .ssansserif {
     font-family: 'Fira', sans-serif;
 }
+
+/* used mostly for DrRacket menu commands */
 .ssansserif {
-    font-family: 'Fira';
-    font-weight: 500;
+    font-family: 'Fira', sans-serif;
     font-size: 0.9em;
 }
 
@@ -98,19 +110,13 @@ li {
 }
 
 h1, h2, h3, h4, h5, h6, h7, h8 {
-    font-family: 'Fira';
+    font-family: 'Fira', sans-serif;
     font-weight: 300;
     font-size: 1.6rem;
     color: #333;
     margin-top: inherit;
     margin-bottom: 1rem;
     line-height: 1.25;
-    -moz-font-feature-settings: 'tnum=1';
-    -moz-font-feature-settings: 'tnum' 1;
-    -webkit-font-feature-settings: 'tnum' 1;
-    -o-font-feature-settings: 'tnum' 1;
-    -ms-font-feature-settings: 'tnum' 1;
-    font-feature-settings: 'tnum' 1;
 
 }
 
@@ -121,12 +127,15 @@ h3, h4, h5, h6, h7, h8 {
 
 
 h2 { /* per-page main title */
-    font-family: 'Miso';
-    font-weight: bold;
+    font-family: 'Cooper-Hewitt';
     margin-top: 4rem;
-    font-size: 3rem;
-    line-height: 1.1;
+    font-size: 2.3rem;
+    font-weight: bold;
+    line-height: 1.2;
     width: 90%;
+    /* a little nudge to make text visually lower than 4rem rule in left margin */
+    position: relative;
+    top: 6px;
 }
 
 h3, h4, h5, h6, h7, h8 {
@@ -174,7 +183,7 @@ a:hover {
     left: 0;
     width: 15rem;
     height: 6rem;
-    font-family: 'Fira';
+    font-family: 'Fira', sans-serif;
     font-size: 0.9rem;
     border-bottom: 0px solid hsl(216, 15%, 70%);
     background-color: inherit;
@@ -251,17 +260,25 @@ a:hover {
 }
 
 .searchbox {
-    font-size: 1rem;
+    font-size: 0.9rem;
     width: 12rem;
     margin: 1rem;
-    padding: 0.25rem;
+    padding: 0.25rem 0.4rem ;
     vertical-align: middle;
     background-color: white;
+    font-family: 'Fira-Mono', monospace;
 }
 
+
 #search_box {
-    font-size: 0.8rem;
+    font-family: 'Fira-Mono', monospace;
+    font-size: 1rem;
+    padding: 0.25rem 0.3rem ;
 }
+
+/* Default to local view. Global will specialize */
+.plt_global_only { display: none; }
+.plt_local_only { display: block; }
 
 /* ---------------------------------------- */
 /* Version */
@@ -362,7 +379,7 @@ a:hover {
 }
 
 .refcontent {
-    font-family: 'Fira';
+    font-family: 'Fira', sans-serif;
     font-size: 1rem;
     line-height: 1.6;
     margin: 0 0 0 0;
@@ -409,14 +426,7 @@ a:hover {
     padding-bottom: 0.4rem;
     padding-left: 0.2rem;
     line-height: 1.1;
-    font-family: 'Fira';
-    -moz-font-feature-settings: 'tnum=1';
-    -moz-font-feature-settings: 'tnum' 1;
-    -webkit-font-feature-settings: 'tnum' 1;
-    -o-font-feature-settings: 'tnum' 1;
-    -ms-font-feature-settings: 'tnum' 1;
-    font-feature-settings: 'tnum' 1;
-
+    font-family: 'Fira', sans-serif;
 }
 
 .tocset td a {
@@ -486,9 +496,21 @@ table.tocsublist {
     font-size: 1rem;
 }
 
-.tocviewsublist td, .tocviewsublistbottom td, .tocviewsublisttop td, .tocsub td,
+.tocviewsublist td, 
+.tocviewsublistbottom td, 
+.tocviewsublisttop td, 
+.tocsub td,
 .tocviewsublistonly td {
     font-size: 90%;
+}
+
+/* shrink the monospaced text (`stt`) within nav */
+.tocviewsublist td .stt, 
+.tocviewsublistbottom td .stt, 
+.tocviewsublisttop td .stt, 
+.tocsub td .stt,
+.tocviewsublistonly td .stt {
+    font-size: 95%;
 }
 
 
@@ -528,7 +550,7 @@ table.tocsublist {
 .tocsubtitle {
     display: block;
     font-size: 62%;
-    font-family: 'Fira';
+    font-family: 'Fira', sans-serif;
     font-weight: bolder;
     font-style: normal;
     letter-spacing: 2px;
@@ -582,20 +604,27 @@ blockquote {
     margin-bottom: 0.5em;
 }
 
+/* put a little air between lines of code sample */
+/* Fira Mono appears taller than Source Code Pro */
+.SCodeFlow td {
+    padding-bottom: 1px;
+}
+
 .boxed {
     margin: 0;
     margin-top: 2em;
     padding: 0.25em;
-    padding-bottom: 0.5em;
+    padding-top: 0.3em;
+    padding-bottom: 0.4em;
     background: #f3f3f3;
     box-sizing:border-box;
     border-top: 1px solid #99b;
     background: hsl(216, 78%, 95%);
-    background: -moz-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 78%, 95%) 100%);
-    background: -webkit-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 78%, 95%) 100%);
-    background: -o-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 78%, 95%) 100%);
-    background: -ms-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 78%, 95%) 100%);
-    background: linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 78%, 95%) 100%);
+    background: -moz-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 62%, 95%) 100%);
+    background: -webkit-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 62%, 95%) 100%);
+    background: -o-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 62%, 95%) 100%);
+    background: -ms-linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 62%, 95%) 100%);
+    background: linear-gradient(to bottom left, hsl(0, 0%, 99%) 0%, hsl(216, 62%, 95%) 100%);
 }
 
 blockquote > blockquote.SVInsetFlow {
@@ -610,7 +639,6 @@ blockquote > blockquote.SVInsetFlow {
 
 .SVInsetFlow a, .SCodeFlow a {
     color: #07A;
-    font-weight: 500;
 }
 
 .SubFlow {
@@ -628,11 +656,11 @@ blockquote > blockquote.SVInsetFlow {
 .SAuthorListBox {
     position: static;
     float: none;
-    font-family: 'Fira';
+    font-family: 'Fira', sans-serif;
     font-weight: 300;
     font-size: 110%;
     margin-top: 1rem;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     width: 30rem;
     height: auto;
 }

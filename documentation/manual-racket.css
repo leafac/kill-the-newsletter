@@ -6,9 +6,11 @@
 .RktMod, .RktKw, .RktVar, .RktSym,
 .RktRes, .RktOut, .RktCmt, .RktVal,
 .RktBlk, .RktErr {
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'Fira-Mono', monospace;
   white-space: inherit;
-    font-size: 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+
 }
 
 /* this selctor grabs the first linked Racket symbol
@@ -16,14 +18,14 @@ in a definition box (i.e., the symbol being defined) */
 a.RktValDef, a.RktStxDef, a.RktSymDef,
 span.RktValDef, span.RktStxDef, span.RktSymDef
 {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     color: black;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 
 .inheritedlbl {
-  font-family: 'Fira', sans;
+  font-family: 'Fira', sans-serif;
 }
 
 .RBackgroundLabelInner {
@@ -119,7 +121,6 @@ span.RktValDef, span.RktStxDef, span.RktSymDef
 .RktValLink, .RktStxLink, .RktModLink {
   text-decoration: none;
     color: #07A;
-    font-weight: 500;
     font-size: 1rem;
 }
 
@@ -131,7 +132,7 @@ h2 .RktMod, h3 .RktMod, h4 .RktMod, h5 .RktMod,
 h2 .RktVal, h3 .RktVal, h4 .RktVal, h5 .RktVal,
 h2 .RktPn, h3 .RktPn, h4 .RktPn, h5 .RktPn {
     color: #333;
-    font-size: 1.65rem;
+    font-size: 1.50rem;
     font-weight: 400;
 }
 
@@ -141,9 +142,9 @@ h2 .RktPn, h3 .RktPn, h4 .RktPn, h5 .RktPn {
     color: inherit;
 }
 
-.tocset .RktValLink, .tocset .RktStxLink, .tocset .RktModLink {
+.tocset .RktValLink, .tocset .RktStxLink, .tocset .RktModLink, .tocset .RktSym {
     color: black;
-  font-weight: 400;
+    font-weight: 400;
     font-size: 0.9rem;
 }
 
@@ -195,11 +196,11 @@ tbody > tr:first-child > td > .together {
 }
 
 .defmodule {
-    font-family: 'Source Code Pro';
+    font-family: 'Fira-Mono', monospace;
     padding: 0.25rem 0.75rem 0.25rem 0.5rem;
     margin-bottom: 1rem;
     width: 100%;
-    background-color: hsl(60, 29%, 94%);
+    background-color: #ebf0f4;
 }
 
 .defmodule a {
@@ -218,6 +219,10 @@ tbody > tr:first-child > td > .together {
     font-size: 1rem;
 }
 
+/* make parens ordinary color in defmodule */
+.defmodule .RktPn {
+    color: inherit;
+}
 
 .specgrammar {
     float: none;
@@ -288,7 +293,7 @@ tbody > tr:first-child > td > .together {
    text-align: right;
    z-index: 0;
    font-weight: 300;
-   font-family: 'Source Code Pro';
+   font-family: 'Fira-Mono', monospace;
    font-size: 0.9rem;
     color: gray;
 }
@@ -296,7 +301,7 @@ tbody > tr:first-child > td > .together {
 
 .RpackageSpec .Smaller {
    font-weight: 300;
-   font-family: 'Source Code Pro';
+   font-family: 'Fira-Mono', monospace;
    font-size: 0.9rem;
 }
 
