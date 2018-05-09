@@ -1,7 +1,3 @@
-require "sinatra"
-
-get "/" do
-  "Hello World!"
-end
+require "./kill-the-newsletter"
 
 run Sinatra::Application

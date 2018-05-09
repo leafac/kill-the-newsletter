@@ -1,4 +1,8 @@
 source "https://rubygems.org"
 
-gem "unicorn"
+gem "puma"
 gem "sinatra"
+
+group :development do
+  gem "sinatra-contrib"
+end
