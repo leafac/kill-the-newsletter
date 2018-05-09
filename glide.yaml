@@ -1,4 +1,0 @@
-package: git.leafac.com/kill-the-newsletter
-import:
-- package: github.com/jhillyerd/enmime
-- package: github.com/mhale/smtpd

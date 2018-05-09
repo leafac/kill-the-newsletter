@@ -1,5 +1,0 @@
-/kill-the-newsletter
-/vendor
-/feeds/*
-!/feeds/.gitkeep
-/documentation/kill-the-newsletter.html
