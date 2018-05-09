@@ -1,0 +1,28 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    kgio (2.11.2)
+    mustermann (1.0.2)
+    rack (2.0.5)
+    rack-protection (2.0.1)
+      rack
+    raindrops (0.19.0)
+    sinatra (2.0.1)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.1)
+      tilt (~> 2.0)
+    tilt (2.0.8)
+    unicorn (5.4.0)
+      kgio (~> 2.6)
+      raindrops (~> 0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  sinatra
+  unicorn
+
+BUNDLED WITH
+   1.16.1
