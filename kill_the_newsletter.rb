@@ -45,6 +45,10 @@ post "/" do
   erb :index
 end
 
+post "/email" do
+  params.inspect
+end
+
 not_found do
   @error = "404 Not Found"
   erb :index
