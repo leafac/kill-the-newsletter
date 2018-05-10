@@ -46,7 +46,7 @@ post "/" do
 end
 
 post "/email" do
-  logger.info params.inspect
+  logger.info params
   200
 end
 
