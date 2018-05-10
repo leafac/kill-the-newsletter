@@ -4,55 +4,9 @@ require "fog/backblaze"
 require "securerandom"
 require "date"
 
-Inbox = Struct.new :name, :token do
-  def initialize name
-    super name, Token.fresh
-  end
-
-  def email
-    "#{token}@kill-the-newsletter.com"
-  end
-
-  def feed
-    "https://www.kill-the-newsletter.com/feeds/#{file}"
-  end
-
-  def file
-    "#{token}.xml"
-  end
-
-  def urn
+module IDable
+  def id
     "urn:kill-the-newsletter:#{token}"
-  end
-
-  def save storage
-    # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
-    @persisted = true
-  end
-
-  def persisted?
-    !! @persisted
-  end
-end
-
-Entry = Struct.new :id, :title, :author, :created_at, :content, :html do
-  def initialize title, author, content, html
-    super Token.fresh, title, author, DateTime.now.rfc3339, content, html
-  end
-
-  def from_email email
-    html = ! email["html"].blank?
-    new(
-      email.fetch("subject"),
-      email.fetch("from"),
-      email.fetch("subject"),
-      html ? email.fetch("html") : email.fetch("text"),
-      html,
-    )
-  end
-
-  def html?
-    !! html
   end
 end
 
@@ -71,6 +25,58 @@ end
 class NilClass
   def blank?
     true
+  end
+end
+
+Inbox = Struct.new :token, :name do
+  include IDable
+
+  def initialize name
+    super Token.fresh, name
+  end
+
+  def email
+    "#{token}@kill-the-newsletter.com"
+  end
+
+  def feed
+    "https://www.kill-the-newsletter.com/feeds/#{file}"
+  end
+
+  def file
+    "#{token}.xml"
+  end
+
+  def save storage
+    # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
+    @persisted = true
+  end
+
+  def persisted?
+    !! @persisted
+  end
+end
+
+Entry = Struct.new :token, :title, :author, :created_at, :content, :html do
+  include IDable
+
+  def initialize title, author, content, html
+    super Token.fresh, title, author, DateTime.now.rfc3339, content, html
+  end
+
+  def from_email email
+    html = ! email["html"].blank?
+    new(
+      email.fetch("subject"),
+      email.fetch("from"),
+      email.fetch("subject"),
+      html ? email.fetch("html") : email.fetch("text"),
+      html,
+    )
+  end
+
+  def html?
+    !! html
   end
 end
 
@@ -102,6 +108,8 @@ end
 
 post "/email" do
   logger.info params
+  # params.fetch("envelope").fetch("to") => ["example@example.com", ...]
+  # params.fetch("to") => "example@example.com"
   200
 end
 
