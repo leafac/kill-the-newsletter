@@ -46,7 +46,8 @@ post "/" do
 end
 
 post "/email" do
-  params.inspect
+  logger.info params.inspect
+  200
 end
 
 not_found do
