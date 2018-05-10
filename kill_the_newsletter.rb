@@ -15,6 +15,14 @@ Inbox = Struct.new :name, :token do
     "https://www.kill-the-newsletter.com/feeds/#{token}.xml"
   end
 
+  def save
+    @persisted = true
+  end
+
+  def persisted?
+    !! @persisted
+  end
+
   private
 
     def self.fresh_token
@@ -32,10 +40,14 @@ post "/" do
     @error = "Please provide the newsletter name."
   else
     @inbox = Inbox.from_name name
+    unless @inbox.save
+      @error = "Error creating “#{name}” inbox!<br>Please contact the <a href=\"mailto:kill-the-newsletter@leafac.com?subject=[Kill the Newsletter!] Error creating “#{name}” inbox with token “#{@inbox.token}”\">system administrator</a><br>with token “#{@inbox.token}”."
+    end
   end
   erb :index
 end
 
-# not_found do
-#   erb :not_found
-# end
+not_found do
+  @error = "404 Not Found"
+  erb :index
+end

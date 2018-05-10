@@ -6,29 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Convert email newsletters into Atom feeds.">
     <link rel="stylesheet" href="/stylesheets/styles.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
   </head>
   <body>
     <header>
       <h1>Kill the Newsletter!</h1>
-      <p>Convert email newsletters into Atom feeds.</p>
-      <p><%= File.read "public/envelope-to-feed.svg" %></p>
+      <p><%= File.read "public/images/envelope-to-feed.svg" %></p>
+      <h2>Convert email newsletters into Atom feeds</h2>
     </header>
-    <% if @inbox %>
-      <p>“<%= @inbox.name %>” inbox successfully created.</p>
-      <p>Sign up for a newsletter with <a href="mailto:<%= @inbox.email %>"><%= @inbox.email %></a>.</p>
-      <p>Subscribe to the Atom feed at <a href="<%= @inbox.feed %>"><%= @inbox.feed %></a>.</p>
-      <p>Don’t share these addresses! They contain a security token that other people could use to spam your inbox and unsubscribe you from your newsletters.</p>
-      <p><a href="/">Create another inbox.</a></p>
-    <% else %>
-      <form method="POST" action="/">
-        <p>
-          <input type="text" name="name" placeholder="Newsletter name…" autofocus="autofocus">
-          <input type="submit" value="Create Inbox">
-        </p>
-      </form>
-    <% end %>
+    <main>
+      <% if @error %>
+        <p class="error"><%= @error %></p>
+      <% end %>
+      <% if @inbox.nil? %>
+        <form method="POST" action="/">
+          <p><input type="text" name="name" placeholder="Newsletter name…" autofocus></p>
+          <p><input type="submit" value="Create Inbox"></p>
+        </form>
+      <% elsif @inbox.persisted? %>
+        <p>“<%= @inbox.name %>” inbox created</p>
+        <p>Sign up for the newsletter with<br><a href="mailto:<%= @inbox.email %>" target="_blank"><%= @inbox.email %></a></p>
+        <p>Subscribe to the Atom feed at<br><a href="<%= @inbox.feed %>" target="_blank"><%= @inbox.feed %></a></p>
+        <p><em>Don’t share these addresses!</em><br>They contain a security token<br>that other people could use to send you spam<br>and unsubscribe you from your newsletters.</p>
+        <p><a href="/" class="button">Create Another Inbox</a></p>
+      <% end %>
+    </main>
     <footer>
-      <p>Created by <a href="https://www.leafac.com">Leandro Facchinetti</a>.</p>
+      <p>By <a href="https://www.leafac.com">Leandro Facchinetti</a></p>
     </footer>
   </body>
 </html>
