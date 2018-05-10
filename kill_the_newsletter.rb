@@ -40,9 +40,7 @@ post "/" do
     @error = "Please provide the newsletter name."
   else
     @inbox = Inbox.from_name name
-    unless @inbox.save
-      @error = "Error creating “#{name}” inbox!<br>Please contact the <a href=\"mailto:kill-the-newsletter@leafac.com?subject=[Kill the Newsletter!] Error creating “#{name}” inbox with token “#{@inbox.token}”\">system administrator</a><br>with token “#{@inbox.token}”."
-    end
+    @inbox.save
   end
   erb :index
 end
