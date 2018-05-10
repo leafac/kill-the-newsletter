@@ -13,11 +13,19 @@ Inbox = Struct.new :name, :token do
   end
 
   def feed
-    "https://www.kill-the-newsletter.com/feeds/#{token}.xml"
+    "https://www.kill-the-newsletter.com/feeds/#{file}"
+  end
+
+  def file
+    "#{token}.xml"
+  end
+
+  def urn
+    "urn:kill-the-newsletter:#{token}"
   end
 
   def save storage
-    storage.put_object(ENV.fetch("B2_BUCKET"), "#{token}.xml", "hello world")
+    # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
     @persisted = true
   end
 
