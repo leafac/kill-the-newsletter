@@ -2,10 +2,11 @@ require "sinatra"
 require "sinatra/reloader" if development?
 require "fog/backblaze"
 require "securerandom"
+require "date"
 
 Inbox = Struct.new :name, :token do
-  def self.from_name name
-    new name, fresh_token
+  def initialize name
+    super name, Token.fresh
   end
 
   def email
@@ -32,12 +33,45 @@ Inbox = Struct.new :name, :token do
   def persisted?
     !! @persisted
   end
+end
 
-  private
+Entry = Struct.new :id, :title, :author, :created_at, :content, :html do
+  def initialize title, author, content, html
+    super Token.fresh, title, author, DateTime.now.rfc3339, content, html
+  end
 
-    def self.fresh_token
-      SecureRandom.urlsafe_base64(30).tr("-_", "")[0...20].downcase
-    end
+  def from_email email
+    html = ! email["html"].blank?
+    new(
+      email.fetch("subject"),
+      email.fetch("from"),
+      email.fetch("subject"),
+      html ? email.fetch("html") : email.fetch("text"),
+      html,
+    )
+  end
+
+  def html?
+    !! html
+  end
+end
+
+module Token
+  def self.fresh
+    SecureRandom.urlsafe_base64(30).tr("-_", "")[0...20].downcase
+  end
+end
+
+class String
+  def blank?
+    strip.empty?
+  end
+end
+
+class NilClass
+  def blank?
+    true
+  end
 end
 
 configure do
@@ -48,6 +82,7 @@ configure do
     b2_bucket_name: ENV.fetch("B2_BUCKET"),
     b2_bucket_id: ENV.fetch("B2_BUCKET_ID"),
   )
+  set :bucket, ENV.fetch("B2_BUCKET")
 end
 
 get "/" do
@@ -56,10 +91,10 @@ end
 
 post "/" do
   name = params["name"]
-  if name.nil? || name.strip.empty?
+  if name.blank?
     @error = "Please provide the newsletter name."
   else
-    @inbox = Inbox.from_name name
+    @inbox = Inbox.new name
     @inbox.save settings.storage
   end
   erb :index
@@ -68,6 +103,16 @@ end
 post "/email" do
   logger.info params
   200
+end
+
+get "/feeds/:file" do
+  begin
+    file = settings.storage.get_object(settings.bucket, params.fetch("file"))
+    content_type file.headers.fetch("Content-Type")
+    file.body
+  rescue Fog::Errors::NotFound
+    404
+  end
 end
 
 not_found do
