@@ -30,6 +30,11 @@ body {
   margin: 0 auto;
 }
 
+main {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
 a {
   color: #657b83;
 }
