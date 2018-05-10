@@ -1,5 +1,6 @@
 require "sinatra"
 require "sinatra/reloader" if development?
+require "fog/backblaze"
 require "securerandom"
 
 Inbox = Struct.new :name, :token do
@@ -15,7 +16,8 @@ Inbox = Struct.new :name, :token do
     "https://www.kill-the-newsletter.com/feeds/#{token}.xml"
   end
 
-  def save
+  def save storage
+    storage.put_object(ENV.fetch("B2_BUCKET"), "#{token}.xml", "hello world")
     @persisted = true
   end
 
@@ -30,6 +32,16 @@ Inbox = Struct.new :name, :token do
     end
 end
 
+configure do
+  set :storage, Fog::Storage.new(
+    provider: "backblaze",
+    b2_account_id: ENV.fetch("B2_ACCOUNT_ID"),
+    b2_account_token: ENV.fetch("B2_ACCOUNT_TOKEN"),
+    b2_bucket_name: ENV.fetch("B2_BUCKET"),
+    b2_bucket_id: ENV.fetch("B2_BUCKET_ID"),
+  )
+end
+
 get "/" do
   erb :index
 end
@@ -40,7 +52,7 @@ post "/" do
     @error = "Please provide the newsletter name."
   else
     @inbox = Inbox.from_name name
-    @inbox.save
+    @inbox.save settings.storage
   end
   erb :index
 end

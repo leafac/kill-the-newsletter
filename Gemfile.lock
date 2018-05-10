@@ -2,6 +2,19 @@ GEM
   remote: https://rubygems.org/
   specs:
     backports (3.11.3)
+    builder (3.2.3)
+    excon (0.62.0)
+    fog-backblaze (0.1.1)
+      fog-core (>= 1.40, < 3)
+    fog-core (2.1.0)
+      builder
+      excon (~> 0.58)
+      formatador (~> 0.2)
+      mime-types
+    formatador (0.2.5)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
     multi_json (1.13.1)
     mustermann (1.0.2)
     puma (3.11.4)
@@ -26,6 +39,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  fog-backblaze
   puma
   sinatra
   sinatra-contrib
