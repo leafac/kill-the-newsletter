@@ -1,0 +1,114 @@
+@import "normalize.css";
+
+@font-face {
+  font-family: "Charter";
+  font-style: normal;
+  font-weight: 400;
+  font-stretch: normal;
+  src: url("/fonts/charter_regular-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-style: italic;
+  font-weight: 400;
+  font-stretch: normal;
+  src: url("/fonts/charter_italic-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-style: normal;
+  font-weight: 700;
+  font-stretch: normal;
+  src: url("/fonts/charter_bold-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-style: italic;
+  font-weight: 700;
+  font-stretch: normal;
+  src: url("/fonts/charter_bold_italic-webfont.woff") format("woff");
+}
+
+/* *, *::before, *::after {
+  box-sizing: border-box;
+  outline: none;
+}
+
+body {
+  color: #444444;
+  font-family: "Charter", "Iowan Old Style", "Georgia", serif;
+  margin: 40px auto;
+  max-width: 650px;
+  line-height: 1.6;
+  font-size: 18px;
+  padding: 0 10px;
+}
+
+a {
+  text-decoration: none;
+  color: #7EA3DF;
+}
+
+h1, h2 {
+  line-height: 1.2;
+  margin: 30px 0 20px 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-style: italic;
+}
+
+header, section {
+  margin: 50px 0;
+}
+
+header h1 {
+  margin-bottom: 0;
+}
+
+header p {
+  font-style: italic;
+  margin: 0;
+}
+
+input {
+  color: #444444;
+  font-family: "Charter", "Iowan Old Style", "Georgia", serif;
+  font-size: 18px;
+}
+
+input[type="submit"] {
+  border: none;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+input[type="text"] {
+  border: 0;
+  border-bottom: 1px solid #EEEEEE;
+  font-size: 30px;
+  width: 100%;
+}
+
+.success, .error {
+  border-left: 7px solid;
+  padding-left: 15px;
+  margin: 30px 0;
+}
+
+.success {
+  border-left-color: #8FA134;
+}
+
+.error {
+  border-left-color: #AE5F1D;
+}
+
+footer {
+  text-size: 16px;
+  font-style: italic;
+} */
