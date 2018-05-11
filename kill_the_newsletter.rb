@@ -62,7 +62,6 @@ post "/" do
 end
 
 post "/email" do
-  logger.error params
   entry = erb :entry, layout: false, locals: {
     token: fresh_token,
     title: params.fetch("subject"),
