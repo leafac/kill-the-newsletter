@@ -70,8 +70,7 @@ post "/email" do
     html: ! params["html"].blank?,
     content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
   }
-  # params.fetch("envelope").fetch("to").each do |to|
-  begin to = params.fetch("to")
+  params.fetch("envelope").fetch("to").each do |to|
     begin
       raise Fog::Errors::NotFound if to !~ /@#{EMAIL_DOMAIN}\z/
       token = to[0...-("@#{EMAIL_DOMAIN}".length)]
