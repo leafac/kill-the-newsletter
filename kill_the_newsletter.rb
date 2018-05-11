@@ -21,7 +21,10 @@ configure do
     b2_bucket_name: ENV.fetch("B2_BUCKET"),
   )
 
-  BUCKET = ENV.fetch("B2_BUCKET")
+  BUCKET = ENV.fetch "B2_BUCKET"
+
+  FEED_MAXIMUM_SIZE = 1_900_000
+  NAME_MAXIMUM_SIZE = 1_000
 end
 
 #####################################################################################################
@@ -36,6 +39,7 @@ post "/" do
   token = fresh_token
   locals = { token: token, name: name }
   halt erb(:index, locals: { error_message: "Please provide the newsletter name." }) if name.blank?
+  halt erb(:index, locals: { error_message: "Newsletter name is too long." }) if name.length > NAME_MAXIMUM_SIZE
   feed = erb :feed, layout: false, locals: locals do
     erb :entry, locals: {
       token: fresh_token,
@@ -48,44 +52,42 @@ post "/" do
   end
   begin
     put_feed token, feed
+    logger.info "Inbox created: #{locals}"
     erb :success, locals: locals
   rescue => error
-    logger.error "#{locals}: #{error}"
+    logger.error "Error creating inbox: #{locals}"
+    logger.error error
     erb :error, locals: locals
   end
 end
 
-# post "/email" do
-#   html = ! email["html"].blank?
-#   @entry = Entry.new(
-#     Rack::Utils.escape_html(email.fetch("subject")),
-#     Rack::Utils.escape_html(email.fetch("from")),
-#     Rack::Utils.escape_html(email.fetch("subject")),
-#     Rack::Utils.escape_html(html ? email.fetch("html") : email.fetch("text")),
-#     html,
-#   )
-#   rendered_entry = erb :entry
-#   params.fetch("envelope").fetch("to").map do |email|
-#     begin
-#       token = email[0...-("@kill-the-newsletter.com".length)]
-#       file = "#{token}.xml"
-#       feed = settings.storage.get_object(settings.bucket, file)
-#       updated_feed = feed.sub(/\n<updated>.*?<\/updated>/, rendered_entry)
-#       truncated_feed = begin
-#         if updated_feed.length <= 2_000_000
-#           updated_feed
-#         else
-#           truncated_feed = updated_feed[0..2_000_000]
-#           # TODO
-#         end
-#       end
-#       settings.storage.put_object(settings.bucket, file, truncated_feed)
-#     rescue Fog::Errors::NotFound
-#       nil
-#     end
-#   end
-#   200
-# end
+post "/email" do
+  entry = erb :entry, layout: false, locals: {
+    token: fresh_token,
+    title: params.fetch("subject"),
+    author: params.fetch("from"),
+    created_at: now,
+    html: ! params["html"].blank?,
+    content: params["html"].blank? : params.fetch("text") : params.fetch("html"),
+  }
+  params.fetch("envelope").fetch("to").each do |to|
+    begin
+      token = to[0...-("@#{EMAIL_DOMAIN}".length)]
+      feed = get_feed token
+      updated_feed = feed.sub /\n<updated>.*?<\/updated>/, entry
+      if updated_feed.bytesize > FEED_MAXIMUM_SIZE
+        updated_feed = updated_feed.byteslice 0, FEED_MAXIMUM_SIZE
+        updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
+        updated_feed += "\n</feed>"
+      end
+      put_feed token, updated_feed
+      logger.info "Received email from “#{params.fetch("from")}” to “#{to}”"
+    rescue Fog::Errors::NotFound
+      logger.info "Discarded email from “#{params.fetch("from")}” to “#{to}”"
+    end
+  end
+  200
+end
 
 get "/feeds/:token.xml" do |token|
   begin
@@ -138,7 +140,7 @@ helpers do
   # https://github.com/rails/rails/blob/ab3ad6a9ad119825636153cd521e25c280483340/activesupport/lib/active_support/core_ext/object/blank.rb
   class String
     def blank?
-      /\A[[:space:]]*\z/.match self
+      self =~ /\A[[:space:]]*\z/
     end
   end
 
@@ -219,15 +221,15 @@ __END__
 <title><%= escape name %></title>
 <subtitle><%= NAME %> inbox “<%= email token %>”.</subtitle>
 <id><%= id token %></id>
-  <%= yield %>
+<%= yield %>
 </feed>
 
 @@ entry
 <updated><%= created_at %></updated>
 <entry>
   <id><%= id token %></id>
-  <title><%= Rack::Utils.escape_html title %></title>
-  <author><name><%= Rack::Utils.escape_html author %></name></author>
+  <title><%= escape title %></title>
+  <author><name><%= escape author %></name></author>
   <updated><%= created_at %></updated>
-  <content<%= html ? " type=\"html\"" : "" %>><%= Rack::Utils.escape_html content %></content>
+  <content<%= html ? " type=\"html\"" : "" %>><%= escape content %></content>
 </entry>
