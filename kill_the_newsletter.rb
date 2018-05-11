@@ -62,30 +62,29 @@ post "/" do
 end
 
 post "/email" do
-  entry = erb :entry, layout: false, locals: {
-    token: fresh_token,
-    title: params.fetch("subject"),
-    author: params.fetch("from"),
-    created_at: now,
-    html: ! params["html"].blank?,
-    content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
-  }
-  params.fetch("envelope").fetch("to").each do |to|
-    begin
-      raise Fog::Errors::NotFound if to !~ /@#{EMAIL_DOMAIN}\z/
-      token = to[0...-("@#{EMAIL_DOMAIN}".length)]
-      feed = get_feed token
-      updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
-      if updated_feed.bytesize > FEED_MAXIMUM_SIZE
-        updated_feed = updated_feed.byteslice 0, FEED_MAXIMUM_SIZE
-        updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
-        updated_feed += "\n</feed>"
-      end
-      put_feed token, updated_feed
-      logger.info "Received email from “#{params.fetch("from")}” to “#{to}”"
-    rescue Fog::Errors::NotFound
-      logger.info "Discarded email from “#{params.fetch("from")}” to “#{to}”"
+  begin
+    to = params.fetch("to")
+    raise Fog::Errors::NotFound if to !~ /@#{EMAIL_DOMAIN}\z/
+    token = to[0...-("@#{EMAIL_DOMAIN}".length)]
+    feed = get_feed token
+    entry = erb :entry, layout: false, locals: {
+      token: fresh_token,
+      title: params.fetch("subject"),
+      author: params.fetch("from"),
+      created_at: now,
+      html: ! params["html"].blank?,
+      content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
+    }
+    updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
+    if updated_feed.bytesize > FEED_MAXIMUM_SIZE
+      updated_feed = updated_feed.byteslice 0, FEED_MAXIMUM_SIZE
+      updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
+      updated_feed += "\n</feed>"
     end
+    put_feed token, updated_feed
+    logger.info "Received email from “#{params.fetch("from")}” to “#{to}”"
+  rescue Fog::Errors::NotFound
+    logger.info "Discarded email from “#{params.fetch("from")}” to “#{to}”"
   end
   200
 end
