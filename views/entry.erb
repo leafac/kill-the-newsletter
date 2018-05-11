@@ -1,8 +1,0 @@
-<updated><%= @entry.created_at %></updated>
-<entry>
-  <id><%= @entry.id %></id>
-  <title><%= @entry.title %></title>
-  <author><name><%= @entry.author %></name></author>
-  <updated><%= @entry.created_at %></updated>
-  <content<%= @entry.html? ? " type=\"html\"" : "" %>><%= @entry.content %></content>
-</entry>
