@@ -8,24 +8,25 @@ get "/" do
   erb :index
 end
 
-# post "/" do
-#   name = params["name"]
-#   halt erb(:index, locals: { error_message: "Please provide the newsletter name." }) if name.blank?
-#   @inbox = Inbox.new Rack::Utils.escape_html(name)
-#   @entry = Entry.new(
-#     "“#{@inbox.name}” inbox created",
-#     "Kill the Newsletter!",
-#     Rack::Utils.escape_html(erb(:inbox)),
-#     true,
-#   )
-#   begin
-#     settings.storage.put_object(settings.bucket, @inbox.file, erb(:entry, layout: :feed))
-#     @inbox.persisted = true
-#   rescue
-#   end
-#   erb :index
-# end
-# 
+post "/" do
+  halt erb(:index, locals: { error_message: "Please provide the newsletter name." }) if params["name"].blank?
+  # STORAGE.put_object BUCKET, file(token), feed
+  # name = params["name"]
+  # @inbox = Inbox.new Rack::Utils.escape_html(name)
+  # @entry = Entry.new(
+  #   "“#{@inbox.name}” inbox created",
+  #   "Kill the Newsletter!",
+  #   Rack::Utils.escape_html(erb(:inbox)),
+  #   true,
+  # )
+  # begin
+  #   settings.storage.put_object(settings.bucket, @inbox.file, erb(:entry, layout: :feed))
+  #   @inbox.persisted = true
+  # rescue
+  # end
+  # erb :index
+end
+
 # post "/email" do
 #   html = ! email["html"].blank?
 #   @entry = Entry.new(
@@ -58,11 +59,9 @@ end
 #   200
 # end
 # 
-# get "/feeds/:file" do
+# get "/feeds/:token.xml" do
 #   begin
-#     file = settings.storage.get_object(settings.bucket, params.fetch("file"))
-#     content_type file.headers.fetch("Content-Type")
-#     file.body
+#     STORAGE.get_object(BUCKET, "#{token}.xml").tap { |file| content_type "text/xml" }.body
 #   rescue Fog::Errors::NotFound
 #     404
 #   end
@@ -82,19 +81,7 @@ STORAGE = Fog::Storage.new(
 
 BUCKET = ENV.fetch("B2_BUCKET_ID")
 
-def file token
-  "#{token}.xml"
-end
-
-def get_feed token
-  STORAGE.get_object(BUCKET, file(token)).body
-end
-
-def put_feed token, feed
-  STORAGE.put_object BUCKET, file(token), feed
-end
-
-def fresh_id
+def fresh_token
   SecureRandom.urlsafe_base64(30).tr("-_", "")[0...20].downcase
 end
 
@@ -102,6 +89,7 @@ def now
   DateTime.now.rfc3339
 end
 
+# https://github.com/rails/rails/blob/ab3ad6a9ad119825636153cd521e25c280483340/activesupport/lib/active_support/core_ext/object/blank.rb
 class String
   def blank?
     /\A[[:space:]]*\z/.match self
@@ -155,39 +143,39 @@ __END__
 
 @@ instructions
 
-<p>Sign up for the newsletter with<br><a href="mailto:<%= email %>" target="_blank"><%= email %></a></p>
-<p>Subscribe to the Atom feed at<br><a href="<%= feed %>" target="_blank"><%= feed %></a></p>
+<p>Sign up for the newsletter with<br><a href="mailto:<%= token %>@kill-the-newsletter.com" target="_blank"><%= token %>@kill-the-newsletter.com</a></p>
+<p>Subscribe to the Atom feed at<br><a href="https://www.kill-the-newsletter.com/feeds/<%= token %>.xml" target="_blank">https://www.kill-the-newsletter.com/feeds/<%= token %>.xml</a></p>
 <p><em>Don’t share these addresses!</em><br>They contain a security token<br>that other people could use to send you spam<br>and unsubscribe you from your newsletters.</p>
 
-@@ other
+@@ success
 
-<% if @inbox.persisted? %>
-  <p>“<%= @inbox.name %>” inbox created</p>
-  <%= erb :inbox %>
-  <p><a href="/" class="button">Create Another Inbox</a></p>
-<% else %>
-  <p class="error">Error creating “<%= @inbox.name %>” inbox!<br>Please contact the <a href="mailto:kill-the-newsletter@leafac.com?subject=[Kill the Newsletter!] Error creating “<%= @inbox.name %>” inbox with token “<%= @inbox.token %>”">system administrator</a><br>with token “<%= @inbox.token %>”.</p>
-<% end %>
+<p>“<%= name %>” inbox created</p>
+<%= instructions %>
+<p><a href="/" class="button">Create Another Inbox</a></p>
+
+@@ error
+
+<p class="error">Error creating “<%= name %>” inbox!<br>Please contact the <a href="mailto:kill-the-newsletter@leafac.com?subject=[Kill the Newsletter!] Error creating “<%= name %>” inbox with token “<%= token %>”">system administrator</a><br>with token “<%= token %>”.</p>
 
 @@ feed
 
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-<link rel="self" type="application/atom+xml" href="<%= @inbox.feed %>"/>
+<link rel="self" type="application/atom+xml" href="https://www.kill-the-newsletter.com/feeds/<%= token %>.xml"/>
 <link rel="alternate" type="text/html" href="https://www.kill-the-newsletter.com/"/>
-<title><%= @inbox.name %></title>
-<subtitle>Kill the Newsletter! inbox “<%= @inbox.email %>”.</subtitle>
-<id>urn:kill-the-newsletter:<%= @inbox.token %></id>
+<title><%= name %></title>
+<subtitle>Kill the Newsletter! inbox “<%= token %>@kill-the-newsletter.com”.</subtitle>
+<id>urn:kill-the-newsletter:<%= token %></id>
   <%= yield %>
 </feed>
 
 @@ entry
 
-<updated><%= @entry.created_at %></updated>
+<updated><%= created_at %></updated>
 <entry>
-  <id>urn:kill-the-newsletter:<%= @entry.token %></id>
-  <title><%= @entry.title %></title>
-  <author><name><%= @entry.author %></name></author>
-  <updated><%= @entry.created_at %></updated>
-  <content<%= @entry.html? ? " type=\"html\"" : "" %>><%= @entry.content %></content>
+  <id>urn:kill-the-newsletter:<%= token %></id>
+  <title><%= title %></title>
+  <author><name><%= author %></name></author>
+  <updated><%= created_at %></updated>
+  <content<%= html? ? " type=\"html\"" : "" %>><%= content %></content>
 </entry>
