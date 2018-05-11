@@ -70,11 +70,13 @@ post "/email" do
     html: ! params["html"].blank?,
     content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
   }
-  params.fetch("envelope").fetch("to").each do |to|
+  # params.fetch("envelope").fetch("to").each do |to|
+  begin to = params.fetch("to")
     begin
+      raise Fog::Errors::NotFound if to !~ /@#{EMAIL_DOMAIN}\z/
       token = to[0...-("@#{EMAIL_DOMAIN}".length)]
       feed = get_feed token
-      updated_feed = feed.sub /\n<updated>.*?<\/updated>/, entry
+      updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
       if updated_feed.bytesize > FEED_MAXIMUM_SIZE
         updated_feed = updated_feed.byteslice 0, FEED_MAXIMUM_SIZE
         updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
