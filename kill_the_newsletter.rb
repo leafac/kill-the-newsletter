@@ -68,7 +68,7 @@ post "/email" do
     author: params.fetch("from"),
     created_at: now,
     html: ! params["html"].blank?,
-    content: params["html"].blank? : params.fetch("text") : params.fetch("html"),
+    content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
   }
   params.fetch("envelope").fetch("to").each do |to|
     begin
