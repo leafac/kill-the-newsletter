@@ -89,24 +89,43 @@ post "/" do
     Rack::Utils.escape_html(erb(:inbox)),
     true,
   )
-  puts erb(:entry, layout: :feed)
-  @inbox.persisted = true
+  begin
+    settings.storage.put_object(settings.bucket, @inbox.file, erb(:entry, layout: :feed))
+    @inbox.persisted = true
+  rescue
+  end
   erb :index
 end
 
 post "/email" do
-  logger.info params
-  # html = ! email["html"].blank?
-  # new(
-  #   Rack::Utils.escape_html(email.fetch("subject")),
-  #   Rack::Utils.escape_html(email.fetch("from")),
-  #   Rack::Utils.escape_html(email.fetch("subject")),
-  #   Rack::Utils.escape_html(html ? email.fetch("html") : email.fetch("text")),
-  #   html,
-  # )
-  # params.fetch("envelope").fetch("to") => ["example@example.com", ...]
-  # params.fetch("to") => "example@example.com"
-  # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
+  html = ! email["html"].blank?
+  @entry = Entry.new(
+    Rack::Utils.escape_html(email.fetch("subject")),
+    Rack::Utils.escape_html(email.fetch("from")),
+    Rack::Utils.escape_html(email.fetch("subject")),
+    Rack::Utils.escape_html(html ? email.fetch("html") : email.fetch("text")),
+    html,
+  )
+  rendered_entry = erb :entry
+  params.fetch("envelope").fetch("to").map do |email|
+    begin
+      token = email[0...-("@kill-the-newsletter.com".length)]
+      file = "#{token}.xml"
+      feed = settings.storage.get_object(settings.bucket, file)
+      updated_feed = feed.sub(/\n<updated>.*?<\/updated>/, rendered_entry)
+      truncated_feed = begin
+        if updated_feed.length <= 2_000_000
+          updated_feed
+        else
+          truncated_feed = updated_feed[0..2_000_000]
+          # TODO
+        end
+      end
+      settings.storage.put_object(settings.bucket, file, truncated_feed)
+    rescue Fog::Errors::NotFound
+      nil
+    end
+  end
   200
 end
 
