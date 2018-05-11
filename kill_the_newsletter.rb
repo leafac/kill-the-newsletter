@@ -63,6 +63,7 @@ end
 
 post "/email" do
   begin
+    logger.error params
     to = params.fetch("to")
     raise Fog::Errors::NotFound if to !~ /@#{EMAIL_DOMAIN}\z/
     token = to[0...-("@#{EMAIL_DOMAIN}".length)]
