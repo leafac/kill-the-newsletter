@@ -15,8 +15,8 @@
       <h2>Convert email newsletters into Atom feeds</h2>
     </header>
     <main>
-      <% if @error %>
-        <p class="error"><%= @error %></p>
+      <% if defined? error_message %>
+        <p class="error"><%= error_message %></p>
       <% end %>
       <% if @inbox.nil? %>
         <form method="POST" action="/">
@@ -25,9 +25,7 @@
         </form>
       <% elsif @inbox.persisted? %>
         <p>“<%= @inbox.name %>” inbox created</p>
-        <p>Sign up for the newsletter with<br><a href="mailto:<%= @inbox.email %>" target="_blank"><%= @inbox.email %></a></p>
-        <p>Subscribe to the Atom feed at<br><a href="<%= @inbox.feed %>" target="_blank"><%= @inbox.feed %></a></p>
-        <p><em>Don’t share these addresses!</em><br>They contain a security token<br>that other people could use to send you spam<br>and unsubscribe you from your newsletters.</p>
+        <%= erb :inbox %>
         <p><a href="/" class="button">Create Another Inbox</a></p>
       <% else %>
         <p class="error">Error creating “<%= @inbox.name %>” inbox!<br>Please contact the <a href="mailto:kill-the-newsletter@leafac.com?subject=[Kill the Newsletter!] Error creating “<%= @inbox.name %>” inbox with token “<%= @inbox.token %>”">system administrator</a><br>with token “<%= @inbox.token %>”.</p>

@@ -8,12 +8,12 @@ module IDable
   def id
     "urn:kill-the-newsletter:#{token}"
   end
-end
 
-module Token
-  def self.fresh
-    SecureRandom.urlsafe_base64(30).tr("-_", "")[0...20].downcase
-  end
+  private
+
+    def fresh_id
+      SecureRandom.urlsafe_base64(30).tr("-_", "")[0...20].downcase
+    end
 end
 
 class String
@@ -28,11 +28,11 @@ class NilClass
   end
 end
 
-Inbox = Struct.new :token, :name do
+Inbox = Struct.new :token, :name, :persisted do
   include IDable
 
   def initialize name
-    super Token.fresh, name
+    super fresh_id, name, false
   end
 
   def email
@@ -47,13 +47,8 @@ Inbox = Struct.new :token, :name do
     "#{token}.xml"
   end
 
-  def save storage
-    # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
-    @persisted = true
-  end
-
   def persisted?
-    !! @persisted
+    !! persisted
   end
 end
 
@@ -61,18 +56,7 @@ Entry = Struct.new :token, :title, :author, :created_at, :content, :html do
   include IDable
 
   def initialize title, author, content, html
-    super Token.fresh, title, author, DateTime.now.rfc3339, content, html
-  end
-
-  def from_email email
-    html = ! email["html"].blank?
-    new(
-      email.fetch("subject"),
-      email.fetch("from"),
-      email.fetch("subject"),
-      html ? email.fetch("html") : email.fetch("text"),
-      html,
-    )
+    super fresh_id, title, author, DateTime.now.rfc3339, content, html
   end
 
   def html?
@@ -97,19 +81,32 @@ end
 
 post "/" do
   name = params["name"]
-  if name.blank?
-    @error = "Please provide the newsletter name."
-  else
-    @inbox = Inbox.new name
-    @inbox.save settings.storage
-  end
+  halt erb(:index, locals: { error_message: "Please provide the newsletter name." }) if name.blank?
+  @inbox = Inbox.new Rack::Utils.escape_html(name)
+  @entry = Entry.new(
+    "“#{@inbox.name}” inbox created",
+    "Kill the Newsletter!",
+    Rack::Utils.escape_html(erb(:inbox)),
+    true,
+  )
+  puts erb(:entry, layout: :feed)
+  @inbox.persisted = true
   erb :index
 end
 
 post "/email" do
   logger.info params
+  # html = ! email["html"].blank?
+  # new(
+  #   Rack::Utils.escape_html(email.fetch("subject")),
+  #   Rack::Utils.escape_html(email.fetch("from")),
+  #   Rack::Utils.escape_html(email.fetch("subject")),
+  #   Rack::Utils.escape_html(html ? email.fetch("html") : email.fetch("text")),
+  #   html,
+  # )
   # params.fetch("envelope").fetch("to") => ["example@example.com", ...]
   # params.fetch("to") => "example@example.com"
+  # storage.put_object(ENV.fetch("B2_BUCKET"), file, "hello world")
   200
 end
 
@@ -124,6 +121,5 @@ get "/feeds/:file" do
 end
 
 not_found do
-  @error = "404 Not Found"
-  erb :index
+  erb :index, locals: { error_message: "404 Not Found" }
 end
