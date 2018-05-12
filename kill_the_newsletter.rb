@@ -59,15 +59,19 @@ post "/" do
 end
 
 post "/email" do
-  entry = erb :entry, layout: false, locals: {
+  entry = erb(
+    :entry,
+    layout: false,
+    locals: {
     token: fresh_token,
     title: params.fetch("subject"),
     author: params.fetch("from"),
     created_at: now,
     html: ! params["html"].blank?,
-    content: (params["html"].blank? ? params.fetch("text") : params.fetch("html"))
-             .encode("UTF-8", "binary", invalid: :replace, undef: :replace, replace: ""),
-  }
+    content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
+    }
+  ).encode("UTF-8", "binary", invalid: :replace, undef: :replace, replace: "")
+  .force_encoding("UTF-8")
   JSON.parse(params.fetch("envelope")).fetch("to").each do |to|
     begin
       raise Fog::Errors::NotFound if to !~ /@#{settings.email_domain}\z/
