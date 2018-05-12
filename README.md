@@ -76,6 +76,7 @@ Run Locally
    ```shell
    $ curl --request POST \
           --url http://localhost:5000/email \
+          --form 'charsets={}' \
           --form 'from=GLaDOS <glados@example.com>' \
           --form 'envelope={"to":["cfni8kcr4oqalfwgechq@localhost"]}' \
           --form 'subject=Come to the party' \

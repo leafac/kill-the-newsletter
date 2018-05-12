@@ -59,14 +59,15 @@ post "/" do
 end
 
 post "/email" do
-  html = params["html"] && ! params["html"].fix_encoding.blank?
+  html = email_field "html"
+  text = email_field "text"
   entry = erb :entry, layout: false, locals: {
     token: fresh_token,
-    title: params.fetch("subject"),
-    author: params.fetch("from"),
+    title: email_field("suject"),
+    author: email_field("from"),
     created_at: now,
-    html: html,
-    content: (html ? params.fetch("html") : params.fetch("text")).fix_encoding,
+    html: ! html.blank?,
+    content: html.blank? ? text : html,
   }
   JSON.parse(params.fetch("envelope")).fetch("to").each do |to|
     begin
@@ -128,6 +129,15 @@ helpers do
     DateTime.now.rfc3339
   end
 
+  # https://github.com/honeybadger-io/incoming/blob/00d6184855fa806222386c2cbb7f4111ee8d2fb1/lib/incoming/strategies/sendgrid.rb#L21-L34
+  # https://github.com/thoughtbot/griddler/blob/7690cc31ded0f834b77160f1d85217b85d3480cd/lib/griddler/email.rb#L155
+  # https://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+  def email_field field
+    params.fetch(field, "")
+          .force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "UTF-8"))
+          .encode("UTF-8", "binary", invalid: :replace, undef: :replace, replace: "")
+  end
+
   def get_feed token
     settings.storage.get_object(settings.bucket, file(token)).body
   end
@@ -146,13 +156,6 @@ helpers do
   class NilClass
     def blank?
       true
-    end
-  end
-
-  # https://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
-  class String
-    def fix_encoding
-      encode("UTF-8", "binary", invalid: :replace, undef: :replace, replace: "").force_encoding("UTF-8")
     end
   end
 
