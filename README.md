@@ -16,6 +16,73 @@ https://www.kill-the-newsletter.com
 | Contributions | [GitHub Pull Requests](https://github.com/leafac/kill-the-newsletter/pulls) |
 | Author | [Leandro Facchinetti](https://www.leafac.com) |
 
+Infrastructure
+--------------
+
+|||
+|-|-|
+| Domain | [NameCheap](https://www.namecheap.com) |
+| Hosting | [Heroku](https://www.heroku.com) |
+| HTTPS for free Heroku dyno | [Cloudflare](https://www.cloudflare.com) |
+| Receive Emails | [SendGrid’s Inbound Parse Webhook](https://sendgrid.com/docs/User_Guide/Settings/parse.html) |
+| Store Feeds | [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) |
+
+Setup
+-----
+
+1. Create accounts in [Infrastructure](#infrastructure) services.
+
+2. [**NameCheap**] Buy domain.
+
+3. [**Heroku**] Create new app.
+
+4. [**Heroku**] Add custom domain.
+
+5. [**Heroku**] Add SendGrid add-on.
+
+6. [**SendGrid**] Start to authenticate domain at Sender Authentication (verification will happen at step 11).
+
+7. [**Cloudflare**] Add site.
+
+8. [**NameCheap**] Configure Cloudflare as nameserver.
+
+   ![](docs/nameservers.png)
+
+9. [**Cloudflare**] Activate site.
+
+10. [**Cloudflare**] Configure DNS (SendGrid’s DNS records from step 6 are grayed out):
+
+   ![](docs/dns.png)
+
+11. [**SendGrid**] Verify Sender Authentication.
+
+    ![](docs/sender-authentication.png)
+
+12. [**SendGrid**] Create Inbound Parse endpoint at `<URL>/email` (`<URL>` must match value in [Configuration](#configuration)).
+
+    ![](docs/inbound-parse.png)
+
+13. [**Backblaze**] Create bucket.
+
+14. [**Heroku**] Set Config Vars following [Configuration](#configuration).
+
+Run Locally
+-----------
+
+1. Create `.env` file following [Configuration](#configuration).
+2. Run with `heroku local`.
+3. Simulate SendGrid’s Inbound Parse Webhook:
+
+   ```shell
+   $ curl --request POST \
+          --url http://localhost:5000/email \
+          --form 'from=GLaDOS <glados@example.com>' \
+          --form 'envelope={"to":["cfni8kcr4oqalfwgechq@localhost"]}' \
+          --form 'subject=Come to the party' \
+          --form 'text=There will be *cake*' \
+          --form 'html=There will be <em>cake</em>'
+   ```
+
 Configuration
 -------------
 
@@ -29,15 +96,3 @@ Configuration
 | `EMAIL_DOMAIN` | Domain to receive emails | `kill-the-newsletter.com` | `localhost` | |
 | `URN` | URN used in feeds ids | | `kill-the-newsletter` | |
 | `ADMINISTRATOR_EMAIL` | Email address for support requests | `administrator@example.com` | `kill-the-newsletter@leafac.com` | |
-
-* * *
-
-```shell
-$ curl --request POST \
-       --url http://localhost:5000/email \
-       --form 'from=GLaDOS <glados@example.com>' \
-       --form 'envelope={"to":["cfni8kcr4oqalfwgechq@localhost"]}' \
-       --form 'subject=Come to the party' \
-       --form 'text=There will be cake' \
-       --form 'html=There will be <em>cake</em>'
-```
