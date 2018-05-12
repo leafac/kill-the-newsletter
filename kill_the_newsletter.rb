@@ -18,7 +18,7 @@ configure do
     b2_account_token: ENV.fetch("B2_ACCOUNT_TOKEN"),
     b2_bucket_name: ENV.fetch("B2_BUCKET"),
   )
-  set :bucket, ENV.fetch "B2_BUCKET"
+  set :bucket, ENV.fetch("B2_BUCKET")
 
   set :feed_maximum_size, 1_900_000
   set :name_maximum_size, 1_000
