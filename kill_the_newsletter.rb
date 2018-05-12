@@ -7,8 +7,8 @@ require "fog/backblaze"
 
 configure do
   NAME = ENV.fetch "NAME", "Kill the Newsletter!"
-  DOMAIN = ENV.fetch "DOMAIN", "www.kill-the-newsletter.com"
-  EMAIL_DOMAIN = ENV.fetch "EMAIL_DOMAIN", "kill-the-newsletter.com"
+  DOMAIN = ENV.fetch "DOMAIN", "localhost:5000"
+  EMAIL_DOMAIN = ENV.fetch "EMAIL_DOMAIN", "localhost"
   URN = ENV.fetch "URN", "kill-the-newsletter"
   ADMINISTRATOR_EMAIL = ENV.fetch "ADMINISTRATOR_EMAIL", "kill-the-newsletter@leafac.com"
 
