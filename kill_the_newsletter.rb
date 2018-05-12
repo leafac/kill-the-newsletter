@@ -63,7 +63,7 @@ post "/email" do
   text = email_field "text"
   entry = erb :entry, layout: false, locals: {
     token: fresh_token,
-    title: email_field("suject"),
+    title: email_field("subject"),
     author: email_field("from"),
     created_at: now,
     html: ! html.blank?,
