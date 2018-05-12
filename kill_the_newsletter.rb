@@ -61,11 +61,11 @@ end
 post "/email" do
   entry = erb :entry, layout: false, locals: {
     token: fresh_token,
-    title: params.fetch("subject"),
-    author: params.fetch("from"),
+    title: params.fetch("subject").force_encoding("UTF-8"),
+    author: params.fetch("from").force_encoding("UTF-8"),
     created_at: now,
     html: ! params["html"].blank?,
-    content: params["html"].blank? ? params.fetch("text") : params.fetch("html"),
+    content: (params["html"].blank? ? params.fetch("text") : params.fetch("html")).force_encoding("UTF-8"),
   }
   JSON.parse(params.fetch("envelope")).fetch("to").each do |to|
     begin
