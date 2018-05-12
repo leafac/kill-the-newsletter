@@ -128,7 +128,7 @@ helpers do
   end
 
   def get_feed token
-    settings.storage.get_object(settings.bucket, file(token)).body
+    settings.storage.get_object(settings.bucket, file(token)).body.force_encoding("UTF-8")
   end
 
   def put_feed token, feed
