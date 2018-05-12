@@ -20,7 +20,7 @@ Configuration
 -------------
 
 | Environment Variable | Description | Example | Default Value | Required |
-|-|-|
+|-|-|-|-|-|
 | `B2_ACCOUNT_ID` | Backblaze B2 Cloud Storage Account ID | `b59189777aec` | | ✓ |
 | `B2_APPLICATION_KEY` | Backblaze B2 Cloud Storage Application Key | `5dc69b45c8661d6de1c52f45766e989638d7157179` | | ✓ |
 | `B2_BUCKET` | Backblaze B2 Cloud Storage Bucket | `kill-the-newsletter` | | ✓ |
