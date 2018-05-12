@@ -62,13 +62,13 @@ post "/email" do
   html = params["html"] && ! params["html"].fix_encoding.blank?
   entry = erb :entry, layout: false, locals: {
     token: fresh_token,
-    title: params.fetch("subject").fix_encoding,
-    author: params.fetch("from").fix_encoding,
+    title: params.fetch("subject"),
+    author: params.fetch("from"),
     created_at: now,
     html: html,
     content: (html ? params.fetch("html") : params.fetch("text")).fix_encoding,
   }
-  JSON.parse(params.fetch("envelope").fix_encoding).fetch("to").each do |to|
+  JSON.parse(params.fetch("envelope")).fetch("to").each do |to|
     begin
       raise Fog::Errors::NotFound if to !~ /@#{settings.email_domain}\z/
       token = to[0...-("@#{settings.email_domain}".length)]
