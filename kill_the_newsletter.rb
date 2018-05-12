@@ -14,7 +14,7 @@ configure do
 
   set :storage, Fog::Storage.new(
     provider: "backblaze",
-    b2_account_id: ENV.fetch("B2_ACCOUNT_ID"),
+    b2_application_key: ENV.fetch("B2_APPLICATION_KEY"),
     b2_account_token: ENV.fetch("B2_ACCOUNT_TOKEN"),
     b2_bucket_name: ENV.fetch("B2_BUCKET"),
   )
