@@ -7,7 +7,7 @@ require "fog/backblaze"
 
 configure do
   set :name, ENV.fetch("NAME", "Kill the Newsletter!")
-  set :domain, ENV.fetch("DOMAIN", "localhost:5000")
+  set :url, ENV.fetch("DOMAIN", "http://localhost:5000")
   set :email_domain, ENV.fetch("EMAIL_DOMAIN", "localhost")
   set :urn, ENV.fetch("URN", "kill-the-newsletter")
   set :administrator_email, ENV.fetch("ADMINISTRATOR_EMAIL", "kill-the-newsletter@leafac.com")
@@ -112,7 +112,7 @@ helpers do
   end
 
   def feed token
-    "https://#{settings.domain}/feeds/#{token}.xml"
+    "#{settings.url}/feeds/#{token}.xml"
   end
 
   def id token
@@ -205,7 +205,7 @@ __END__
 <p><a href="/" class="button">Create Another Inbox</a></p>
 
 @@ error
-<p class="error">Error creating “<%= escape name %>” inbox!<br>Please contact the <a href="mailto:<%= settings.administrator_email %>?subject=[<%= settings.name %> @ <%= settings.domain %>] Error creating “<%= escape name %>” inbox with token “<%= token %>”">system administrator</a><br>with token “<%= token %>”.</p>
+<p class="error">Error creating “<%= escape name %>” inbox!<br>Please contact the <a href="mailto:<%= settings.administrator_email %>?subject=[<%= settings.name %>] Error creating “<%= escape name %>” inbox with token “<%= token %>”">system administrator</a><br>with token “<%= token %>”.</p>
 
 @@ not_found
 <p class="error">404 Not Found</p>
@@ -215,7 +215,7 @@ __END__
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 <link rel="self" type="application/atom+xml" href="<%= feed token %>"/>
-<link rel="alternate" type="text/html" href="https://<%= settings.domain %>/"/>
+<link rel="alternate" type="text/html" href="<%= settings.url %>/"/>
 <title><%= escape name %></title>
 <subtitle><%= settings.name %> inbox “<%= email token %>”.</subtitle>
 <id><%= id token %></id>
