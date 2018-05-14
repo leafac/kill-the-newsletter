@@ -20,7 +20,7 @@ configure do
   )
   set :bucket, ENV.fetch("B2_BUCKET")
 
-  set :feed_maximum_size, 1_900_000
+  set :feed_maximum_size, 500_000
   set :name_maximum_size, 1_000
 end
 
