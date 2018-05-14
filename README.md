@@ -3,6 +3,8 @@ Kill the Newsletter!
 
 Convert email newsletters into Atom feeds.
 
+![](public/images/envelope-to-feed.svg)
+
 https://www.kill-the-newsletter.com
 
 |||
