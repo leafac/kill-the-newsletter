@@ -136,12 +136,14 @@ helpers do
   # https://zenlikeai.wordpress.com/2013/04/06/sendgrid-parse-incoming-email-encoding-errors-for-rails-apps-using-postgresql/
   def email_field field
     params.fetch(field, "")
-      .force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "binary"))
-      .encode("UTF-8", invalid: :replace, undef: :replace)
+      .force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "binary").strip)
+      .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
   end
 
   def get_feed token
-    settings.storage.get_object(settings.bucket, file(token)).body.encode("UTF-8", invalid: :replace, undef: :replace)
+    settings.storage.get_object(settings.bucket, file(token)).body
+      .force_encoding("binary")
+      .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
   end
 
   def put_feed token, feed
