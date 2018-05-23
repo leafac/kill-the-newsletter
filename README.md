@@ -1,9 +1,9 @@
 Kill the Newsletter!
 ====================
 
-Convert email newsletters into Atom feeds.
-
 ![](public/images/envelope-to-feed.svg)
+
+Convert email newsletters into Atom feeds.
 
 https://www.kill-the-newsletter.com
 
