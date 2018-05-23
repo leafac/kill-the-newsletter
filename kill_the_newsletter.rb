@@ -134,7 +134,7 @@ helpers do
   # https://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
   def email_field field
     params.fetch(field, "").force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "ASCII-8BIT"))
-                           .encode("UTF-8", invalid: :replace, undef: :replace)
+                           .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
   end
 
   def get_feed token
