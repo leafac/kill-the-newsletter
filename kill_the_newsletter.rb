@@ -141,9 +141,12 @@ helpers do
   end
 
   def get_feed token
-    settings.storage.get_object(settings.bucket, file(token)).body
-      .force_encoding("binary")
-      .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+    body = settings.storage.get_object(settings.bucket, file(token)).body.force_encoding("UTF-8")
+    if body.valid_encoding?
+      body
+    else
+      body.force_encoding("binary").encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+    end
   end
 
   def put_feed token, feed
