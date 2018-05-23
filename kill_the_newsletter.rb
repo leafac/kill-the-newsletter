@@ -74,14 +74,7 @@ post "/email" do
       raise Fog::Errors::NotFound if to !~ /@#{settings.email_domain}\z/
       token = to[0...-("@#{settings.email_domain}".length)]
       feed = get_feed token
-      begin
-        updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
-      rescue Encoding::CompatibilityError => e
-        logger.error params
-        logger.error feed
-        logger.error entry
-        raise e
-      end
+      updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
       if updated_feed.bytesize > settings.feed_maximum_size
         updated_feed = updated_feed.byteslice 0, settings.feed_maximum_size
         updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
