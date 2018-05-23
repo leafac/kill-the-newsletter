@@ -76,7 +76,7 @@ post "/email" do
       feed = get_feed token
       begin
         updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
-      rescue e
+      rescue => e
         logger.error feed.encoding
         logger.error entry.encoding
         raise e
