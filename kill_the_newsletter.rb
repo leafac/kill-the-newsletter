@@ -74,7 +74,13 @@ post "/email" do
       raise Fog::Errors::NotFound if to !~ /@#{settings.email_domain}\z/
       token = to[0...-("@#{settings.email_domain}".length)]
       feed = get_feed token
-      updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
+      begin
+        updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
+      rescue e
+        logger.error feed.encoding
+        logger.error entry.encoding
+        raise e
+      end
       if updated_feed.bytesize > settings.feed_maximum_size
         updated_feed = updated_feed.byteslice 0, settings.feed_maximum_size
         updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
@@ -132,11 +138,10 @@ helpers do
   # https://github.com/honeybadger-io/incoming/blob/00d6184855fa806222386c2cbb7f4111ee8d2fb1/lib/incoming/strategies/sendgrid.rb#L21-L34
   # https://github.com/thoughtbot/griddler/blob/7690cc31ded0f834b77160f1d85217b85d3480cd/lib/griddler/email.rb#L155
   # https://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
+  # https://github.com/robforman/sendgrid-parse/blob/658337e29eb6dc164457cfdabb2cc766e5f2213d/lib/sendgrid-parse/encodable_hash.rb
+  # https://zenlikeai.wordpress.com/2013/04/06/sendgrid-parse-incoming-email-encoding-errors-for-rails-apps-using-postgresql/
   def email_field field
-    encoding = JSON.parse(params.fetch("charsets")).fetch(field, "ASCII-8BIT")
-    params.fetch(field, "")
-          .force_encoding(encoding)
-          .encode("UTF-8", encoding, invalid: :replace, undef: :replace, replace: "")
+    params.fetch(field, "").force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "binary")).encode("UTF-8")
   end
 
   def get_feed token
