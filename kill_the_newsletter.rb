@@ -74,13 +74,7 @@ post "/email" do
       raise Fog::Errors::NotFound if to !~ /@#{settings.email_domain}\z/
       token = to[0...-("@#{settings.email_domain}".length)]
       feed = get_feed token
-      begin
-        updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
-      rescue => e
-        logger.error feed.encoding
-        logger.error entry.encoding
-        raise e
-      end
+      updated_feed = feed.sub /<updated>.*?<\/updated>/, entry
       if updated_feed.bytesize > settings.feed_maximum_size
         updated_feed = updated_feed.byteslice 0, settings.feed_maximum_size
         updated_feed = updated_feed[/.*<\/entry>/m] || updated_feed[/.*?<\/updated>/m]
@@ -141,11 +135,13 @@ helpers do
   # https://github.com/robforman/sendgrid-parse/blob/658337e29eb6dc164457cfdabb2cc766e5f2213d/lib/sendgrid-parse/encodable_hash.rb
   # https://zenlikeai.wordpress.com/2013/04/06/sendgrid-parse-incoming-email-encoding-errors-for-rails-apps-using-postgresql/
   def email_field field
-    params.fetch(field, "").force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "binary")).encode("UTF-8")
+    params.fetch(field, "")
+      .force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "binary"))
+      .encode("UTF-8", invalid: :replace, undef: :replace)
   end
 
   def get_feed token
-    settings.storage.get_object(settings.bucket, file(token)).body
+    settings.storage.get_object(settings.bucket, file(token)).body.encode("UTF-8", invalid: :replace, undef: :replace)
   end
 
   def put_feed token, feed
