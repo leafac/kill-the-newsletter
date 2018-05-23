@@ -133,8 +133,10 @@ helpers do
   # https://github.com/thoughtbot/griddler/blob/7690cc31ded0f834b77160f1d85217b85d3480cd/lib/griddler/email.rb#L155
   # https://robots.thoughtbot.com/fight-back-utf-8-invalid-byte-sequences
   def email_field field
-    params.fetch(field, "").force_encoding(JSON.parse(params.fetch("charsets")).fetch(field, "ASCII-8BIT"))
-                           .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
+    encoding = JSON.parse(params.fetch("charsets")).fetch(field, "ASCII-8BIT")
+    params.fetch(field, "")
+          .force_encoding(encoding)
+          .encode("UTF-8", encoding, invalid: :replace, undef: :replace, replace: "")
   end
 
   def get_feed token
