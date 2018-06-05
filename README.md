@@ -48,7 +48,7 @@ Setup
 
 8. [**NameCheap**] Configure Cloudflare as nameserver.
 
-   ![](docs/nameservers.png)
+   <img alt="" src="docs/nameservers.png" width="744px" height="144px" />
 
 9. [**Cloudflare**] Activate site.
 
