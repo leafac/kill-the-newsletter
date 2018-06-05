@@ -54,15 +54,15 @@ Setup
 
 10. [**Cloudflare**] Configure DNS (SendGrid’s DNS records from step 6 are grayed out):
 
-   ![](docs/dns.png)
+    <img alt="" src="docs/dns.png" width="961px" height="615px" />
 
 11. [**SendGrid**] Verify Sender Authentication.
 
-    ![](docs/sender-authentication.png)
+    <img alt="" src="docs/sender-authentication.png" width="541px" height="311px" />
 
 12. [**SendGrid**] Create Inbound Parse endpoint at `<URL>/email` (`<URL>` must match value in [Configuration](#configuration)).
 
-    ![](docs/inbound-parse.png)
+    <img alt="" src="docs/inbound-parse.png" width="1204px" height="157px" />
 
 13. [**Backblaze**] Create bucket.
 
