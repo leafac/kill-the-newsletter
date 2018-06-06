@@ -1,10 +1,10 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    backports (3.11.3)
+    backports (2.8.2)
     builder (3.2.3)
     excon (0.62.0)
-    fog-backblaze (0.1.1)
+    fog-backblaze (0.1.2)
       fog-core (>= 1.40, < 3)
     fog-core (2.1.0)
       builder
@@ -19,19 +19,19 @@ GEM
     mustermann (1.0.2)
     puma (3.11.4)
     rack (2.0.5)
-    rack-protection (2.0.1)
+    rack-protection (2.0.2)
       rack
-    sinatra (2.0.1)
+    sinatra (2.0.2)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.1)
+      rack-protection (= 2.0.2)
       tilt (~> 2.0)
-    sinatra-contrib (2.0.1)
-      backports (>= 2.0)
+    sinatra-contrib (2.0.2)
+      backports (~> 2.8.2)
       multi_json
       mustermann (~> 1.0)
-      rack-protection (= 2.0.1)
-      sinatra (= 2.0.1)
+      rack-protection (= 2.0.2)
+      sinatra (= 2.0.2)
       tilt (>= 1.3, < 3)
     tilt (2.0.8)
 
