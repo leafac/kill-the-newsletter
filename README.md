@@ -62,7 +62,7 @@ Setup
 
 12. [**SendGrid**] Create Inbound Parse endpoint at `<URL>/email` (`<URL>` must match value in [Configuration](#configuration)).
 
-    <img alt="" src="docs/inbound-parse.png" width="1204" />
+    <img alt="" src="docs/inbound-parse.png" width="704" />
 
 13. [**Backblaze**] Create bucket.
 
