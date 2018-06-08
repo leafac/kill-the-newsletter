@@ -48,21 +48,21 @@ Setup
 
 8. [**NameCheap**] Configure Cloudflare as nameserver.
 
-   <img alt="" src="docs/nameservers.png" width="744px" />
+   <img alt="" src="docs/nameservers.png" width="744" />
 
 9. [**Cloudflare**] Activate site.
 
 10. [**Cloudflare**] Configure DNS (SendGrid’s DNS records from step 6 are grayed out):
 
-    <img alt="" src="docs/dns.png" width="961px" />
+    <img alt="" src="docs/dns.png" width="961" />
 
 11. [**SendGrid**] Verify Sender Authentication.
 
-    <img alt="" src="docs/sender-authentication.png" width="541px" />
+    <img alt="" src="docs/sender-authentication.png" width="541" />
 
 12. [**SendGrid**] Create Inbound Parse endpoint at `<URL>/email` (`<URL>` must match value in [Configuration](#configuration)).
 
-    <img alt="" src="docs/inbound-parse.png" width="1204px" />
+    <img alt="" src="docs/inbound-parse.png" width="1204" />
 
 13. [**Backblaze**] Create bucket.
 
