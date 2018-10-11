@@ -1,0 +1,10 @@
+localhost:8000 {
+  on startup go run kill-the-newsletter.go &
+  rewrite {
+    if {path} is /
+    to /kill-the-newsletter{uri}
+  }
+  proxy /kill-the-newsletter localhost:8080 {
+    without /kill-the-newsletter
+  }
+}

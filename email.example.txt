@@ -1,0 +1,6 @@
+From: Publisher <publisher@example.com>
+To: User <user@example.com>
+Subject: Welcome to Kill the Newsletter!
+Date: Mon, 7 Nov 2016 08:45:16
+
+Enjoy your readings!

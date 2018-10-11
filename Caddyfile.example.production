@@ -1,0 +1,18 @@
+kill-the-newsletter.com {
+  redir https://www.kill-the-newsletter.com{uri}
+}
+
+www.kill-the-newsletter.com {
+  on startup go run kill-the-newsletter.go &
+  rewrite {
+    if {path} is /
+    to /kill-the-newsletter{uri}
+  }
+  proxy /kill-the-newsletter localhost:8080 {
+    without /kill-the-newsletter
+  }
+  git github.com/leafac/kill-the-newsletter {
+    hook /deploy
+    then caddy -service restart
+  }
+}

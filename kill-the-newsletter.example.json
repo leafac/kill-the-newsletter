@@ -1,0 +1,13 @@
+{
+  "administrator": "mailto:kill-the-newsletter@leafac.com",
+  "web": {
+    "url": "https://www.kill-the-newsletter.com"
+  },
+  "email": {
+    "server": ":25",
+    "host": "kill-the-newsletter.com"
+  },
+  "feed": {
+    "urn": "kill-the-newsletter"
+  }
+}

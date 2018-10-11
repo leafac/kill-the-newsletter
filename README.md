@@ -1,15 +1,15 @@
 Kill the Newsletter!
 ====================
 
-![](public/images/envelope-to-feed.svg)
+![](envelope-to-feed.svg)
 
-Convert email newsletters into Atom feeds.
+Convert email newsletters into Atom feeds
 
 https://www.kill-the-newsletter.com
 
 |||
 |-|-|
-| Version | [0.0.3](#0.0.3) |
+| Version | [0.0.4](CHANGELOG.md#004---2018-10-11) |
 | Documentation | [GitHub](https://github.com/leafac/kill-the-newsletter#readme) |
 | License | [GNU General Public License Version 3](https://gnu.org/licenses/gpl-3.0.txt) |
 | Code of Conduct | [Contributor Covenant v1.4.0](http://contributor-covenant.org/version/1/4/) |
@@ -18,84 +18,67 @@ https://www.kill-the-newsletter.com
 | Contributions | [GitHub Pull Requests](https://github.com/leafac/kill-the-newsletter/pulls) |
 | Author | [Leandro Facchinetti](https://www.leafac.com) |
 
-Infrastructure
---------------
-
-|||
-|-|-|
-| Domain | [NameCheap](https://www.namecheap.com) |
-| Hosting | [Heroku](https://www.heroku.com) |
-| HTTPS for free Heroku dyno | [Cloudflare](https://www.cloudflare.com) |
-| Receive Emails | [SendGrid’s Inbound Parse Webhook](https://sendgrid.com/docs/User_Guide/Settings/parse.html) |
-| Store Feeds | [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) |
-
 Setup
 -----
 
-1. Create accounts in [Infrastructure](#infrastructure) services.
+Install [Go](https://golang.org), [Caddy](https://caddyserver.com), and the dependencies:
 
-2. [**NameCheap**] Buy domain.
+```console
+$ go get github.com/jhillyerd/enmime github.com/mhale/smtpd
+```
 
-3. [**Heroku**] Create new app.
-
-4. [**Heroku**] Add custom domain.
-
-5. [**Heroku**] Add SendGrid add-on.
-
-6. [**SendGrid**] Start to authenticate domain at Sender Authentication (verification will happen at step 11).
-
-7. [**Cloudflare**] Add site.
-
-8. [**NameCheap**] Configure Cloudflare as nameserver.
-
-   <img alt="" src="docs/nameservers.png" width="744" />
-
-9. [**Cloudflare**] Activate site.
-
-10. [**Cloudflare**] Configure DNS (SendGrid’s DNS records from step 6 are grayed out):
-
-    <img alt="" src="docs/dns.png" width="961" />
-
-11. [**SendGrid**] Verify Sender Authentication.
-
-    <img alt="" src="docs/sender-authentication.png" width="541" />
-
-12. [**SendGrid**] Create Inbound Parse endpoint at `<URL>/email` (`<URL>` must match value in [Configuration](#configuration)).
-
-    <img alt="" src="docs/inbound-parse.png" width="704" />
-
-13. [**Backblaze**] Create bucket.
-
-14. [**Heroku**] Set Config Vars following [Configuration](#configuration).
-
-Run Locally
+Development
 -----------
 
-1. Create `.env` file following [Configuration](#configuration).
-2. Run with `heroku local`.
-3. Simulate SendGrid’s Inbound Parse Webhook:
+Start Caddy:
 
-   ```shell
-   $ curl --request POST \
-          --url http://localhost:5000/email \
-          --form 'charsets={}' \
-          --form 'from=GLaDOS <glados@example.com>' \
-          --form 'envelope={"to":["cfni8kcr4oqalfwgechq@localhost"]}' \
-          --form 'subject=Come to the party' \
-          --form 'text=There will be *cake*' \
-          --form 'html=There will be <em>cake</em>'
-   ```
+```console
+$ caddy
+```
 
-Configuration
--------------
+Visit http://localhost:8000.
 
-| Environment Variable | Description | Example | Default Value | Required |
-|-|-|-|-|-|
-| `B2_ACCOUNT_ID` | Backblaze B2 Cloud Storage Account ID | `b59189777aec` | | ✓ |
-| `B2_APPLICATION_KEY` | Backblaze B2 Cloud Storage Application Key | `5dc69b45c8661d6de1c52f45766e989638d7157179` | | ✓ |
-| `B2_BUCKET` | Backblaze B2 Cloud Storage Bucket | `kill-the-newsletter` | | ✓ |
-| `NAME` | Display name | | `Kill the Newsletter!` | |
-| `URL` | Service URL | `https://www.kill-the-newsletter.com` | `http://localhost:5000` | |
-| `EMAIL_DOMAIN` | Domain to receive emails | `kill-the-newsletter.com` | `localhost` | |
-| `URN` | URN used in feeds ids | | `kill-the-newsletter` | |
-| `ADMINISTRATOR_EMAIL` | Email address for support requests | `administrator@example.com` | `kill-the-newsletter@leafac.com` | |
+Create inboxes and send emails to them, for example:
+
+```console
+$ curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt <token>@localhost --upload-file email.example.txt
+```
+
+Deployment
+----------
+
+It is not possible to deploy **Kill the Newsletter!** to [Heroku](https://www.heroku.com/) because it depends on the file system. We recommend a [DigitalOcean](https://www.digitalocean.com) Droplet running [Ubuntu](https://www.ubuntu.com).
+
+```console
+$ wget 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
+$ tar xvzf go1.11.1.linux-amd64.tar.gz
+$ wget 'https://caddyserver.com/download/linux/amd64?plugins=hook.service,http.git&license=personal&telemetry=on' -O caddy.tar.gz
+$ mkdir caddy && tar xvzf caddy.tar.gz -C caddy
+```
+
+```console
+$ caddy -service install -agree -email <email@example.com> -conf Caddyfile.production
+```
+
+Settings
+--------
+
+Configure **Kill the Newsletter!** with a file named `kill-the-newsletter.json`. See `kill-the-newsletter.example.json` for an example of `kill-the-newsletter.json` that runs in production. The following are the available settings:
+
+| Key | Default | Description |
+|-|-|-|
+| `Name` | `"Kill the Newsletter!"` | Service name |
+| `Administrator` | `mailto:administrator@example.com` | System administrator contact |
+| `Web.Server` | `":8080"` | Network address on which the web server listens |
+| `Web.URL` | `"http://localhost:8000"` | Base URL for links |
+| `Web.URIs.Root` | `"/"` | Root URI |
+| `Web.URIs.Feeds` | `"/feeds/"` | URI under which to find the feeds |
+| `Email.Server` | `":2525"` | Network address on which the email server listens |
+| `Email.Host` | `"localhost"` | Host for which the application accepts emails |
+| `Feed.NameSizeLimit` | `500` | Maximum size for a feed name |
+| `Feed.Path` | `"./feeds/"` | Filesystem path in which to store the feeds as files |
+| `Feed.Suffix` | `".xml"` | Suffix to use for feeds files |
+| `Feed.URN` | `"localhost"` | URN to use when creating identifiers for feeds and entries |
+| `Feed.SizeLimit` | `500000` | Maximum size (in bytes) for feeds |
+| `Token.Length` | `20` | Length of the tokens that identify feeds |
+| `Token.Characters` | `"abcdefghijklmnopqrstuvwxyz0123456789"` | Characters that form the tokens that identify feeds |
