@@ -2,8 +2,9 @@
 Description=Kill the Newsletter!
 
 [Service]
-ExecStart=/root/bin/go/bin/go run kill-the-newsletter.go
+ExecStart=/root/go/bin/go run kill-the-newsletter.go
 WorkingDirectory=/root/kill-the-newsletter
+Environment=GOPATH=/root/go/packages
 LimitNOFILE=8192
 Restart=always
 RestartSec=120

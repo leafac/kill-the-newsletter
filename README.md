@@ -50,14 +50,11 @@ We recommend a [DigitalOcean](https://www.digitalocean.com) Droplet running [Ubu
 Install Go, Caddy, the dependencies, and **Kill the Newsletter!**:
 
 ```console
-$ mkdir ~/bin
-$ cd ~/bin
 $ wget 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
 $ tar xvzf go1.11.1.linux-amd64.tar.gz
 $ wget 'https://caddyserver.com/download/linux/amd64?plugins=http.git&license=personal&telemetry=on' -O caddy.tar.gz
 $ mkdir caddy && tar xvzf caddy.tar.gz -C caddy
-$ ~/bin/go/bin/go get github.com/jhillyerd/enmime github.com/mhale/smtpd
-$ cd
+$ GOPATH=/root/go/packages go/bin/go get github.com/jhillyerd/enmime github.com/mhale/smtpd
 $ git clone https://github.com/leafac/kill-the-newsletter.git
 ```
 
@@ -73,6 +70,8 @@ Configure Caddy and **Kill the Newsletter!**:
 ```console
 systemctl enable caddy
 systemctl enable kill-the-newsletter
+systemctl start caddy
+systemctl start kill-the-newsletter
 
 systemctl daemon-reload
 
