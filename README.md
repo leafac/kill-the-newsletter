@@ -54,7 +54,7 @@ $ wget 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
 $ tar xvzf go1.11.1.linux-amd64.tar.gz
 $ wget 'https://caddyserver.com/download/linux/amd64?plugins=http.git&license=personal&telemetry=on' -O caddy.tar.gz
 $ mkdir caddy && tar xvzf caddy.tar.gz -C caddy
-$ GOPATH=/root/go/packages go/bin/go get github.com/jhillyerd/enmime github.com/mhale/smtpd
+$ env GOPATH=/root/go/packages go/bin/go get github.com/jhillyerd/enmime github.com/mhale/smtpd
 $ git clone https://github.com/leafac/kill-the-newsletter.git
 ```
 
