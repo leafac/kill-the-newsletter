@@ -10,7 +10,7 @@ www.kill-the-newsletter.com {
   proxy /kill-the-newsletter localhost:8080 {
     without /kill-the-newsletter
   }
-  git github.com/leafac/kill-the-newsletter {
+  git https://github.com/leafac/kill-the-newsletter.git {
     hook /deploy
     then systemctl restart kill-the-newsletter
   }
