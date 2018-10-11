@@ -2,3 +2,4 @@
 /Caddyfile.production
 /public/feeds/*
 !/public/feeds/.gitkeep
+/.caddy
