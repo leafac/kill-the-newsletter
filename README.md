@@ -77,7 +77,7 @@ $ systemctl enable caddy
 $ systemctl enable kill-the-newsletter
 ```
 
-TODO: Firewall
+TODO: Enable Firewall
 
 Settings
 --------
