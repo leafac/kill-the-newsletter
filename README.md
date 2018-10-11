@@ -67,16 +67,17 @@ Configure Caddy and **Kill the Newsletter!**:
 | `kill-the-newsletter.json` | `kill-the-newsletter.example.json` | [Settings](#settings) |
 | `/etc/systemd/system/kill-the-newsletter.service` | `kill-the-newsletter.example.service` | |
 
+Load, start and enable the services (so they start if the operating system restarts):
+
 ```console
-systemctl enable caddy
-systemctl enable kill-the-newsletter
-systemctl start caddy
-systemctl start kill-the-newsletter
-
-systemctl daemon-reload
-
-firewall
+$ systemctl daemon-reload
+$ systemctl start caddy
+$ systemctl start kill-the-newsletter
+$ systemctl enable caddy
+$ systemctl enable kill-the-newsletter
 ```
+
+TODO: Firewall
 
 Settings
 --------

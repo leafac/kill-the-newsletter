@@ -2,7 +2,7 @@
 Description=Caddy
 
 [Service]
-ExecStart=/root/caddy/caddy -agree true -email kill-the-newsletter@leafac.com -conf Caddyfile.production
+ExecStart=/root/caddy/caddy -agree=true -email=kill-the-newsletter@leafac.com -conf=Caddyfile.production
 WorkingDirectory=/root/kill-the-newsletter
 LimitNOFILE=8192
 Restart=always
