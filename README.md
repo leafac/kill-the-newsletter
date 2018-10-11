@@ -1,4 +1,4 @@
-Kill the Newsletter!
+Kill the Newsletter!
 ====================
 
 ![](envelope-to-feed.svg)
@@ -18,17 +18,15 @@ https://www.kill-the-newsletter.com
 | Contributions | [GitHub Pull Requests](https://github.com/leafac/kill-the-newsletter/pulls) |
 | Author | [Leandro Facchinetti](https://www.leafac.com) |
 
-Setup
------
+Development
+-----------
 
 Install [Go](https://golang.org), [Caddy](https://caddyserver.com), and the dependencies:
 
 ```console
+$ brew install go caddy
 $ go get github.com/jhillyerd/enmime github.com/mhale/smtpd
 ```
-
-Development
------------
 
 Start Caddy:
 
@@ -41,33 +39,52 @@ Visit http://localhost:8000.
 Create inboxes and send emails to them, for example:
 
 ```console
-$ curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt <token>@localhost --upload-file email.example.txt
+$ curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt vwee2c3557jtb89azgvj@localhost --upload-file email.example.txt
 ```
 
 Deployment
 ----------
 
-It is not possible to deploy **Kill the Newsletter!** to [Heroku](https://www.heroku.com/) because it depends on the file system. We recommend a [DigitalOcean](https://www.digitalocean.com) Droplet running [Ubuntu](https://www.ubuntu.com).
+We recommend a [DigitalOcean](https://www.digitalocean.com) Droplet running [Ubuntu](https://www.ubuntu.com). (It is not possible to deploy **Kill the Newsletter!** to [Heroku](https://www.heroku.com/) because it depends on the file system.)
+
+Install Go, Caddy, the dependencies, and **Kill the Newsletter!**:
 
 ```console
+$ mkdir ~/bin
+$ cd ~/bin
 $ wget 'https://dl.google.com/go/go1.11.1.linux-amd64.tar.gz'
 $ tar xvzf go1.11.1.linux-amd64.tar.gz
-$ wget 'https://caddyserver.com/download/linux/amd64?plugins=hook.service,http.git&license=personal&telemetry=on' -O caddy.tar.gz
+$ wget 'https://caddyserver.com/download/linux/amd64?plugins=http.git&license=personal&telemetry=on' -O caddy.tar.gz
 $ mkdir caddy && tar xvzf caddy.tar.gz -C caddy
+$ ~/bin/go/bin/go get github.com/jhillyerd/enmime github.com/mhale/smtpd
+$ cd
+$ git clone https://github.com/leafac/kill-the-newsletter.git
 ```
 
+Configure Caddy and **Kill the Newsletter!**:
+
+| File | Example | |
+|-|-|-|
+| `Caddyfile.production` | `Caddyfile.example.production` | |
+| `/etc/systemd/system/caddy.service` | `caddy.example.service` | |
+| `kill-the-newsletter.json` | `kill-the-newsletter.example.json` | [Settings](#settings) |
+| `/etc/systemd/system/kill-the-newsletter.service` | `kill-the-newsletter.example.service` | |
+
 ```console
-$ caddy -service install -agree -email <email@example.com> -conf Caddyfile.production
+systemctl enable caddy
+systemctl enable kill-the-newsletter
+
+systemctl daemon-reload
+
+firewall
 ```
 
 Settings
 --------
 
-Configure **Kill the Newsletter!** with a file named `kill-the-newsletter.json`. See `kill-the-newsletter.example.json` for an example of `kill-the-newsletter.json` that runs in production. The following are the available settings:
-
 | Key | Default | Description |
 |-|-|-|
-| `Name` | `"Kill the Newsletter!"` | Service name |
+| `Name` | `"Kill the Newsletter!"` | Service name |
 | `Administrator` | `mailto:administrator@example.com` | System administrator contact |
 | `Web.Server` | `":8080"` | Network address on which the web server listens |
 | `Web.URL` | `"http://localhost:8000"` | Base URL for links |

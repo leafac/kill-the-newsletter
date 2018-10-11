@@ -3,7 +3,6 @@ kill-the-newsletter.com {
 }
 
 www.kill-the-newsletter.com {
-  on startup go run kill-the-newsletter.go &
   rewrite {
     if {path} is /
     to /kill-the-newsletter{uri}
@@ -13,6 +12,6 @@ www.kill-the-newsletter.com {
   }
   git github.com/leafac/kill-the-newsletter {
     hook /deploy
-    then caddy -service restart
+    then systemctl restart kill-the-newsletter
   }
 }

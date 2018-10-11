@@ -71,7 +71,7 @@ var Settings struct {
 }
 
 func SettingsDefaults() {
-	Settings.Name = "Kill the Newsletter!"
+	Settings.Name = "Kill the Newsletter!"
 	Settings.Administrator = "mailto:administrator@example.com"
 	Settings.Web.Server = ":8080"
 	Settings.Web.URL = "http://localhost:8000"
