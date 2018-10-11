@@ -80,7 +80,7 @@ func SettingsDefaults() {
 	Settings.Email.Server = ":2525"
 	Settings.Email.Host = "localhost"
 	Settings.Feed.NameSizeLimit = 500
-	Settings.Feed.Path = "./feeds/"
+	Settings.Feed.Path = "./public/feeds/"
 	Settings.Feed.Suffix = ".xml"
 	Settings.Feed.URN = "localhost"
 	Settings.Feed.SizeLimit = 500000

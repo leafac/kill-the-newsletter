@@ -5,13 +5,14 @@ kill-the-newsletter.com {
 www.kill-the-newsletter.com {
   rewrite {
     if {path} is /
-    to /kill-the-newsletter{uri}
+    to /proxy{uri}
   }
-  proxy /kill-the-newsletter localhost:8080 {
-    without /kill-the-newsletter
+  rewrite / /public{path} /proxy{uri}
+  proxy /proxy localhost:8080 {
+    without /proxy
   }
   git github.com/leafac/kill-the-newsletter {
-    hook /deploy
+    hook /deploy MY-SECRET
     then systemctl restart kill-the-newsletter
   }
 }

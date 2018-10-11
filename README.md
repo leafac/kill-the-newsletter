@@ -95,7 +95,7 @@ Settings
 | `Email.Server` | `":2525"` | Network address on which the email server listens |
 | `Email.Host` | `"localhost"` | Host for which the application accepts emails |
 | `Feed.NameSizeLimit` | `500` | Maximum size for a feed name |
-| `Feed.Path` | `"./feeds/"` | Filesystem path in which to store the feeds as files |
+| `Feed.Path` | `"./public/feeds/"` | Filesystem path in which to store the feeds as files |
 | `Feed.Suffix` | `".xml"` | Suffix to use for feeds files |
 | `Feed.URN` | `"localhost"` | URN to use when creating identifiers for feeds and entries |
 | `Feed.SizeLimit` | `500000` | Maximum size (in bytes) for feeds |
