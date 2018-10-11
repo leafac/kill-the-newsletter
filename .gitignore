@@ -1,3 +1,4 @@
 /kill-the-newsletter.json
+/Caddyfile.production
 /feeds/*
 !/feeds/.gitkeep
