@@ -1,4 +1,4 @@
-localhost:8000 {
+:8000 {
   on startup go run kill-the-newsletter.go &
   rewrite {
     if {path} is /
