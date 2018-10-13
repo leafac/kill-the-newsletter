@@ -7,12 +7,12 @@ www.kill-the-newsletter.com {
     if {path} is /
     to /proxy{uri}
   }
-  rewrite / /public{path} /proxy{uri}
   proxy /proxy localhost:8080 {
     without /proxy
   }
+  rewrite / /public{path}
   git github.com/leafac/kill-the-newsletter {
     hook /deploy MY-SECRET
-    then systemctl restart kill-the-newsletter
+    then_long env GOPATH=/root/go/packages /root/go/bin/go run kill-the-newsletter.go
   }
 }

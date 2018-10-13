@@ -58,28 +58,23 @@ $ env GOPATH=/root/go/packages go/bin/go get github.com/jhillyerd/enmime github.
 $ git clone https://github.com/leafac/kill-the-newsletter.git
 ```
 
-Configure Caddy and **Kill the Newsletter!**:
+Configure **Kill the Newsletter!**:
 
 | File | Example | |
 |-|-|-|
 | `Caddyfile.production` | `Caddyfile.example.production` | |
-| `/etc/systemd/system/caddy.service` | `caddy.example.service` | |
 | `kill-the-newsletter.json` | `kill-the-newsletter.example.json` | [Settings](#settings) |
 | `/etc/systemd/system/kill-the-newsletter.service` | `kill-the-newsletter.example.service` | |
 
-Load, start and enable the services (so they start if the operating system restarts):
+Load, start and enable the service (so that it starts at boot):
 
 ```console
 $ systemctl daemon-reload
-$ systemctl start caddy
 $ systemctl start kill-the-newsletter
-$ systemctl enable caddy
 $ systemctl enable kill-the-newsletter
 ```
 
 Create a GitHub webhook with `Content type` `application/json` for automatic deployments.
-
-TODO: Enable Firewall
 
 Settings
 --------
