@@ -1,10 +1,9 @@
 [Unit]
-Description=Kill the Newsletter!
+Description=Caddy
 
 [Service]
-ExecStart=/root/go/bin/go run kill-the-newsletter.go
+ExecStart=/root/caddy/caddy -agree=true -email=kill-the-newsletter@leafac.com -conf=Caddyfile.production
 WorkingDirectory=/root/kill-the-newsletter
-Environment=GOPATH=/root/go/packages
 LimitNOFILE=8192
 Restart=always
 RestartSec=120
