@@ -13,7 +13,6 @@ www.kill-the-newsletter.com {
   rewrite / /public{path}
   git github.com/leafac/kill-the-newsletter {
     hook /deploy MY-SECRET
-    then bash -c "killall kill-the-newsletter || true"
     then_long env GOPATH=/root/go/packages /root/go/bin/go run kill-the-newsletter.go
   }
 }
