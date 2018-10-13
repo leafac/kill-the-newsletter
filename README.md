@@ -84,7 +84,7 @@ Settings
 |-|-|-|
 | `Name` | `"Kill the Newsletter!"` | Service name |
 | `Administrator` | `mailto:administrator@example.com` | System administrator contact |
-| `Web.Server` | `":8080"` | Network address on which the web server listens |
+| `Web.Server` | `"localhost:8080"` | Network address on which the web server listens |
 | `Web.URL` | `"http://localhost:8000"` | Base URL for links |
 | `Web.URIs.Root` | `"/"` | Root URI |
 | `Web.URIs.Feeds` | `"/feeds/"` | URI under which to find the feeds |
