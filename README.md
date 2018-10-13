@@ -77,7 +77,7 @@ $ systemctl enable caddy
 $ systemctl enable kill-the-newsletter
 ```
 
-Create a GitHub webhook with `Content type` `application/json` for automatic deployments to work.
+Create a GitHub webhook with `Content type` `application/json` for automatic deployments.
 
 TODO: Enable Firewall
 
