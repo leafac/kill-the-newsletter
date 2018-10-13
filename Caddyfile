@@ -4,8 +4,8 @@ localhost:8000 {
     if {path} is /
     to /proxy{uri}
   }
-  rewrite / /public{path} /proxy{uri}
   proxy /proxy localhost:8080 {
     without /proxy
   }
+  rewrite / /public{path}
 }
