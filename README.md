@@ -1,7 +1,7 @@
 Kill the Newsletter!
 ====================
 
-![](envelope-to-feed.svg)
+![](public/envelope-to-feed.svg)
 
 Convert email newsletters into Atom feeds
 
