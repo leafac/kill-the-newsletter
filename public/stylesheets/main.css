@@ -16,9 +16,13 @@
   src: url("/fonts/charter_italic-webfont.woff") format("woff");
 }
 
+html {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
 body, input, h1, h2 {
-  background-color: #fdf6e3;
-  color: #657b83;
   font-family: "Charter", "Iowan Old Style", "Georgia", serif;
   font-size: 16px;
   font-weight: 400;
@@ -38,7 +42,7 @@ main {
 }
 
 a {
-  color: #657b83;
+  color: black;
 }
 
 h1, h2 {
@@ -54,7 +58,7 @@ h1 a {
 }
 
 .error, .error a {
-  color: #dc322f;
+  color: red;
 }
 
 input {
@@ -63,15 +67,16 @@ input {
 }
 
 input[type="text"] {
-  border-bottom: 1px solid #93a1a1;
+  border-bottom: 1px solid;
   width: 350px;
 }
 
 input[type="submit"], .button {
+  background-color: white;
   padding: 5px;
   text-decoration: none;
   cursor: pointer;
-  border: 1px solid #93a1a1;
+  border: 1px solid;
   border-radius: 3px;
   font-size: 14px;
 }
