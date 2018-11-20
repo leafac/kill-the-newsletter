@@ -370,7 +370,9 @@ func Template(view string) string {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Convert email newsletters into Atom feeds.">
     <link rel="stylesheet" href="/stylesheets/main.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+	<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+	<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
   </head>
   <body>
     <header>
