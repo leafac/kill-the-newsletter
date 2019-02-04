@@ -1,0 +1,7 @@
+<%= form_for @inbox do |f| %>
+  <% @inbox.errors.full_messages.each do |msg| %>
+    <p class="error"><%= msg %></p>
+  <% end %>
+  <p><%= f.text_field :name, placeholder: 'Newsletter name…', autofocus: true %></p>
+  <p><%= f.submit 'Create Inbox' %></p>
+<% end %>

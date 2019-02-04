@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="92"
+   height="92"
+   viewBox="0 0 92 92"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
+   sodipodi:docname="favicon.svg"
+   inkscape:export-filename="/Users/leafac/iCloud/Projects/kill-the-newsletter/public/favicon.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <marker
+       inkscape:stockid="TriangleOutL"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="TriangleOutL"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path1165"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="scale(0.2)"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="69.432353"
+     inkscape:cy="-36.510248"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="947"
+     inkscape:window-height="855"
+     inkscape:window-x="1080"
+     inkscape:window-y="171"
+     inkscape:window-maximized="0"
+     units="px" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-115.27269,37.630108)">
+    <g
+       id="g895"
+       transform="translate(0.17505338,-32.998547)">
+      <path
+         id="path864"
+         d="m 184.25459,29.35773 c -0.36473,-0.0189 -0.68357,0.09793 -0.94938,0.348548 -0.2657,0.25062 -0.40056,0.566196 -0.40056,0.934556 v 1.713302 c 0,0.679748 0.52184,1.241351 1.20155,1.283134 9.96458,0.599996 17.93496,8.570348 18.53496,18.534895 0.0419,0.679744 0.60695,1.209097 1.29048,1.201523 h 1.70597 c 0.3685,0 0.6839,-0.134665 0.93452,-0.40049 0.25059,-0.262035 0.36737,-0.588446 0.34848,-0.956807 -0.67975,-12.205051 -10.45728,-21.978932 -22.6661,-22.658676 z m 0.0378,7.542977 c -0.37228,-0.03024 -0.7056,0.07937 -0.97901,0.33377 -0.27326,0.254438 -0.40796,0.573423 -0.40796,0.949365 v 1.713346 c 0,0.664562 0.49988,1.21493 1.16447,1.275674 5.84051,0.550647 10.49318,5.195883 11.04378,11.036387 0.0608,0.664547 0.61119,1.171903 1.27574,1.171903 h 1.71334 c 0.37606,0 0.69494,-0.141959 0.94934,-0.415366 0.25058,-0.273449 0.36435,-0.606875 0.33373,-0.979015 -0.66837,-8.024043 -7.06563,-14.4177 -15.09346,-15.086053 z m 2.12867,9.434344 a 3.5202509,3.5202509 0 0 0 -3.51564,3.523037 3.5202509,3.5202509 0 0 0 3.51564,3.523053 3.5202509,3.5202509 0 0 0 3.52309,-3.523053 3.5202509,3.5202509 0 0 0 -3.52309,-3.523037 z"
+         style="clip-rule:evenodd;fill:#000000;fill-rule:evenodd;stroke-width:0.41272548"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:connector-curvature="0"
+         style="color:#000000;text-indent:0;text-transform:none;direction:ltr;baseline-shift:baseline;display:inline;overflow:visible;visibility:visible;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.41272548;enable-background:accumulate"
+         d="m 119.0473,28.366987 c -2.06936,0 -3.77461,1.705285 -3.77461,3.774614 v 18.453677 c 0,2.069329 1.70525,3.774614 3.77461,3.774614 h 27.68051 c 2.06933,0 3.77461,-1.705285 3.77461,-3.774614 V 32.141601 c 0,-2.069329 -1.70528,-3.774614 -3.77461,-3.774614 z m 0.17046,2.51641 h 27.33974 l -12.83108,12.188871 c -0.6031,0.573569 -1.10203,0.586405 -1.70381,0.01323 z m -1.42858,2.110091 12.49028,11.913661 c 1.43792,1.369803 3.75201,1.367751 5.19012,0 l 12.51651,-11.913661 v 17.60179 c 0,0.718771 -0.53941,1.258208 -1.25821,1.258208 h -27.6805 c -0.71879,0 -1.2582,-0.539437 -1.2582,-1.258208 z"
+         marker="none"
+         visibility="visible"
+         display="inline"
+         overflow="visible"
+         id="path994" />
+      <path
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path1021"
+         d="m 157.16872,41.368441 h 13.20722"
+         style="fill:#000000;stroke:#000000;stroke-width:4.12725496;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#TriangleOutL)" />
+    </g>
+  </g>
+</svg>

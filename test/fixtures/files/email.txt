@@ -1,0 +1,6 @@
+From: Publisher <publisher@example.com>
+To: Reader <reader@example.com>
+Subject: An <strong>example</strong> email 🎉 with emoji
+Date: Mon, 7 Nov 2016 08:45:16
+
+This a short <em>email</em> ✉️ example

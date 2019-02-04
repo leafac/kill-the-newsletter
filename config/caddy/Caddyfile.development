@@ -1,0 +1,17 @@
+:2015 {
+  root public
+
+  rewrite {
+    if {path} is /
+    to /proxy/{uri}
+  }
+
+  rewrite {
+    to {path} /proxy/{uri}
+  }
+
+  proxy /proxy localhost:3000 {
+    without /proxy
+    transparent
+  }
+}

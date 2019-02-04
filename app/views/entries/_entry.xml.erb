@@ -1,0 +1,8 @@
+<updated><%= entry.created_at.rfc3339 %></updated>
+<entry>
+  <id><%= urn entry.id %></id>
+  <title><%= entry.title %></title>
+  <author><name><%= entry.author %></name></author>
+	<updated><%= entry.created_at.rfc3339 %></updated>
+  <content type="<%= entry.content_type %>"><%= entry.content %></content>
+</entry>

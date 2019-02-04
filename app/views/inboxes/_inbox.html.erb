@@ -1,0 +1,5 @@
+<p>Sign up for the newsletter with<br><%= mail_to inbox_email_address(inbox) %></p>
+<p>Subscribe to the Atom feed at<br><%= link_to nil, inbox_feed_url(inbox), target: '_blank' %></p>
+<p><em>Don’t share these addresses!</em><br>They contain a security token<br>that other people could use to spam you<br>and control your newsletter subscriptions.</p>
+<p><em>Enjoy your readings!</em></p>
+<p><%= link_to 'Create Another Inbox', new_inbox_url, class: 'button' %></p>

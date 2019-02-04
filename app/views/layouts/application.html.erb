@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kill the Newsletter!</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Convert email newsletters into Atom feeds.">
+
+    <%= favicon_link_tag %>
+    <%= favicon_link_tag 'favicon-32x32.png', type: 'image/png', sizes: '32x32' %>
+    <%= favicon_link_tag 'favicon-16x16.png', type: 'image/png', sizes: '16x16' %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+  <body>
+    <header>
+      <h1><%= link_to 'Kill the Newsletter!', root_path %></h1>
+      <p><%= File.read(Rails.root.join('app', 'assets', 'images', 'envelope-to-feed.svg')).html_safe %></p>
+      <h2>Convert email newsletters into Atom feeds</h2>
+    </header>
+    <main>
+      <%= yield %>
+    </main>
+    <footer>
+      <p>Kill the Newsletter! is <%= link_to 'free software', 'https://github.com/leafac/kill-the-newsletter' %> by <%= link_to 'Leandro Facchinetti', 'https://www.leafac.com' %></p>
+    </footer>
+  </body>
+</html>

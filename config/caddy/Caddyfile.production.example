@@ -1,0 +1,27 @@
+<host-without-www> {
+  redir https://www.<host-without-www>{uri}
+}
+
+www.<host-without-www> {
+  root public
+
+  rewrite {
+    if {path} is /
+    to /proxy/{uri}
+  }
+
+  rewrite {
+    to {path} /proxy/{uri}
+  }
+
+  proxy /proxy localhost:3000 {
+    without /proxy
+    transparent
+  }
+
+  git github.com/leafac/kill-the-newsletter {
+    hook /deploy <github-deployment-hook-secret>
+    then env RAILS_ENV=production bin/rails assets:precompile
+    then systemctl restart kill-the-newsletter
+  }
+}
