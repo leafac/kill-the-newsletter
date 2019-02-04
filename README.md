@@ -170,7 +170,7 @@ Deployment
    $ systemctl enable kill-the-newsletter exim caddy
    ```
 
-7. Create a GitHub webhook with `Content type` equals `application/json` for automatic deployments.
+7. Create a GitHub webhook for `https://<host>/deploy` with `Content type` equals `application/json` for automatic deployments.
 
 Settings
 --------
