@@ -32,7 +32,7 @@
 
 # Ignore feeds
 /public/feeds/*
-/public/feeds/.keep
+!/public/feeds/.keep
 
 # Ignore Exim configuration
 /config/exim/exim.development.conf
