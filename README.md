@@ -32,7 +32,7 @@ Development
 
 1. Install the dependencies (example given for [macOS](https://www.apple.com/macos/) with [Homebrew](https://brew.sh)):
 
-   ```console
+   ```
    $ brew install rbenv node yarn exim caddy
    $ rbenv init # Follow instructions
    $ rbenv install $(cat .ruby-version)
@@ -42,7 +42,7 @@ Development
 
 2. Start the application:
 
-   ```console
+   ```
    $ bin/rails server
    ```
 
@@ -50,13 +50,13 @@ Development
 
 4. Set `root` as the owner of `config/exim/exim.development.conf` (otherwise Exim would refuse to run for security reasons):
 
-   ```console
+   ```
    $ sudo chown root config/exim/exim.development.conf
    ```
 
-5. Start Exim (see [§ Appendix: Managing the Exim Queue](#appendix--managing-the-exim-queue) for useful commands):
+5. Start Exim (see [§ Appendix: Managing the Exim Queue](#appendix-managing-the-exim-queue) for useful commands):
 
-   ```console
+   ```
    $ sudo exim -C config/exim/exim.development.conf -bd -q30m -d
    ```
 
@@ -64,7 +64,7 @@ Development
 
 7. Send a test email:
 
-   ```console
+   ```
    $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/email.txt
    ```
 
@@ -75,25 +75,25 @@ Before deploying, test the production environment locally.
 
 1. Precompile the assets:
 
-   ```console
+   ```
    $ env RAILS_ENV=production bin/rails assets:precompile
    ```
 
 2. Start the application in the `production` environment:
 
-   ```console
+   ```
    $ env RAILS_ENV=production KILL_THE_NEWSLETTER_HOST=localhost:2015 bin/rails server --binding localhost --port 3000
    ```
 
-3. Start Exim (see [§ Appendix: Managing the Exim Queue](#appendix--managing-the-exim-queue) for useful commands):
+3. Start Exim (see [§ Appendix: Managing the Exim Queue](#appendix-managing-the-exim-queue) for useful commands):
 
-   ```console
+   ```
    $ sudo exim -C config/exim/exim.development.conf -bd -q30m -d
    ```
 
 4. Start Caddy as a reverse proxy:
 
-   ```console
+   ```
    $ caddy -conf config/caddy/Caddyfile.development
    ```
 
@@ -101,7 +101,7 @@ Before deploying, test the production environment locally.
 
 6. Send a test email:
 
-   ```console
+   ```
    $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/email.txt
    ```
 
@@ -112,7 +112,7 @@ Deployment
 
 2. Add a user to run the application (running it `root` would be insecure):
 
-   ```console
+   ```
    [root]$ adduser <user> --disabled-password
    [root]$ mkdir ~<user>/.ssh
    [root]$ cp ~/.ssh/authorized_keys ~<user>/.ssh/authorized_keys
@@ -121,7 +121,7 @@ Deployment
 
 3. Install **Kill the Newsletter!** and its dependencies:
 
-   ```console
+   ```
    [root]$ curl -sL https://deb.nodesource.com/setup_10.x | bash
    [root]$ curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
    [root]$ echo "deb https://dl.yarnpkg.com/debian/ stable main" >> /etc/apt/sources.list.d/yarn.list
@@ -155,8 +155,8 @@ Deployment
 
 5. Set `root` as the owner of the systemd services and `config/exim/exim.production.conf` (otherwise Exim would refuse to run for security reasons):
 
-   ```console
-   $ sudo chown root:root/etc/systemd/system/kill-the-newsletter.service
+   ```
+   $ sudo chown root:root /etc/systemd/system/kill-the-newsletter.service
    $ sudo chown root:root /etc/systemd/system/exim.service
    $ sudo chown root:root /etc/systemd/system/caddy.service
    $ sudo chown root:root config/exim/exim.production.conf
@@ -164,7 +164,7 @@ Deployment
 
 6. Load, start and enable the services (so that they start at boot):
 
-   ```console
+   ```
    $ systemctl daemon-reload
    $ systemctl start kill-the-newsletter exim caddy
    $ systemctl enable kill-the-newsletter exim caddy
@@ -188,7 +188,7 @@ When Exim receives email, it tries to deliver the email to the Rails application
 
 **List Emails in the Queue**
 
-```console
+```
 $ sudo exim -C config/exim/exim.development.conf -bp
 ```
 
@@ -198,12 +198,12 @@ Restart Exim. Exim retries to deliver emails on the queue at startup.
 
 **Empty the Queue**
 
-```console
+```
 $ sudo exim -C config/exim/exim.development.conf -bp | sudo exiqgrep -C config/exim/exim.development.conf -i | sudo xargs exim -C config/exim/exim.development.conf -Mrm
 ```
 
 **Read the Logs**
 
-```console
-sudo tail -F /usr/local/var/spool/exim/log/mainlog
+```
+$ sudo tail -F /usr/local/var/spool/exim/log/mainlog
 ```
