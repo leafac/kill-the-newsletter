@@ -19,9 +19,8 @@ www.<host-without-www> {
     transparent
   }
 
-  git github.com/leafac/kill-the-newsletter {
+  git github.com/leafac/kill-the-newsletter <absolute-path-to-kill-the-newsletter> {
     hook /deploy <github-deployment-hook-secret>
-    then env RAILS_ENV=production bin/rails assets:precompile
-    then systemctl restart kill-the-newsletter
+    then env RAILS_ENV=production <absolute-path-to-kill-the-newsletter>/bin/rails assets:precompile
   }
 }
