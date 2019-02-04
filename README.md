@@ -156,10 +156,10 @@ Deployment
 5. Set `root` as the owner of the systemd services and `config/exim/exim.production.conf` (otherwise Exim would refuse to run for security reasons):
 
    ```
-   $ sudo chown root:root /etc/systemd/system/kill-the-newsletter.service
-   $ sudo chown root:root /etc/systemd/system/exim.service
-   $ sudo chown root:root /etc/systemd/system/caddy.service
-   $ sudo chown root:root config/exim/exim.production.conf
+   $ chown root:root /etc/systemd/system/kill-the-newsletter.service
+   $ chown root:root /etc/systemd/system/exim.service
+   $ chown root:root /etc/systemd/system/caddy.service
+   $ chown root:root config/exim/exim.production.conf
    ```
 
 6. Load, start and enable the services (so that they start at boot):
