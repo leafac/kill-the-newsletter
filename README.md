@@ -184,7 +184,7 @@ Settings
 Appendix: Managing the Exim Queue
 ---------------------------------
 
-When Exim receives email, it tries to deliver the email to the Rails application immediately. If Exim fails to deliver (for example, because the Rails application is not running), then the email enters a retry queue. The following are some recipes on managing this queue:
+When Exim receives email, it tries to deliver the email to the Rails application immediately. If Exim fails to deliver (for example, because the Rails application is not running), then the email enters a retry queue. The following are some recipes to manage this queue:
 
 **List Emails in the Queue**
 
@@ -194,7 +194,9 @@ $ sudo exim -C config/exim/exim.development.conf -bp
 
 **Force Immediate Delivery Retry**
 
-Restart Exim. Exim retries to deliver emails on the queue at startup.
+```
+$ sudo exim -C config/exim/exim.development.conf -qff
+```
 
 **Empty the Queue**
 
