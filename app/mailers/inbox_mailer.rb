@@ -10,7 +10,7 @@ class InboxMailer < ApplicationMailer
     entry = Entry.new(
       title: email.subject,
       author: email.envelope_from,
-      content: part.body,
+      content: part.body.decoded.force_encoding('UTF-8'),
       content_type: part.content_type =~ /html/ ? 'html' : 'text'
     )
     entry_string = ApplicationController.renderer.new.render 'entries/_entry', locals: { entry: entry }
