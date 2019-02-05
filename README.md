@@ -9,7 +9,7 @@ https://www.kill-the-newsletter.com
 
 |||
 |-|-|
-| Version | [0.0.5](CHANGELOG.md#005---2019-02-03) |
+| Version | [0.0.5](CHANGELOG.md#006---2019-02-05) |
 | Documentation | [GitHub](https://github.com/leafac/kill-the-newsletter#readme) |
 | License | [GNU General Public License Version 3](https://gnu.org/licenses/gpl-3.0.txt) |
 | Code of Conduct | [Contributor Covenant v1.4.0](http://contributor-covenant.org/version/1/4/) |

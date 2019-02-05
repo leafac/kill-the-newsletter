@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.0.6] - 2019-02-05
+### Fixed
+- Encoding issues that prevented emails from being processed at all. Some emails were lost ☹️
+- Multipart emails that were processed incorrectly.
+
 ## [0.0.5] - 2019-02-03
 ### Changed
 - Migrate the application from Go to Ruby on Rails, receiving email via a Exim pipe. This is a bigger hammer, but it’s easier for me to maintain, because I know Ruby on Rails better than I know Go.
@@ -26,7 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Basic functionality.
 
-[Unreleased]: https://github.com/leafac/kill-the-newsletter/compare/0.0.5...HEAD
+[Unreleased]: https://github.com/leafac/kill-the-newsletter/compare/0.0.6...HEAD
+[0.0.6]: https://github.com/leafac/kill-the-newsletter/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/leafac/kill-the-newsletter/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/leafac/kill-the-newsletter/compare/0.0.3...0.0.4
 [0.0.3]: https://github.com/leafac/kill-the-newsletter/compare/0.0.2...0.0.3
