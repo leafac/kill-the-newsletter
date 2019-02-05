@@ -30,5 +30,6 @@ class InboxMailer < ApplicationMailer
   rescue => e
     logger.fatal e.message
     logger.fatal e.backtrace.join("\n")
+    raise e
   end
 end
