@@ -6,13 +6,7 @@ class InboxMailer < ApplicationMailer
     feed_path = Rails.root.join 'public', 'feeds', "#{id}.xml"
     return unless File.file? feed_path
     feed_string = File.read feed_path
-    part = if email.multipart?
-      email.parts.find { |part| part.content_type =~ /html/ } ||
-      email.parts.find { |part| part.content_type =~ /text/ } ||
-      email.parts.first
-    else
-      email
-    end
+    part = email.html_part || email.text_part || email
     entry = Entry.new(
       title: email.subject,
       author: email.envelope_from,
