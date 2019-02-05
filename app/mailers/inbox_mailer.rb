@@ -27,5 +27,8 @@ class InboxMailer < ApplicationMailer
       updated_feed_string += "\n</feed>"
     end
     File.write feed_path, updated_feed_string
+  rescue => e
+    logger.fatal e.message
+    logger.fatal e.backtrace.join("\n")
   end
 end
