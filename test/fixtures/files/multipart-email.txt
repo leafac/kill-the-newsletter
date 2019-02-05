@@ -1,0 +1,70 @@
+From: Publisher <publisher@example.com>
+Content-Type: multipart/alternative;
+	boundary="Apple-Mail=_08B8FCD6-AAE6-4ABF-9087-770C4ADB0248"
+Mime-Version: 1.0 (Mac OS X Mail 12.2 \(3445.102.3\))
+Subject: Test after migration
+X-Universally-Unique-Identifier: 758259F1-B341-4010-B497-6D2647E1F06A
+Message-Id: <BAB53388-1C18-4EE4-A086-B3474C16C180@icloud.com>
+Date: Mon, 4 Feb 2019 07:37:26 -0500
+To: Reader <reader@example.com>
+
+
+--Apple-Mail=_08B8FCD6-AAE6-4ABF-9087-770C4ADB0248
+Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset=us-ascii
+
+Testing!
+
+-- 
+Publisher <publisher@example.com>
+https://www.kill-the-newsletter.com
+
+
+--Apple-Mail=_08B8FCD6-AAE6-4ABF-9087-770C4ADB0248
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html;
+	charset=us-ascii
+
+<html><head><meta http-equiv=3D"Content-Type" content=3D"text/html; =
+charset=3Dus-ascii"></head><body style=3D"word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D"">Testing!<br class=3D""><div class=3D"">
+<div dir=3D"auto" style=3D"caret-color: rgb(0, 0, 0); color: rgb(0, 0, =
+0); letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; word-wrap: =
+break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D""><div dir=3D"auto" style=3D"caret-color: rgb(0, 0, 0); color: =
+rgb(0, 0, 0); letter-spacing: normal; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; word-wrap: =
+break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D""><div dir=3D"auto" style=3D"caret-color: rgb(0, 0, 0); color: =
+rgb(0, 0, 0); letter-spacing: normal; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; word-wrap: =
+break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D""><div dir=3D"auto" style=3D"caret-color: rgb(0, 0, 0); color: =
+rgb(0, 0, 0); letter-spacing: normal; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; word-wrap: =
+break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D""><div dir=3D"auto" style=3D"caret-color: rgb(0, 0, 0); color: =
+rgb(0, 0, 0); letter-spacing: normal; text-align: start; text-indent: =
+0px; text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; text-decoration: none; word-wrap: =
+break-word; -webkit-nbsp-mode: space; line-break: after-white-space;" =
+class=3D""><div dir=3D"auto" style=3D"color: rgb(0, 0, 0); =
+letter-spacing: normal; text-align: start; text-indent: 0px; =
+text-transform: none; white-space: normal; word-spacing: 0px; =
+-webkit-text-stroke-width: 0px; word-wrap: break-word; =
+-webkit-nbsp-mode: space; line-break: after-white-space;" class=3D""><br =
+class=3D"">--&nbsp;<br class=3D"">Publisher&nbsp;&lt;<a =
+href=3D"mailto:publisher@example.com" class=3D"">publisher@example.com</a>&gt;<br =
+class=3D""><a href=3D"https://www.kill-the-newsletter.com" =
+class=3D"">https://www.kill-the-newsletter.com</a></div></div></div></div></div></div>
+</div>
+<br class=3D""></body></html>=
+
+--Apple-Mail=_08B8FCD6-AAE6-4ABF-9087-770C4ADB0248--

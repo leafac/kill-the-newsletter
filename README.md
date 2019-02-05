@@ -65,7 +65,7 @@ Development
 7. Send a test email:
 
    ```
-   $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/email.txt
+   $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/simple-email.txt
    ```
 
 Testing the Production Environment Locally
@@ -102,7 +102,7 @@ Before deploying, test the production environment locally.
 6. Send a test email:
 
    ```
-   $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/email.txt
+   $ curl smtp://localhost --mail-from publisher@example.com --mail-rcpt <inbox-token>@localhost --upload-file test/fixtures/files/simple-email.txt
    ```
 
 Deployment
