@@ -7,10 +7,13 @@ class InboxMailer < ApplicationMailer
     return unless File.file? feed_path
     feed_string = File.read feed_path
     part = email.html_part || email.text_part || email
+    body = part.body.decoded
+                    .force_encoding(part.content_type_parameters.fetch('charset', 'binary').strip)
+                    .encode("UTF-8", invalid: :replace, undef: :replace, replace: "")
     entry = Entry.new(
       title: email.subject,
       author: email.envelope_from,
-      content: part.body.decoded.force_encoding('UTF-8'),
+      content: body,
       content_type: part.content_type =~ /html/ ? 'html' : 'text'
     )
     entry_string = ApplicationController.renderer.new.render 'entries/_entry', locals: { entry: entry }
