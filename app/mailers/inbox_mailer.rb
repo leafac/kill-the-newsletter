@@ -44,6 +44,6 @@ class InboxMailer < ApplicationMailer
         string
       else
         string.force_encoding('binary').encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
-      end
+      end.gsub(/[[:cntrl:]]/, '')
     end
 end
