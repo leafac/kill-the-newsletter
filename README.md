@@ -110,7 +110,7 @@ Deployment
 
 1. Configure DNS to have A & AAAA records pointing to the machine’s IP address; a CNAME record pointing `www` to the top-level; and an MX record pointing to the top-level as well.
 
-2. Add a user to run the application (running it `root` would be insecure):
+2. Add a user to run the application (running it as `root` would be insecure):
 
    ```
    [root]$ adduser <user> --disabled-password
