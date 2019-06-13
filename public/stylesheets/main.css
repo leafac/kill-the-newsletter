@@ -1,0 +1,56 @@
+@font-face {
+  font-family: "Charter";
+  font-weight: normal;
+  font-style: normal;
+  src: url("charter_regular-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-weight: normal;
+  font-style: italic;
+  src: url("charter_italic-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-weight: bold;
+  font-style: normal;
+  src: url("charter_bold-webfont.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Charter";
+  font-weight: bold;
+  font-style: italic;
+  src: url("charter_bold_italic-webfont.woff") format("woff");
+}
+
+body {
+  font-family: "Charter", "Georgia", serif;
+  line-height: 1.5;
+  padding: 10px;
+  text-align: center;
+}
+
+a {
+  color: black;
+}
+
+h1 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin-top: 2rem;
+}
+
+h1 a {
+  text-decoration: none;
+}
+
+input[type=text] {
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
