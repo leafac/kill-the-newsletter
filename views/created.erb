@@ -1,0 +1,22 @@
+<h1>“<%= @name %>” Inbox Created</h1>
+
+<p>
+  Sign up for the newsletter with<br>
+  <a href="mailto:<%= @token %>@kill-the-newsletter.com"><%= @token %>@kill-the-newsletter.com</a>
+</p>
+
+<p>
+  Subscribe to the Atom feed at<br>
+  <a href="https://www.kill-the-newsletter.com/feeds/<%= @token %>.xml" target="_blank">https://www.kill-the-newsletter.com/feeds/<%= @token %>.xml</a>
+</p>
+
+<p>
+  Don’t share these addresses.<br>
+  They contain a security token that other people could use<br>to send you spam and to control your newsletter subscriptions.
+</p>
+
+<p>Enjoy your readings!</p>
+
+<form method="GET" action="https://www.kill-the-newsletter.com">
+  <p><button>Create Another Inbox</button></p>
+</form>
