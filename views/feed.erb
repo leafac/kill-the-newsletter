@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link rel="self" type="application/atom+xml" href="https://www.kill-the-newsletter.com/feeds/<%= @token %>.xml"/>
+  <link rel="alternate" type="text/html" href="https://www.kill-the-newsletter.com/"/>
+  <title><%= h @name %></title>
+  <subtitle>Kill the Newsletter! inbox “<%= @token %>@kill-the-newsletter.com”</subtitle>
+  <id>urn:kill-the-newsletter:<%= @token %></id>
+  <%=
+    erb :entry, locals: {
+      title: "“#{@name}” inbox created",
+      author: "Kill the Newsletter!",
+      content: erb(:created),
+      content_type: "html"
+    }
+  %>
+</feed>
