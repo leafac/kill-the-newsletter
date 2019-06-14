@@ -5,7 +5,8 @@ get "/" do
 end
 
 post "/" do
-  @name = params.fetch("name") { halt 400 }
+  @name = params["name"]
+  halt 400 if @name.nil? || @name.strip.empty? || @name.length > 500
   @token = fresh_token
   File.write "public/feeds/#{@token}.xml", erb(:feed, layout: false)
   erb :created
