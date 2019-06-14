@@ -2,21 +2,20 @@ require "mail"
 require "nokogiri"
 require "./server"
 
-# mail = Mail.new STDIN.read
-# token = Mail::Address.new(mail.smtp_envelope_to.first).local # TODO: Remove ‘.first’
-# # TODO: Check that ‘token’ isn’t malicious and follows the format
-# # feed = File.read File.expand_path("../public/feeds/#{token}.xml", __FILE__) rescue return
-# part = mail.multipart? ? mail.html_part || mail.text_part : mail
-# # part.content_type_parameters => {'charset' => 'ISO-8859-1'}
-
-feed = Nokogiri::XML(File.read("public/feeds/7dkg97z4zr9lqvwdwdf9.xml")) { |config| config.strict }
+mail = Mail.new STDIN.read
+token = Mail::Address.new(mail["Envelope-to"].value).local.downcase
+return unless token =~ /\A[a-z0-9]{20}\z/
+feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
+return unless File.exist? feed_path
+feed = Nokogiri::XML(File.read(feed_path)) { |config| config.strict }
+part = mail.html_part || mail.text_part || mail
 feed.at_css("updated").replace(
   Sinatra::Application.new.helpers.erb(
     :entry,
     layout: false,
     locals: {
       title: mail.subject,
-      author: mail.smtp_envelope_from, # mail.from.addresses (LIST) OR mail.sender.address OR mail.envelope_from OR mail.smtp_envelope_from OR mail.reply_to (LIST)
+      author: mail["From"] || mail.smtp_envelope_from,
       content_type: part.text? ? "text" : "html",
       content: part.decoded,
     }
@@ -24,6 +23,11 @@ feed.at_css("updated").replace(
 )
 feed.at_css("entry:last-of-type").remove until feed.to_s.length <= 500_000
 puts x
+
+# WARNING ON EMAIL PARSING
+
+
+# part.content_type_parameters => {'charset' => 'ISO-8859-1'}
 
 
 # class InboxMailer < ApplicationMailer

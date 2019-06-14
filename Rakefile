@@ -1,8 +1,14 @@
+require "rake/testtask"
+
 task default: :test
 
-desc "Run tests"
-task :test do
-end
+Rake::TestTask.new { |t| t.test_files = ["test.rb"] }
+
+desc "Run development server"
+task(:server) { sh "rerun bundle exec ruby server.rb" }
+
+desc "Run email server"
+task(:email) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bd -q30m -d" }
 
 # curl | bash for user data
 
