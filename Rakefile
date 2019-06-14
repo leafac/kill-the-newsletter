@@ -6,6 +6,10 @@ end
 
 # curl | bash for user data
 
+# sudo chown -R leafac:admin /usr/local/var
+
+# sudo exim -C "$(pwd)/exim.conf" -bd -q30m -d
+
 # Deployment key?
 
 # ssh root@servers_public_IP "bash -s" -- < /path/to/script/file
