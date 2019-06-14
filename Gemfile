@@ -4,4 +4,7 @@ gem "sinatra"
 gem "thin"
 gem "mail"
 gem "nokogiri"
-gem "rerun", group: :development
+group :development do
+  gem "rake"
+  gem "rerun"
+end

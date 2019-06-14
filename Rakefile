@@ -9,7 +9,7 @@ end
 # ```console
 # $ brew bundle
 # $ rbenv init # Follow instructions
-# $ rbenv install 2.6.3
+# $ rbenv install $(< .ruby-version)
 # $ bundle install
 # $ chown root exim.conf
 # ```
