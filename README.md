@@ -1,0 +1,31 @@
+Kill the Newsletter!
+====================
+
+<img alt="Kill the Newsletter!" src="public/logo.png" width="200" height="62">
+
+Convert email newsletters into Atom feeds
+
+https://www.kill-the-newsletter.com
+
+https://github.com/leafac/www.kill-the-newsletter.com
+
+**Kill the Newsletter!** is composed of two [Ruby](https://www.ruby-lang.org/en/) programs:
+
+- **[Server](server.rb):** A [Sinatra](http://sinatrarb.com) application which serves the main website and creates feeds.
+- **[Email Handler](email_handler.rb):** A script which is invoked by [Exim](https://www.exim.org) to receive an email through a pipe and update a feed.
+
+The feeds are simply stored as text files.
+
+**Kill the Newsletter!** runs on:
+
+- **Host:** [DigitalOcean](https://www.digitalocean.com). (It wouldn’t be possible to host it on [Heroku](https://www.heroku.com/) because it depends on the file system.)
+- **Domain & DNS:** [Namecheap](https://www.namecheap.com).
+- **Continuous Integration Server:** [Travis CI](https://www.travis-ci.com).
+- **Operating System:** [Ubuntu](https://www.ubuntu.com).
+- **Process Manager:** [systemd](https://www.freedesktop.org/wiki/Software/systemd/).
+- **Web Server:** [Thin](https://github.com/macournoyer/thin).
+- **Reverse Proxy:** [Caddy](https://caddyserver.com).
+- **Email Server:** [Exim](https://www.exim.org).
+- **Package Manager:** [Homebrew](https://brew.sh).
+
+See the [Rakefile](Rakefile) for instructions on installation, running, testing, and deployment.
