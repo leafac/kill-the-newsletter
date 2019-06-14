@@ -1,8 +1,6 @@
 require "sinatra"
 
-get "/" do
-  erb :new
-end
+get("/") { erb :new }
 
 post "/" do
   @name = params["name"]
@@ -13,11 +11,7 @@ post "/" do
 end
 
 helpers do
-  def fresh_token
-    SecureRandom.alphanumeric(20).downcase
-  end
-
-  def h text
-    Rack::Utils.escape_html text
-  end
+  def fresh_token() SecureRandom.alphanumeric(20).downcase end
+  def h(text) Rack::Utils.escape_html(text) end
+  def now() Time.now.to_datetime.rfc3339 end
 end

@@ -1,8 +1,8 @@
-<updated><%= Time.now.to_datetime.rfc3339 %></updated>
+<updated><%= now %></updated>
 <entry>
   <id>urn:kill-the-newsletter:<%= fresh_token %></id>
   <title><%= h title %></title>
   <author><name><%= h author %></name></author>
-	<updated><%= Time.now.to_datetime.rfc3339 %></updated>
+  <updated><%= now %></updated>
   <content type="<%= content_type %>"><%= h yield %></content>
 </entry>
