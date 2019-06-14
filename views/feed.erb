@@ -9,8 +9,9 @@
     erb :entry, locals: {
       title: "“#{@name}” inbox created",
       author: "Kill the Newsletter!",
-      content: erb(:created),
-      content_type: "html"
-    }
+      content_type: "html",
+    } do
+      erb(:created)
+    end
   %>
 </feed>

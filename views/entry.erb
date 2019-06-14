@@ -4,5 +4,5 @@
   <title><%= h title %></title>
   <author><name><%= h author %></name></author>
 	<updated><%= Time.now.to_datetime.rfc3339 %></updated>
-  <content type="<%= content_type %>"><%= h content %></content>
+  <content type="<%= content_type %>"><%= h yield %></content>
 </entry>
