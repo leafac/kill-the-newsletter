@@ -4,6 +4,12 @@ desc "Run tests"
 task :test do
 end
 
+# curl | bash for user data
+
+# Deployment key?
+
+# ssh root@servers_public_IP "bash -s" -- < /path/to/script/file
+
 # **Install Dependencies**
 
 # ```console

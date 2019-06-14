@@ -8,19 +8,8 @@ require "./server"
 # # feed = File.read File.expand_path("../public/feeds/#{token}.xml", __FILE__) rescue return
 # part = mail.multipart? ? mail.html_part || mail.text_part : mail
 # # part.content_type_parameters => {'charset' => 'ISO-8859-1'}
-# entry = 
-#   erb :entry, layout: false, locals: {
-#     title: mail.subject,
-#     author: mail.smtp_envelope_from, # mail.from.addresses (LIST) OR mail.sender.address OR mail.envelope_from OR mail.smtp_envelope_from OR mail.reply_to (LIST)
-#     content_type: part.text? ? "text" : "html",
-#   } do
-#     part.decoded
-#   end
-# end
 
-# puts entry
-
-feed = Nokogiri::XML(File.read("public/feeds/7dkg97z4zr9lqvwdwdf9.xml"), nil, "UTF-8") { |config| config.strict }
+feed = Nokogiri::XML(File.read("public/feeds/7dkg97z4zr9lqvwdwdf9.xml")) { |config| config.strict }
 feed.at_css("updated").replace(
   Sinatra::Application.new.helpers.erb(
     :entry,
