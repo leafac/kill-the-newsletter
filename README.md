@@ -28,4 +28,4 @@ The feeds are simply stored as text files.
 - **Email Server:** [Exim](https://www.exim.org).
 - **Package Manager:** [Homebrew](https://brew.sh).
 
-See the [Rakefile](Rakefile) for instructions on installation, running, testing, and deployment.
+Refer to `rake --tasks` for tasks for installation, running, testing, and deployment.
