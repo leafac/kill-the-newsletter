@@ -10,8 +10,7 @@
       title: "“#{@name}” Inbox Created",
       author: "Kill the Newsletter!",
       content_type: "html",
-    } do
-      erb(:created)
-    end
+      content: erb(:created),
+    }
   %>
 </feed>
