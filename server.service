@@ -1,0 +1,20 @@
+[Unit]
+Description=Server
+
+[Service]
+User=leafac
+Environment=PATH=/home/kill-the-newsletter/.rbenv/shims:/home/kill-the-newsletter/.rbenv/bin:/home/linuxbrew/.linuxbrew/sbin:/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=RAILS_ENV=production
+Environment=KILL_THE_NEWSLETTER_HTTPS=true
+Environment=KILL_THE_NEWSLETTER_HOST=www.kill-the-newsletter.com
+Environment=KILL_THE_NEWSLETTER_EMAIL_HOST=kill-the-newsletter.com
+WorkingDirectory=/home/leafac/kill-the-newsletter
+ExecStart=/home/leafac/kill-the-newsletter/bin/rails server --binding localhost --port 3000
+LimitNOFILE=8192
+Restart=always
+RestartSec=120
+StartLimitInterval=5
+StartLimitBurst=10
+
+[Install]
+WantedBy=multi-user.target
