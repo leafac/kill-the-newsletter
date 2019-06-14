@@ -1,3 +1,9 @@
+task default: :test
+
+desc "Run tests"
+task :test do
+end
+
 # **Install Dependencies**
 
 # ```console
