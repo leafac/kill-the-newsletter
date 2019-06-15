@@ -14,7 +14,7 @@ https://github.com/leafac/www.kill-the-newsletter.com
 **Kill the Newsletter!** is composed of two [Ruby](https://www.ruby-lang.org/en/) programs:
 
 - **[Server](server.rb):** A [Sinatra](http://sinatrarb.com) application which serves the main website and creates feeds.
-- **[Email Handler](email_handler.rb):** A script which is invoked by [Exim](https://www.exim.org) to receive an email through a pipe and update a feed.
+- **[Mail Handler](mail_handler.rb):** A script which is invoked by [Exim](https://www.exim.org) to receive an mail through a pipe and update a feed.
 
 The feeds are simply stored as text files.
 
@@ -27,7 +27,7 @@ The feeds are simply stored as text files.
 - **Process Manager:** [systemd](https://www.freedesktop.org/wiki/Software/systemd/).
 - **Web Server:** [Thin](https://github.com/macournoyer/thin).
 - **Reverse Proxy:** [Caddy](https://caddyserver.com).
-- **Email Server:** [Exim](https://www.exim.org).
+- **Mail Server:** [Exim](https://www.exim.org).
 - **Package Manager:** [Homebrew](https://brew.sh).
 
 Refer to `rake --tasks` for tasks for installation, running, testing, and deployment.

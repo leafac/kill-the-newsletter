@@ -7,8 +7,8 @@ Rake::TestTask.new { |t| t.test_files = ["test.rb"] }
 desc "Run development server"
 task(:server) { sh "rerun bundle exec ruby server.rb" }
 
-desc "Run email server"
-task(:email) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bd -q30m -d" }
+desc "Run mail server"
+task(:mail) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bd -q30m -d" }
 
 # curl | bash for user data
 
@@ -36,13 +36,13 @@ task(:email) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' 
 # $ rerun bundle exec ruby server.rb
 # ```
 
-# **Run Email Server**
+# **Run mail Server**
 
 # ```console
 # $ sudo exim -C exim.conf -bd -q30m -d
 # ```
 
-# See [Rakefile](Rakefile) for commands to manage Exim’s queue and to send test emails.
+# See [Rakefile](Rakefile) for commands to manage Exim’s queue and to send test mails.
 
 
 
@@ -129,7 +129,7 @@ task(:email) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' 
 
 
 
-# **List Emails in the Queue**
+# **List mails in the Queue**
 
 # ```
 # $ sudo exim -C config/exim/exim.development.conf -bp
