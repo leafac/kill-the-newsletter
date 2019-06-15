@@ -7,7 +7,7 @@ token = Mail::Address.new(mail[:envelope_to].value).local.downcase
 return unless token =~ /\A[a-z0-9]{20}\z/
 feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
 return unless File.exist? feed_path
-feed = Nokogiri::XML(File.read(feed_path)) { |config| config.strict }
+feed = Nokogiri::XML(File.read(feed_path)) { |config| config.strict.noblanks }
 part = mail.html_part || mail.text_part || mail
 feed.at_css("updated").replace(
   Sinatra::Application.new.helpers.erb(

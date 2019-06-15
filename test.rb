@@ -52,7 +52,7 @@ class TestKillTheNewsletter < Minitest::Test
 
   def feed_path() "public/feeds/#{@token}.xml" end
   def feed() File.read(feed_path) end
-  def assert_feed_valid_xml() Nokogiri::XML(feed) { |config| config.strict } end
+  def assert_feed_valid_xml() Nokogiri::XML(feed) { |config| config.strict.noblanks } end
   def send_mail() Open3.capture2("bundle exec ruby mail_handler.rb", stdin_data: <<-MAIL) end
 From sender@example.com Fri Jun 14 19:48:19 2019
 Return-path: <sender@example.com>
