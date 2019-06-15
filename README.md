@@ -20,7 +20,7 @@ The feeds are simply stored as text files.
 
 **Kill the Newsletter!** runs on:
 
-- **Host:** [DigitalOcean](https://www.digitalocean.com). (It wouldn’t be possible to host it on [Heroku](https://www.heroku.com/) because it depends on the file system.)
+- **Host:** [DigitalOcean](https://www.digitalocean.com). (It wouldn’t be possible to host **Kill the Newsletter!** on [Heroku](https://www.heroku.com/) because it depends on the file system.)
 - **Domain & DNS:** [Namecheap](https://www.namecheap.com).
 - **Continuous Integration Server:** [Travis CI](https://www.travis-ci.com).
 - **Operating System:** [Ubuntu](https://www.ubuntu.com).
@@ -28,6 +28,6 @@ The feeds are simply stored as text files.
 - **Web Server:** [Thin](https://github.com/macournoyer/thin).
 - **Reverse Proxy:** [Caddy](https://caddyserver.com).
 - **Mail Server:** [Exim](https://www.exim.org).
-- **Package Manager:** [Homebrew](https://brew.sh).
+- **Package Managers:** [Homebrew](https://brew.sh) & [Bundler](https://bundler.io).
 
 Refer to `rake --tasks` for tasks for installation, running, testing, and deployment.
