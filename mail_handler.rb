@@ -6,7 +6,7 @@ mail = Mail.new STDIN.read
 token = Mail::Address.new(mail[:envelope_to].value).local.downcase
 return unless token =~ /\A[a-z0-9]{20}\z/
 feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
-return unless File.exist? feed_path
+return unless File.file? feed_path
 feed = Nokogiri::XML(File.read(feed_path)) { |config| config.strict.noblanks }
 part = mail.html_part || mail.text_part || mail
 feed.at_css("updated").replace(
@@ -15,7 +15,7 @@ feed.at_css("updated").replace(
     layout: false,
     locals: {
       title: mail.subject,
-      author: mail[:from]&.value || mail.smtp_envelope_from,
+      author: mail[:from]&.value || mail.envelope_from,
       content_type: part.content_type =~ /html/ ? "html" : "text",
       content: part.decoded,
     }
@@ -24,44 +24,19 @@ feed.at_css("updated").replace(
 feed.at_css("entry:last-of-type").remove until feed.to_s.length <= 500_000
 File.write feed_path, feed.to_xml
 
-# part.content_type_parameters => {'charset' => 'ISO-8859-1'}
+# LOGGER
 
+# part.content_type_parameters[:charset]
 
-# class InboxMailer < ApplicationMailer
-#   MAXIMUM_FEED_SIZE = 500_000
-#   def receive email
-#     id = Mail::Address.new("<#{email.header[:envelope_to]}>").local.downcase
-#     return unless Token.token? id
-#     feed_path = Rails.root.join 'public', 'feeds', "#{id}.xml"
-#     return unless File.file? feed_path
-#     feed_string = File.read feed_path
-#     part = email.html_part || email.text_part || email
 #     body = part.body.decoded
 #                     .force_encoding(part.content_type_parameters.fetch('charset', 'binary').strip)
 #                     .encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
-#     entry = Entry.new(
-#       title: fix_encoding(email.subject),
-#       author: fix_encoding(email.envelope_from),
-#       content: fix_encoding(body),
-#       content_type: part.content_type =~ /html/ ? 'html' : 'text'
-#     )
-#     entry_string = ApplicationController.renderer.new.render 'entries/_entry', locals: { entry: entry }
-#     feed_string = fix_encoding feed_string
-#     entry_string = fix_encoding entry_string
-#     updated_feed_string = feed_string.sub /<updated>.*?<\/updated>/, entry_string
-#     if updated_feed_string.bytesize > MAXIMUM_FEED_SIZE
-#       updated_feed_string = updated_feed_string.byteslice 0, MAXIMUM_FEED_SIZE
-#       updated_feed_string = updated_feed_string[/.*<\/entry>/m] || updated_feed_string[/.*?<\/updated>/m]
-#       updated_feed_string += "\n</feed>"
-#     end
-#     File.write feed_path, updated_feed_string
+
 #   rescue => e
 #     logger.fatal e.message
 #     logger.fatal e.backtrace.join("\n")
 #     raise e
 #   end
-
-#   private
 
 #     # https://github.com/honeybadger-io/incoming/blob/00d6184855fa806222386c2cbb7f4111ee8d2fb1/lib/incoming/strategies/sendgrid.rb#L21-L34
 #     # https://github.com/thoughtbot/griddler/blob/7690cc31ded0f834b77160f1d85217b85d3480cd/lib/griddler/email.rb#L155
@@ -75,4 +50,9 @@ File.write feed_path, feed.to_xml
 #         string.force_encoding('binary').encode('UTF-8', invalid: :replace, undef: :replace, replace: '')
 #       end.gsub(/[[:cntrl:]]/, '')
 #     end
-# end
+
+# - [ ] Stuff in the mail gem: https://github.com/mikel/mail
+# - [ ] ActiveSupport Unicode.tidy_bytes
+# - [ ] http://norman.github.io/utf8_utils/
+# - [ ] String.scrub
+# - [ ] https://github.com/brianmario/charlock_holmes

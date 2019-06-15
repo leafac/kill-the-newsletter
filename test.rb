@@ -13,7 +13,7 @@ class TestKillTheNewsletter < Minitest::Test
     post "/", name: "My Favorite Newsletter"
     @token = last_response.body[/(.{20})@kill-the-newsletter.com/, 1]
     refute_nil @token
-    assert File.exist?(feed_path)
+    assert File.file?(feed_path)
     assert_feed_valid_xml
     assert feed.include?("Created")
     previous_feed_length = feed.length
