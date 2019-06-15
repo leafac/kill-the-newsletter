@@ -9,7 +9,7 @@ Environment=KILL_THE_NEWSLETTER_HTTPS=true
 Environment=KILL_THE_NEWSLETTER_HOST=www.kill-the-newsletter.com
 Environment=KILL_THE_NEWSLETTER_EMAIL_HOST=kill-the-newsletter.com
 WorkingDirectory=/home/leafac/kill-the-newsletter
-ExecStart=/home/leafac/kill-the-newsletter/bin/rails server --binding localhost --port 3000
+ExecStart=bundle exec ruby server.rb -o localhost -e production
 LimitNOFILE=8192
 Restart=always
 RestartSec=120

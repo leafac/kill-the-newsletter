@@ -1,3 +1,4 @@
 language: ruby
-after_success:
-  - echo "Did I do it?"
+deploy:
+  provider: script
+  script: bash deploy.sh
