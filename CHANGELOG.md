@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.0.7] - 2019-06-15
+### Added
+- Automated tests.
+
+### Changed
+- Migrate the application from Ruby on Rails to Sinatra, because it’s simpler.
+- Use proper XML parsing, instead of regular expression hacks.
+- Use Travis CI to run automated tests and deploy.
+
 ## [0.0.6] - 2019-02-05
 ### Fixed
 - Encoding issues that prevented emails from being processed at all. Some emails were lost ☹️
@@ -31,7 +40,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Basic functionality.
 
-[Unreleased]: https://github.com/leafac/kill-the-newsletter/compare/0.0.6...HEAD
+[Unreleased]: https://github.com/leafac/kill-the-newsletter/compare/0.0.7...HEAD
+[0.0.7]: https://github.com/leafac/kill-the-newsletter/compare/0.0.6...0.0.7
 [0.0.6]: https://github.com/leafac/kill-the-newsletter/compare/0.0.5...0.0.6
 [0.0.5]: https://github.com/leafac/kill-the-newsletter/compare/0.0.4...0.0.5
 [0.0.4]: https://github.com/leafac/kill-the-newsletter/compare/0.0.3...0.0.4
