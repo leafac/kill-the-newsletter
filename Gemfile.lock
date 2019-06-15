@@ -19,6 +19,8 @@ GEM
     rack (2.0.7)
     rack-protection (2.0.5)
       rack
+    rack-test (1.1.0)
+      rack (>= 1.0, < 3)
     rake (12.3.2)
     rb-fsevent (0.10.3)
     rb-inotify (0.10.0)
@@ -44,6 +46,7 @@ DEPENDENCIES
   mail
   minitest
   nokogiri
+  rack-test
   rake
   rerun
   sinatra

@@ -6,4 +6,7 @@ gem "mail"
 gem "nokogiri"
 gem "rake"
 gem "rerun", group: :development
-gem "minitest", group: :test
+group :test do
+  gem "minitest"
+  gem "rack-test"
+end
