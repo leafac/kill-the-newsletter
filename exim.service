@@ -5,7 +5,7 @@ Description=Exim
 User=root
 Environment=PATH=/home/leafac/.rbenv/shims:/home/leafac/.rbenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WorkingDirectory=/home/leafac/kill-the-newsletter
-ExecStart=/usr/sbin/exim -C /home/leafac/kill-the-newsletter/config/exim/exim.production.conf -bdf -q30m
+ExecStart=/home/linuxbrew/.linuxbrew/bin/exim -C /home/kill-the-newsletter/kill-the-newsletter/exim.conf -bdf -q30m
 LimitNOFILE=8192
 Restart=always
 RestartSec=120
