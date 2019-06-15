@@ -10,6 +10,10 @@ task(:server) { sh "rerun bundle exec ruby server.rb" }
 desc "Run mail server"
 task(:mail) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bd -q30m -d" }
 
+desc "Deploy"
+task :deploy do
+end
+
 # curl | bash for user data
 
 # sudo chown -R leafac:admin /usr/local/var
