@@ -8,3 +8,5 @@ ufw allow https
 ufw allow smtp
 ufw enable
 rsync -av --chown=kill-the-newsletter:kill-the-newsletter ~/.ssh /home/kill-the-newsletter
+
+# https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#generating-a-new-ssh-key
