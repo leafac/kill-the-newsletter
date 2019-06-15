@@ -5,3 +5,7 @@ www.kill-the-newsletter.com {
 kill-the-newsletter.com {
   redir https://www.kill-the-newsletter.com{uri}
 }
+
+# localhost {
+#   proxy / localhost:4567
+# }

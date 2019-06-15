@@ -14,6 +14,9 @@ desc "Deploy"
 task :deploy do
 end
 
+desc "Run reverse proxy"
+task(:reverse_proxy) { sh "caddy" }
+
 # curl | bash for user data
 
 # sudo chown -R leafac:admin /usr/local/var
