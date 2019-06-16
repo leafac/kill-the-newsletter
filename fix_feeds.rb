@@ -6,6 +6,7 @@ Sinatra::Application.new.helpers.instance_eval do
     token = File.basename feed_path, ".xml"
     feed_string = File.read feed_path
     if feed_string.strip.empty?
+      puts "Trying to fix empty #{token}"
       File.write feed_path, <<-FEED
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
@@ -34,12 +35,11 @@ I’m sorry about the trouble. Please continue to enjoy your readings.
   </entry>
 </feed>
 FEED
-      puts "Fixed empty #{token}"
     end
     begin
       Nokogiri::XML(feed_string) { |config| config.strict.noblanks }
     rescue Nokogiri::XML::SyntaxError => e
-      puts "Trying to fix encoding issue with #{token}: #{e}"
+      puts "Trying to fix invalid #{token}: #{e}"
       feed_string.scrub!.gsub!(/[[:cntrl:]]/, "")
       File.write feed_path, feed_string
     end
