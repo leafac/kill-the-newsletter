@@ -4,7 +4,7 @@ require "./server"
 
 mail = Mail.new STDIN.read
 token = Mail::Address.new(mail[:envelope_to].value).local.downcase
-return unless token =~ /\A[a-z0-9]{20}\z/
+return unless token =~ /\A[a-z0-9]{20,100}\z/
 feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
 return unless File.file? feed_path
 feed = Nokogiri::XML(File.read(feed_path)) { |config| config.strict.noblanks }
