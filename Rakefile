@@ -17,6 +17,8 @@ end
 desc "Run reverse proxy"
 task(:reverse_proxy) { sh "caddy" }
 
+# curl to send email
+
 # curl | bash for user data
 
 # sudo chown -R leafac:admin /usr/local/var
