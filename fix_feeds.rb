@@ -17,21 +17,31 @@ Sinatra::Application.new.helpers.instance_eval do
   <updated>#{now}</updated>
   <entry>
     <id>urn:kill-the-newsletter:#{fresh_token}</id>
-    <title>Kill the Newsletter! Bug · Action Required</title>
+    <title>Kill the Newsletter! Malfunction · Action Required</title>
     <author><name>Kill the Newsletter!</name></author>
     <updated>#{now}</updated>
     <content type="text">
-I’m sorry, but you hit a rare Kill the Newsletter! bug. I fixed the bug, but I lost your feed in the process. For a while you didn’t receive any updates, but they must be working from now on. I also lost the name of the inbox. For now, I renamed it to “Kill the Newsletter!”. To fix this, please contact me at kill-the-newsletter@leafac.com with the feed address and the name you’d like.
+You were affected by a rare Kill the Newsletter! malfuction.
+
+I lost your feed, including its name, and for a while you didn’t receive any updates.
+
+I fixed the problem, and while past entries are lost forver, you should receive updates from now on.
+
+To restore the name of the feed, please write to me at kill-the-newsletter@leafac.com with the feed address and the name you want.
+
+I’m sorry about the trouble. Please continue to enjoy your readings.
     </content>
   </entry>
 </feed>
 FEED
-      puts "Fixed #{token}"
+      puts "Fixed empty #{token}"
     end
     begin
       Nokogiri::XML(feed_string) { |config| config.strict.noblanks }
     rescue Nokogiri::XML::SyntaxError => e
-      puts "Problem with #{token}: #{e}"
+      puts "Trying to fix encoding issue with #{token}: #{e}"
+      feed_string.scrub!.gsub!(/[[:cntrl:]]/, "")
+      File.write feed_path, feed_string
     end
   end
 end
