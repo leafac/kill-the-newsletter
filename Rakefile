@@ -17,6 +17,38 @@ end
 desc "Run reverse proxy"
 task(:reverse_proxy) { sh "caddy" }
 
+
+
+# #!/bin/bash
+
+# apt update
+# apt install build-essential curl file git
+
+# adduser kill-the-newsletter --disabled-password
+# usermod -aG sudo kill-the-newsletter
+# ufw allow ssh
+# ufw allow http
+# ufw allow https
+# ufw allow smtp
+# ufw enable
+# rsync -av --chown=kill-the-newsletter:kill-the-newsletter ~/.ssh /home/kill-the-newsletter
+
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+
+# setcap cap_net_bind_service=+ep ./caddy
+
+# # https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/#generating-a-new-ssh-key
+
+# # https://github.com/do-community/automated-setups/blob/master/Ubuntu-18.04/initial_server_setup.sh
+
+
+
+
+
+
+
+
+
 # curl to send email
 
 # curl | bash for user data
@@ -28,6 +60,10 @@ task(:reverse_proxy) { sh "caddy" }
 # Deployment key?
 
 # ssh root@servers_public_IP "bash -s" -- < /path/to/script/file
+
+# cat > ~/.bash_profile << "EOF"
+# exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+# EOF
 
 # **Install Dependencies**
 
