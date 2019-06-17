@@ -4,10 +4,8 @@ require "./server"
 Sinatra::Application.new.helpers.instance_eval do
   Dir["public/feeds/*"].each do |feed_path|
     token = File.basename feed_path, ".xml"
-    feed_string = File.read feed_path
-    if feed_string.strip.empty?
-      puts "Trying to fix empty #{token}"
-      File.write feed_path, <<-FEED
+    feed = File.read feed_path
+    File.write(feed_path, feed.strip.empty? ? <<-FEED : Nokogiri::XML(feed) { |config| config.noblanks }.to_xml)
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <link rel="self" type="application/atom+xml" href="https://www.kill-the-newsletter.com/feeds/#{token}.xml"/>
@@ -35,13 +33,5 @@ I’m sorry about the trouble. Please continue to enjoy your readings.
   </entry>
 </feed>
 FEED
-    end
-    begin
-      Nokogiri::XML(feed_string) { |config| config.strict.noblanks }
-    rescue Nokogiri::XML::SyntaxError => e
-      puts "Trying to fix invalid #{token}: #{e}"
-      feed_string.scrub!.gsub!(/[[:cntrl:]]/, "")
-      File.write feed_path, feed_string
-    end
   end
 end
