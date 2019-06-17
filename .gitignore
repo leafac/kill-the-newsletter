@@ -1,3 +1,4 @@
 /public/feeds/*
 !/public/feeds/.keep
 /.caddy
+/mail_handler.log
