@@ -26,7 +26,7 @@ I lost your feed, including its name, and for a while you didn’t receive any u
 
 I fixed the problem, and while past entries are lost forver, you should receive updates from now on.
 
-To restore the name of the feed, please write to me at kill-the-newsletter@leafac.com with the feed address and the name you want.
+As for the feed name, for now I had to rename it to “Kill the Newsletter!” To restore the original name of the feed, please write to me at kill-the-newsletter@leafac.com with the feed address and the name you want.
 
 I’m sorry about the trouble. Please continue to enjoy your readings.
     </content>
