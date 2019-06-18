@@ -1,4 +1,4 @@
 language: ruby
 deploy:
   provider: script
-  script: bundle exec rake deploy
+  script: bash deploy.sh
