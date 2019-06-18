@@ -8,7 +8,7 @@ desc "Run development server"
 task(:server) { sh "rerun bundle exec ruby server.rb" }
 
 desc "Run mail server"
-task(:mail) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bd -q30m -d" }
+task(:mail) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bdf -d" }
 
 desc "Deploy"
 task :deploy do
