@@ -4,21 +4,6 @@ task default: :test
 
 Rake::TestTask.new { |t| t.test_files = ["test.rb"] }
 
-desc "Run development server"
-task(:server) { sh "rerun bundle exec ruby server.rb" }
-
-desc "Run mail server"
-task(:mail) { sh "sudo exim -C '#{File.expand_path("../exim.conf", __FILE__)}' -bdf -d" }
-
-desc "Deploy"
-task :deploy do
-end
-
-desc "Run reverse proxy"
-task(:reverse_proxy) { sh "caddy" }
-
-
-
 # #!/bin/bash
 
 # apt update
