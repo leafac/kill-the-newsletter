@@ -20,7 +20,7 @@ ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'git clone git@github.co
 
 ssh -tA root@www.kill-the-newsletter.com 'apt install build-essential curl file git'
 ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"'
-ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'echo "eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" >> ~/.bashrc'
+ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> ~/.bashrc'
 ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "brew bundle"' || true
 
 ssh -tA root@www.kill-the-newsletter.com 'apt install zlib1g-dev'
