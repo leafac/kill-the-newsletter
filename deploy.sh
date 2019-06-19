@@ -4,6 +4,8 @@ set -euxo pipefail
 
 ssh-add
 
+ssh -tA root@www.kill-the-newsletter.com 'systemctl stop server caddy exim'
+
 ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && git pull origin master'
 
 ssh -tA kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "bundle install"'
@@ -14,5 +16,5 @@ ssh -tA root@www.kill-the-newsletter.com 'rsync -av --chown root:root ~kill-the-
 ssh -tA root@www.kill-the-newsletter.com 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/exim.service /etc/systemd/system/exim.service'
 
 ssh -tA root@www.kill-the-newsletter.com 'systemctl daemon-reload'
-ssh -tA root@www.kill-the-newsletter.com 'systemctl restart server caddy exim'
+ssh -tA root@www.kill-the-newsletter.com 'systemctl start server caddy exim'
 ssh -tA root@www.kill-the-newsletter.com 'systemctl enable server caddy exim'
