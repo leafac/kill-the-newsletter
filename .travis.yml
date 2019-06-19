@@ -1,4 +1,4 @@
 language: ruby
-deploy:
-  provider: script
-  script: bash deploy.sh
+# deploy:
+#   provider: script
+#   script: bash deploy.sh
