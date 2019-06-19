@@ -1,11 +1,28 @@
 require "nokogiri"
+require "open-uri"
+require "logger"
 require "./server"
 
+logger = Logger.new "migrate.log"
+FEEDS_TO_MIGRATE = "feeds-to-migrate.log"
+unless File.file? FEEDS_TO_MIGRATE
+  logger.fatal "‘#{FEEDS_TO_MIGRATE}’ not found"
+  abort
+end
 Sinatra::Application.new.helpers.instance_eval do
-  Dir["public/feeds/*"].each do |feed_path|
-    token = File.basename feed_path, ".xml"
-    feed = File.read feed_path
-    File.write(feed_path, feed.strip.empty? ? <<-FEED : Nokogiri::XML(feed) { |config| config.noblanks }.to_xml)
+  File.readlines(FEEDS_TO_MIGRATE).each do |feed_basename|
+    begin
+      feed_basename.strip!
+      next if feed_basename.empty?
+      feed_path = "public/feeds/#{feed_basename}"
+      if File.file? feed_path
+        logger.info "‘#{feed_basename}’ skipped because it has already been migrated"
+        next
+      end
+      token = File.basename feed_path, ".xml"
+      feed = open("https://www.kill-the-newsletter.com/feeds/#{feed_basename}").read
+      if feed.strip.empty?
+        File.write feed_path, <<-FEED
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <link rel="self" type="application/atom+xml" href="https://www.kill-the-newsletter.com/feeds/#{token}.xml"/>
@@ -33,5 +50,13 @@ I’m sorry about the trouble. Please continue to enjoy your readings.
   </entry>
 </feed>
 FEED
+        logger.info "‘#{feed_basename}’ migrated: it was blank"
+      else
+        File.write feed_path, Nokogiri::XML(feed) { |config| config.noblanks }.to_xml
+        logger.info "‘#{feed_basename}’ migrated"
+      end
+    rescue => e
+      logger.fatal "‘#{feed_basename}’ migration failed: #{[e.message, *e.backtrace].join("\n")}"
+    end
   end
 end
