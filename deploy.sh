@@ -4,6 +4,8 @@ set -euxo pipefail
 
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && git pull origin master'
 
+ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "bundle install"'
+
 ssh -t root@www.kill-the-newsletter.com 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/exim.conf /home/linuxbrew/.linuxbrew/etc/exim.conf'
 ssh -t root@www.kill-the-newsletter.com 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/server.service /etc/systemd/system/server.service'
 ssh -t root@www.kill-the-newsletter.com 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/caddy.service /etc/systemd/system/caddy.service'

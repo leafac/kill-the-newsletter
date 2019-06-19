@@ -8,6 +8,8 @@ ssh -t root@www.kill-the-newsletter.com 'ufw allow https'
 ssh -t root@www.kill-the-newsletter.com 'ufw allow smtp'
 ssh -t root@www.kill-the-newsletter.com 'ufw enable'
 
+ssh -t root@www.kill-the-newsletter.com 'apt update'
+
 ssh -t root@www.kill-the-newsletter.com 'ssh-keygen -t rsa -b 4096 -C "kill-the-newsletter@leafac.com"'
 ssh -t root@www.kill-the-newsletter.com 'cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys'
 ssh -t root@www.kill-the-newsletter.com 'cat ~/.ssh/id_rsa.pub'
@@ -20,12 +22,12 @@ ssh -t root@www.kill-the-newsletter.com 'rsync -av --chown kill-the-newsletter:k
 
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'git clone git@github.com:leafac/www.kill-the-newsletter.com.git'
 
-ssh -t root@www.kill-the-newsletter.com 'apt update'
 ssh -t root@www.kill-the-newsletter.com 'apt install build-essential curl file git'
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"'
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'echo "eval \$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" >> ~/.bashrc'
-ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "brew bundle"'
+ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "brew bundle"' || true
 
+ssh -t root@www.kill-the-newsletter.com 'apt install zlib1g-dev'
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'echo "eval \"\$(rbenv init -)\"" >> ~/.bashrc'
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "rbenv install $(< .ruby-version)"'
 ssh -t kill-the-newsletter@www.kill-the-newsletter.com 'cd www.kill-the-newsletter.com && bash -ic "bundle install"'
