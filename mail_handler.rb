@@ -4,8 +4,10 @@ require "logger"
 require "./server"
 
 logger = Logger.new "mail_handler.log"
+mail_string = nil
 begin
-  mail = Mail.new STDIN.read
+  mail_string = STDIN.read
+  mail = Mail.new mail_string
   token = Mail::Address.new(mail[:envelope_to].decoded).local.downcase
   return unless token =~ /\A[a-z0-9]{20,100}\z/
   feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
@@ -27,6 +29,6 @@ begin
   feed.at_css("entry:last-of-type").remove until feed.to_xml.length <= 500_000
   File.write feed_path, feed.to_xml
 rescue => e
-  logger.fatal [e.message, *e.backtrace].join("\n")
+  logger.fatal [e.message, *e.backtrace, mail_string].join("\n")
   abort
 end
