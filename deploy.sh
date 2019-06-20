@@ -4,7 +4,7 @@ set -euxo pipefail
 
 ssh-add
 
-ssh -tA root@kill-the-newsletter.com 'systemctl stop server caddy exim'
+ssh -tA root@kill-the-newsletter.com 'systemctl stop server caddy exim' || true
 
 ssh -tA kill-the-newsletter@kill-the-newsletter.com 'cd www.kill-the-newsletter.com && git pull origin master'
 
