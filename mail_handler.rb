@@ -7,7 +7,7 @@ logger = Logger.new "mail_handler.log"
 mail_string = nil
 begin
   mail_string = STDIN.read
-  mail = Mail.new mail_string
+  mail = Mail.new mail_string.scrub
   token = Mail::Address.new(mail[:envelope_to].decoded).local.downcase
   return unless token =~ /\A[a-z0-9]{20,100}\z/
   feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
