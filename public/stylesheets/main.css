@@ -26,12 +26,37 @@
   src: url("charter_bold_italic-webfont.woff") format("woff");
 }
 
-body, input, button {
-  font-family: "Charter", "Georgia", serif;
-  line-height: 1.5;
+@font-face {
+  font-family: "Iosevka Term Slab";
+  font-weight: normal;
+  font-style: normal;
+  src: url("iosevka-term-slab-regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Iosevka Term Slab";
+  font-weight: normal;
+  font-style: italic;
+  src: url("iosevka-term-slab-italic.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Iosevka Term Slab";
+  font-weight: bold;
+  font-style: normal;
+  src: url("iosevka-term-slab-bold.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Iosevka Term Slab";
+  font-weight: bold;
+  font-style: italic;
+  src: url("iosevka-term-slab-bolditalic.woff") format("woff");
 }
 
 body {
+  font-family: "Charter", "Georgia", serif;
+  line-height: 1.5;
   padding: 10px;
   text-align: center;
 }
@@ -52,7 +77,9 @@ h1 a {
 
 input, button, .button {
   background-color: transparent;
-  font-size: 1rem;
+  font-family: "Iosevka Term Slab", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
   padding: 5px;
   border: 1px solid #DFDFDF;
   border-radius: 3px;
