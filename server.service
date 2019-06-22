@@ -5,7 +5,8 @@ Description=Server
 User=kill-the-newsletter
 Group=kill-the-newsletter
 WorkingDirectory=/home/kill-the-newsletter/www.kill-the-newsletter.com
-ExecStart=/home/kill-the-newsletter/.rbenv/shims/bundle exec ruby server.rb -o localhost -e production
+Environment=APP_ENV=production
+ExecStart=/home/kill-the-newsletter/.rbenv/shims/bundle exec ruby server.rb -o localhost
 Restart=always
 
 [Install]
