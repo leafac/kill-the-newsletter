@@ -57,7 +57,9 @@
 body {
   font-family: "Charter", "Georgia", serif;
   line-height: 1.5;
-  padding: 10px;
+  max-width: 600px;
+  padding: 1rem;
+  margin: 0 auto;
   text-align: center;
 }
 
@@ -82,7 +84,7 @@ input, button, button:active, .button {
   font-size: 0.875rem;
   line-height: 1.5;
   max-width: 100%;
-  padding: 5px;
+  padding: 0.25rem;
   border: 1px solid #DFDFDF;
   border-radius: 3px;
 }
