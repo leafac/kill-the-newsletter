@@ -75,17 +75,19 @@ h1 a {
   text-decoration: none;
 }
 
-input, button, .button {
+input, button, button:active, .button {
+  color: black;
   background-color: transparent;
   font-family: "Iosevka Term Slab", "Courier New", monospace;
   font-size: 0.875rem;
   line-height: 1.5;
+  max-width: 100%;
   padding: 5px;
   border: 1px solid #DFDFDF;
   border-radius: 3px;
 }
 
-button, .button {
+button, button:active, .button {
   cursor: pointer;
   font-weight: bold;
   text-decoration: none;
