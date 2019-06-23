@@ -1,9 +1,6 @@
 [![Build Status](https://travis-ci.com/leafac/www.kill-the-newsletter.com.svg?branch=master)](https://travis-ci.com/leafac/www.kill-the-newsletter.com)
 
-Kill the Newsletter!
-====================
-
-<img alt="Kill the Newsletter!" src="public/logo.png" width="200">
+<img alt="Kill the Newsletter!" src="public/logo.png" width="300">
 
 Convert email newsletters into Atom feeds
 
