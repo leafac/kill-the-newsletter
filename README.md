@@ -3,7 +3,7 @@
 Kill the Newsletter!
 ====================
 
-<img alt="Kill the Newsletter!" src="public/logo.png" width="200" height="62">
+<img alt="Kill the Newsletter!" src="public/logo.png" width="200">
 
 Convert email newsletters into Atom feeds
 
