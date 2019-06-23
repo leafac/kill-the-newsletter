@@ -77,6 +77,10 @@ h1 a {
   text-decoration: none;
 }
 
+header h1 {
+  text-align: center;
+}
+
 img {
   max-width: 100%;
   height: auto;
