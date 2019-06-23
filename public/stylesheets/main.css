@@ -77,6 +77,10 @@ h1 a {
   text-decoration: none;
 }
 
+img {
+  height: auto;
+}
+
 input, button, button:active, .button {
   color: black;
   background-color: transparent;
