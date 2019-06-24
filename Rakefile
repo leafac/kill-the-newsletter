@@ -9,5 +9,7 @@ desc "Check that feeds are parseable with Nokogiri"
 task :check_feeds do
   Dir["public/feeds/*.xml"].each do |feed_path|
     Nokogiri::XML(File.read(feed_path)) { |config| config.strict.noblanks }
+  rescue => e
+    puts [feed_path, e.message, *e.backtrace].join("\n")
   end
 end
