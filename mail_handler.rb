@@ -23,10 +23,10 @@ begin
         :entry,
         layout: false,
         locals: {
-          title: mail.subject.scrub,
+          title: mail.subject&.scrub,
           author: mail[:from]&.decoded&.scrub || mail.envelope_from.scrub,
-          content_type: part.content_type.scrub =~ /html/ ? "html" : "text",
-          content: part.decoded.scrub,
+          content_type: part.content_type&.scrub =~ /html/ ? "html" : "text",
+          content: part.decoded&.scrub,
         }
       ).scrub
     )
