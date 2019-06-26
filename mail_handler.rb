@@ -15,10 +15,7 @@ begin
   feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
   return unless File.file? feed_path
   File.open feed_path, "r+" do |feed_file_handler|
-    unless feed_file_handler.flock File::LOCK_EX | File::LOCK_NB
-      logger.info "Can’t obtain lock for ‘#{feed_path}’"
-      abort
-    end
+    feed_file_handler.flock File::LOCK_EX
     feed = Nokogiri::XML(feed_file_handler.read.scrub) { |config| config.strict.noblanks }
     part = mail.html_part || mail.text_part || mail
     feed.at_css("updated").replace(
