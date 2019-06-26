@@ -10,7 +10,7 @@ mail_string = nil
 begin
   mail_string = STDIN.read
   mail = Mail.new mail_string.scrub
-  token = Mail::Address.new(mail[:envelope_to].decoded).local.downcase
+  token = Mail::Address.new(mail[:envelope_to].decoded.scrub).local.downcase
   return unless token =~ /\A[a-z0-9]{20,100}\z/
   feed_path = File.expand_path "../public/feeds/#{token}.xml", __FILE__
   return unless File.file? feed_path
@@ -26,10 +26,10 @@ begin
         :entry,
         layout: false,
         locals: {
-          title: mail.subject,
-          author: mail[:from]&.decoded || mail.envelope_from,
-          content_type: part.content_type =~ /html/ ? "html" : "text",
-          content: part.decoded,
+          title: mail.subject.scrub,
+          author: mail[:from]&.decoded&.scrub || mail.envelope_from.scrub,
+          content_type: part.content_type.scrub =~ /html/ ? "html" : "text",
+          content: part.decoded.scrub,
         }
       ).scrub
     )
