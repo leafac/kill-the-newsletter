@@ -7,4 +7,4 @@ before_deploy:
   - eval "$(ssh-agent -s)"
 deploy:
   provider: script
-  script: bundle exec rake deploy
+  script: rvm use $TRAVIS_RUBY_VERSION do bundle exec rake deploy
