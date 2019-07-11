@@ -43,8 +43,6 @@ task :setup do
   user_with_environment "bundle install"
 
   root 'setcap cap_net_bind_service=+ep $(realpath /home/linuxbrew/.linuxbrew/bin/caddy)'
-
-  sh "bundle exec rake deploy"
 end
 
 desc "Deploy"
