@@ -8,3 +8,4 @@ before_deploy:
 deploy:
   provider: script
   script: rvm use $(< .ruby-version) do bundle exec rake deploy
+  skip_cleanup: true
