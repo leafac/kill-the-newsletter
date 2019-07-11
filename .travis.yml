@@ -7,4 +7,4 @@ before_deploy:
   - eval "$(ssh-agent -s)"
 deploy:
   provider: script
-  script: bash deploy.sh
+  script: bundle exec rake deploy
