@@ -52,7 +52,8 @@ task :deploy do
   root 'systemctl stop server caddy exim || true'
 
   user_with_environment "git pull origin master"
-
+  
+  user_with_environment "brew bundle || true"
   user_with_environment "bundle install"
 
   root 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/exim.conf /home/linuxbrew/.linuxbrew/etc/exim.conf'
