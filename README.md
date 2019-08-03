@@ -27,4 +27,4 @@ The feeds are simply stored as text files.
 - **Mail Server:** [Exim](https://www.exim.org).
 - **Package Managers:** [Homebrew](https://brew.sh) & [Bundler](https://bundler.io).
 
-Refer to `setup.sh` for server setup and to `deploy.sh` for deployment.
+Refer to `Rakefile` for server setup and deployment.
