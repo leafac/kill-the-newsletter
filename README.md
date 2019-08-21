@@ -1,12 +1,4 @@
-[![Build Status](https://travis-ci.com/leafac/www.kill-the-newsletter.com.svg?branch=master)](https://travis-ci.com/leafac/www.kill-the-newsletter.com)
-
-<img alt="Kill the Newsletter!" src="public/logo.png" width="300">
-
-Convert email newsletters into Atom feeds
-
-https://www.kill-the-newsletter.com
-
-https://github.com/leafac/www.kill-the-newsletter.com
+# <img alt="Kill the Newsletter!" src="public/logo.png" width="300">
 
 **Kill the Newsletter!** is composed of two [Ruby](https://www.ruby-lang.org/en/) programs:
 
