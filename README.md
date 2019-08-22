@@ -1,5 +1,9 @@
 # <img alt="Kill the Newsletter!" src="public/logo.png" width="300">
 
+[**Convert email newsletters into Atom feeds**](https://www.kill-the-newsletter.com/)
+
+[Source](https://github.com/leafac/www.kill-the-newsletter.com)
+
 **Kill the Newsletter!** is composed of two [Ruby](https://www.ruby-lang.org/en/) programs:
 
 - **[Server](server.rb):** A [Sinatra](http://sinatrarb.com) application which serves the main website and creates feeds.
