@@ -14,7 +14,7 @@ GEM
     mini_portile2 (2.4.0)
     minitest (5.11.3)
     mustermann (1.0.3)
-    nokogiri (1.10.3)
+    nokogiri (1.10.8)
       mini_portile2 (~> 2.4.0)
     rack (2.0.7)
     rack-protection (2.0.5)
