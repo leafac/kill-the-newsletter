@@ -1,0 +1,3 @@
+.caddy
+static/feeds/*
+!static/feeds/.gitkeep
