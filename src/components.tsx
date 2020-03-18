@@ -80,3 +80,38 @@ export class Form extends React.Component {
     );
   }
 }
+
+export class Created extends React.Component<{ name: string; token: string }> {
+  render() {
+    return (
+      <>
+        <h1>“{this.props.name}” Inbox Created</h1>
+        <p>
+          Sign up for the newsletter with
+          <br />
+          <code>{this.props.token}@kill-the-newsletter.com</code>
+        </p>
+        <p>
+          Subscribe to the Atom feed at
+          <br />
+          <code>
+            https://www.kill-the-newsletter.com/feeds/{this.props.token}.xml
+          </code>
+        </p>
+        <p>
+          Don’t share these addresses.
+          <br />
+          They contain a security token that other people could use
+          <br />
+          to send you spam and to control your newsletter subscriptions.
+        </p>
+        <p>Enjoy your readings!</p>
+        <p>
+          <a href="https://www.kill-the-newsletter.com">
+            <strong>Create Another Inbox</strong>
+          </a>
+        </p>
+      </>
+    );
+  }
+}
