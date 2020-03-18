@@ -117,6 +117,7 @@ export function Created({ inbox: { name, token } }: { inbox: Inbox }) {
 }
 
 // https://validator.w3.org/feed/docs/atom.html
+// https://validator.w3.org/feed/#validate_by_input
 
 export function Feed(inbox: Inbox): object {
   const { name, token } = inbox;
@@ -144,7 +145,7 @@ export function Feed(inbox: Inbox): object {
       subtitle: `Kill the Newsletter! Inbox “${token}@kill-the-newsletter.com”`,
       updated: now(),
       ...Entry({
-        title: `“#${name}” Inbox Created`,
+        title: `“${name}” Inbox Created`,
         author: "Kill the Newsletter!",
         content: ReactDOMServer.renderToStaticMarkup(
           <Created inbox={inbox}></Created>
