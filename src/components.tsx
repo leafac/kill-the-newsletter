@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOMServer from "react-dom/server";
+import { Builder } from "xml2js";
 import cryptoRandomString from "crypto-random-string";
 
 export type Inbox = {
@@ -197,4 +198,12 @@ export function feedEmail(token: string) {
 
 export function id(token: string) {
   return `urn:kill-the-newsletter:${token}`;
+}
+
+export function renderHtml(component: React.ReactElement): string {
+  return `<!DOCTYPE html>\n${ReactDOMServer.renderToStaticMarkup(component)}`;
+}
+
+export function renderXml(xml: object): string {
+  return new Builder().buildObject(xml);
 }

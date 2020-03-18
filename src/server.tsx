@@ -1,6 +1,5 @@
 import express from "express";
 import React from "react";
-import ReactDOMServer from "react-dom/server";
 import {
   Inbox,
   Layout,
@@ -8,19 +7,20 @@ import {
   Created,
   Feed,
   newToken,
-  feedPath
+  feedPath,
+  renderHtml,
+  renderXml
 } from "./components";
-import { Builder } from "xml2js";
 import fs from "fs";
 
-const app = express();
+export const app = express();
 
 app.use(express.static("static"));
 app.use(express.urlencoded());
 
 app.get("/", (req, res) =>
   res.send(
-    render(
+    renderHtml(
       <Layout>
         <Form></Form>
       </Layout>
@@ -30,12 +30,9 @@ app.get("/", (req, res) =>
 
 app.post("/", (req, res) => {
   const inbox: Inbox = { name: req.body.name, token: newToken() };
-  fs.writeFileSync(
-    feedPath(inbox.token),
-    new Builder().buildObject(Feed(inbox))
-  );
+  fs.writeFileSync(feedPath(inbox.token), renderXml(Feed(inbox)));
   res.send(
-    render(
+    renderHtml(
       <Layout>
         <Created inbox={inbox}></Created>
       </Layout>
@@ -43,8 +40,4 @@ app.post("/", (req, res) => {
   );
 });
 
-app.listen(8000);
-
-function render(component: React.ReactElement): string {
-  return `<!DOCTYPE html>\n${ReactDOMServer.renderToStaticMarkup(component)}`;
-}
+if (require.main === module) app.listen(8000);
