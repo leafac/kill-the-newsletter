@@ -1,0 +1,107 @@
+body {
+  font-family: Charter, Georgia, serif;
+  line-height: 1.5;
+  max-width: 600px;
+  padding: 0 2em;
+  margin: 2em auto;
+}
+
+a {
+  color: black;
+}
+
+code {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+h1,
+h2 {
+  line-height: 1.3;
+  margin-top: 2em;
+}
+
+h1 {
+  font-size: 1.5em;
+}
+
+h2 {
+  font-size: 1.25em;
+  font-weight: normal;
+  font-style: italic;
+}
+
+header a {
+  text-decoration: none;
+}
+
+footer {
+  font-size: 0.875em;
+}
+
+nav,
+figure {
+  text-align: center;
+  margin: 2em 0;
+}
+
+figcaption {
+  font-style: italic;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 3px;
+}
+
+video,
+audio {
+  width: 100%;
+}
+
+summary {
+  cursor: pointer;
+}
+
+pre,
+fieldset,
+input,
+textarea {
+  border: 1px solid #dfdfdf;
+  border-radius: 3px;
+}
+
+pre {
+  --grvsc-padding-h: 1em;
+  --grvsc-border-radius: 3px;
+  --grvsc-line-highlighted-background-color: #eee;
+}
+
+legend + pre {
+  --grvsc-padding-v: 0;
+  --grvsc-padding-h: 0;
+  border: none;
+  margin: 0;
+}
+
+pre code {
+  font-size: 0.75em;
+}
+
+legend {
+  font-weight: bold;
+}
+
+input,
+textarea {
+  padding: 0.25em;
+}
+
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  resize: none;
+}
