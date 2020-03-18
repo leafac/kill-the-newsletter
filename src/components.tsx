@@ -60,3 +60,23 @@ export class Layout extends React.Component {
     );
   }
 }
+
+export class Form extends React.Component {
+  render() {
+    return (
+      <form method="POST" action="/">
+        <p>
+          <input
+            type="text"
+            name="name"
+            placeholder="Newsletter Name…"
+            maxLength={500}
+            size={30}
+            required
+          />
+          <button>Create Inbox</button>
+        </p>
+      </form>
+    );
+  }
+}
