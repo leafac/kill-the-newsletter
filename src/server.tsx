@@ -16,7 +16,7 @@ import fs from "fs";
 export const app = express();
 
 app.use(express.static("static"));
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) =>
   res.send(
