@@ -89,15 +89,12 @@ export function Created({ inbox: { name, token } }: { inbox: Inbox }) {
       <p>
         Sign up for the newsletter with
         <br />
-        <code>{token}@kill-the-newsletter.com</code>
+        <code>{feedEmail(token)}</code>
       </p>
       <p>
         Subscribe to the Atom feed at
         <br />
-        <code>
-          https://www.kill-the-newsletter.com/feeds/{token}
-          .xml
-        </code>
+        <code>{feedUrl(token)}</code>
       </p>
       <p>
         Don’t share these addresses.
@@ -119,7 +116,7 @@ export function Created({ inbox: { name, token } }: { inbox: Inbox }) {
 // https://validator.w3.org/feed/docs/atom.html
 // https://validator.w3.org/feed/#validate_by_input
 
-export function Feed(inbox: Inbox): object {
+export function Feed(inbox: Inbox) {
   const { name, token } = inbox;
   return {
     feed: {
@@ -129,7 +126,7 @@ export function Feed(inbox: Inbox): object {
           $: {
             rel: "self",
             type: "application/atom+xml",
-            href: `https://www.kill-the-newsletter.com/feeds/${token}.xml`
+            href: feedUrl(token)
           }
         },
         {
@@ -142,7 +139,7 @@ export function Feed(inbox: Inbox): object {
       ],
       id: id(token),
       title: name,
-      subtitle: `Kill the Newsletter! Inbox “${token}@kill-the-newsletter.com”`,
+      subtitle: `Kill the Newsletter! Inbox “${feedEmail(token)}”`,
       updated: now(),
       ...Entry({
         title: `“${name}” Inbox Created`,
@@ -163,7 +160,7 @@ export function Entry({
   title: string;
   author: string;
   content: string;
-}): object {
+}) {
   return {
     entry: {
       id: id(newToken()),
@@ -175,21 +172,29 @@ export function Entry({
   };
 }
 
-export function newToken(): string {
+export function newToken() {
   return cryptoRandomString({
     length: 20,
     characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
   });
 }
 
-export function now(): string {
+export function now() {
   return new Date().toISOString();
 }
 
-export function feedPath(token: string): string {
+export function feedPath(token: string) {
   return `static/feeds/${token}.xml`;
 }
 
-export function id(token: string): string {
+export function feedUrl(token: string) {
+  return `https://www.kill-the-newsletter.com/feeds/${token}.xml`;
+}
+
+export function feedEmail(token: string) {
+  return `${token}@kill-the-newsletter.com`;
+}
+
+export function id(token: string) {
   return `urn:kill-the-newsletter:${token}`;
 }
