@@ -1,4 +1,11 @@
 import React from "react";
+import ReactDOMServer from "react-dom/server";
+import cryptoRandomString from "crypto-random-string";
+
+export type Inbox = {
+  name: string;
+  token: string;
+};
 
 export class Layout extends React.Component {
   render() {
@@ -81,21 +88,23 @@ export class Form extends React.Component {
   }
 }
 
-export class Created extends React.Component<{ name: string; token: string }> {
+export class Created extends React.Component<{ inbox: Inbox }> {
   render() {
+    const { name, token } = this.props.inbox;
     return (
       <>
-        <h1>“{this.props.name}” Inbox Created</h1>
+        <h1>“{name}” Inbox Created</h1>
         <p>
           Sign up for the newsletter with
           <br />
-          <code>{this.props.token}@kill-the-newsletter.com</code>
+          <code>{token}@kill-the-newsletter.com</code>
         </p>
         <p>
           Subscribe to the Atom feed at
           <br />
           <code>
-            https://www.kill-the-newsletter.com/feeds/{this.props.token}.xml
+            https://www.kill-the-newsletter.com/feeds/{token}
+            .xml
           </code>
         </p>
         <p>
@@ -114,4 +123,81 @@ export class Created extends React.Component<{ name: string; token: string }> {
       </>
     );
   }
+}
+
+// https://validator.w3.org/feed/docs/atom.html
+
+export function Feed(inbox: Inbox): object {
+  const { name, token } = inbox;
+  return {
+    feed: {
+      $: { xmlns: "http://www.w3.org/2005/Atom" },
+      link: [
+        {
+          $: {
+            rel: "self",
+            type: "application/atom+xml",
+            href: `https://www.kill-the-newsletter.com/feeds/${token}.xml`
+          }
+        },
+        {
+          $: {
+            rel: "alternate",
+            type: "text/html",
+            href: "https://www.kill-the-newsletter.com/"
+          }
+        }
+      ],
+      id: id(token),
+      title: name,
+      subtitle: `Kill the Newsletter! Inbox “${token}@kill-the-newsletter.com”`,
+      updated: now(),
+      ...Entry({
+        title: `“#${name}” Inbox Created`,
+        author: "Kill the Newsletter!",
+        content: ReactDOMServer.renderToStaticMarkup(
+          <Created inbox={inbox}></Created>
+        )
+      })
+    }
+  };
+}
+
+export function Entry({
+  title,
+  author,
+  content
+}: {
+  title: string;
+  author: string;
+  content: string;
+}): object {
+  return {
+    entry: {
+      id: id(newToken()),
+      title,
+      author: { name: author },
+      updated: now(),
+      content: { $: { type: "html" }, _: content }
+    }
+  };
+}
+
+export function newToken(): string {
+  return cryptoRandomString({
+    length: 20,
+    characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
+  });
+}
+
+export function now(): string {
+  return new Date().toISOString();
+}
+
+export function feedPath(token: string): string {
+  return `static/feeds/${token}.xml`;
+}
+
+export function id(token: string): string {
+  return `urn:kill-the-newsletter:${token}`;
 }

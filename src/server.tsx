@@ -1,9 +1,17 @@
 import express from "express";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { Layout, Form, Created } from "./components";
+import {
+  Inbox,
+  Layout,
+  Form,
+  Created,
+  Feed,
+  newToken,
+  feedPath
+} from "./components";
+import { Builder } from "xml2js";
 import fs from "fs";
-import cryptoRandomString from "crypto-random-string";
 
 const app = express();
 
@@ -21,16 +29,15 @@ app.get("/", (req, res) =>
 );
 
 app.post("/", (req, res) => {
+  const inbox: Inbox = { name: req.body.name, token: newToken() };
+  fs.writeFileSync(
+    feedPath(inbox.token),
+    new Builder().buildObject(Feed(inbox))
+  );
   res.send(
     render(
       <Layout>
-        <Created
-          name={req.body.name}
-          token={cryptoRandomString({
-            length: 20,
-            characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
-          })}
-        ></Created>
+        <Created inbox={inbox}></Created>
       </Layout>
     )
   );
