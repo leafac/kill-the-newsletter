@@ -4,19 +4,21 @@ import ReactDOMServer from "react-dom/server";
 import { Layout, Form } from "./components";
 
 const app = express();
-const doctype = `<!DOCTYPE html>\n`;
 
 app.use(express.static("static"));
 
 app.get("/", (req, res) =>
   res.send(
-    doctype +
-      ReactDOMServer.renderToStaticMarkup(
-        <Layout>
-          <Form></Form>
-        </Layout>
-      )
+    render(
+      <Layout>
+        <Form></Form>
+      </Layout>
+    )
   )
 );
 
-app.listen(4000);
+app.listen(8000);
+
+function render(component: React.ReactElement): string {
+  return `<!DOCTYPE html>\n${ReactDOMServer.renderToStaticMarkup(component)}`;
+}
