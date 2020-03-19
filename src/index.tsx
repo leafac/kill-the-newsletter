@@ -1,9 +1,10 @@
 import express from "express";
 import { Server } from "http";
 import { SMTPServer } from "smtp-server";
+import { simpleParser } from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { Builder } from "xml2js";
+import { Builder, Parser } from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
@@ -31,7 +32,35 @@ const webApp = express()
     );
   });
 
-export const emailServer = new SMTPServer();
+export const emailServer = new SMTPServer({
+  async onData(stream, session, callback) {
+    const paths = session.envelope.rcptTo.flatMap(({ address }) => {
+      const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
+      if (match === null) return [];
+      const token = match[1];
+      const path = feedPath(token);
+      if (!fs.existsSync(path)) return [];
+      return [path];
+    });
+    if (paths.length === 0) return callback();
+    const email = await simpleParser(stream);
+    const entry = Entry({
+      title: email.subject,
+      author: email.from.text,
+      content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
+    });
+    for (const path of paths) {
+      const xml = await new Parser().parseStringPromise(
+        fs.readFileSync(path).toString()
+      );
+      xml.feed.updated = now();
+      xml.feed.entry.unshift(entry);
+      while (renderXML(xml).length > 500_000) xml.feed.entry.pop();
+      fs.writeFileSync(path, renderXML(xml));
+    }
+    callback();
+  }
+});
 
 export let developmentWebServer: Server;
 
