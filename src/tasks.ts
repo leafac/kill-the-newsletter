@@ -46,7 +46,6 @@ function execInFolder(command: string): void {
   exec(`cd www.kill-the-newsletter.com && ${command}`);
 }
 
-
 // - run: |
 //     mkdir ~/.ssh
 //     echo "${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}" > ~/.ssh/id_rsa
@@ -67,7 +66,7 @@ function execInFolder(command: string): void {
 //   root 'systemctl stop server caddy exim || true'
 
 //   user_with_environment "git pull origin master"
-  
+
 //   user_with_environment "brew bundle || true"
 //   user_with_environment "bundle install"
 
