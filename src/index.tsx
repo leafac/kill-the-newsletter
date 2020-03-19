@@ -1,5 +1,6 @@
 import express from "express";
 import { Server } from "http";
+import { SMTPServer } from "smtp-server";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { Builder } from "xml2js";
@@ -11,7 +12,7 @@ const webApp = express()
   .use(express.urlencoded({ extended: true }))
   .get("/", (req, res) =>
     res.send(
-      renderHtml(
+      renderHTML(
         <Layout>
           <Form></Form>
         </Layout>
@@ -20,15 +21,17 @@ const webApp = express()
   )
   .post("/", (req, res) => {
     const inbox: Inbox = { name: req.body.name, token: newToken() };
-    fs.writeFileSync(feedPath(inbox.token), renderXml(Feed(inbox)));
+    fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
     res.send(
-      renderHtml(
+      renderHTML(
         <Layout>
           <Created inbox={inbox}></Created>
         </Layout>
       )
     );
   });
+
+export const emailServer = new SMTPServer();
 
 export let developmentWebServer: Server;
 
@@ -48,8 +51,10 @@ if (process.env.NODE_ENV === "production") {
     .use(webApp);
   productionWebApp.listen(80);
   productionWebApp.listen(443);
+  emailServer.listen(25);
 } else {
   developmentWebServer = webApp.listen(8000);
+  emailServer.listen(2525);
 }
 
 type Inbox = {
@@ -144,7 +149,7 @@ function Created({ inbox: { name, token } }: { inbox: Inbox }) {
       <p>
         Subscribe to the Atom feed at
         <br />
-        <code>{feedUrl(token)}</code>
+        <code>{feedURL(token)}</code>
       </p>
       <p>
         Don’t share these addresses.
@@ -176,7 +181,7 @@ function Feed(inbox: Inbox) {
           $: {
             rel: "self",
             type: "application/atom+xml",
-            href: feedUrl(token)
+            href: feedURL(token)
           }
         },
         {
@@ -237,7 +242,7 @@ export function feedPath(token: string) {
   return `static/feeds/${token}.xml`;
 }
 
-function feedUrl(token: string) {
+function feedURL(token: string) {
   return `https://www.kill-the-newsletter.com/feeds/${token}.xml`;
 }
 
@@ -249,10 +254,10 @@ function id(token: string) {
   return `urn:kill-the-newsletter:${token}`;
 }
 
-function renderHtml(component: React.ReactElement): string {
+function renderHTML(component: React.ReactElement): string {
   return `<!DOCTYPE html>\n${ReactDOMServer.renderToStaticMarkup(component)}`;
 }
 
-function renderXml(xml: object): string {
+function renderXML(xml: object): string {
   return new Builder().buildObject(xml);
 }

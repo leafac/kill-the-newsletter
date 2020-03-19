@@ -1,4 +1,4 @@
-import { developmentWebServer, feedPath } from ".";
+import { developmentWebServer, emailServer, feedPath } from ".";
 import fetch from "node-fetch";
 import fs from "fs";
 
@@ -16,4 +16,5 @@ test("create feed", async () => {
 
 afterAll(() => {
   developmentWebServer.close();
+  emailServer.close(() => {});
 });
