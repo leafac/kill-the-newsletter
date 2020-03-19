@@ -7,9 +7,9 @@ import xml2js from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
-const app = express();
+const webApp = express();
 if (process.env.NODE_ENV === "production")
-  app.use((req, res, next) => {
+  webApp.use((req, res, next) => {
     if (
       req.protocol !== "https" ||
       req.hostname !== "www.kill-the-newsletter.com"
@@ -20,9 +20,9 @@ if (process.env.NODE_ENV === "production")
       );
     next();
   });
-app.use(express.static("static"));
-app.use(express.urlencoded({ extended: true }));
-app.get("/", (req, res) =>
+webApp.use(express.static("static"));
+webApp.use(express.urlencoded({ extended: true }));
+webApp.get("/", (req, res) =>
   res.send(
     renderHTML(
       <Layout>
@@ -31,7 +31,7 @@ app.get("/", (req, res) =>
     )
   )
 );
-app.post("/", (req, res) => {
+webApp.post("/", (req, res) => {
   const inbox: Inbox = { name: req.body.name, token: newToken() };
   fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
   res.send(
@@ -43,7 +43,7 @@ app.post("/", (req, res) => {
   );
 });
 
-export const emailServer = new SMTPServer({
+const emailApp = new SMTPServer({
   authOptional: true,
   async onData(stream, session, callback) {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
@@ -77,13 +77,15 @@ export const emailServer = new SMTPServer({
   }
 });
 
-export const webServer = app.listen(
+export const webServer = webApp.listen(
   process.env.NODE_ENV === "production" ? 80 : 8000
 );
 if (process.env.NODE_ENV === "production") {
-  app.listen(443);
+  webApp.listen(443);
 }
-emailServer.listen(process.env.NODE_ENV === "production" ? 25 : 2525);
+export const emailServer = emailApp.listen(
+  process.env.NODE_ENV === "production" ? 25 : 2525
+);
 
 type Inbox = {
   name: string;
