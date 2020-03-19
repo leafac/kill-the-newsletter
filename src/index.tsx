@@ -8,29 +8,41 @@ import { Builder, Parser } from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
-const webApp = express()
-  .use(express.static("static"))
-  .use(express.urlencoded({ extended: true }))
-  .get("/", (req, res) =>
-    res.send(
-      renderHTML(
-        <Layout>
-          <Form></Form>
-        </Layout>
-      )
+const app = express();
+if (process.env.NODE_ENV === "production")
+  app.use((req, res, next) => {
+    if (
+      req.protocol !== "https" ||
+      req.hostname !== "www.kill-the-newsletter.com"
+    )
+      return res.redirect(
+        301,
+        `https://www.kill-the-newsletter.com${req.originalUrl}`
+      );
+    next();
+  });
+app.use(express.static("static"));
+app.use(express.urlencoded({ extended: true }));
+app.get("/", (req, res) =>
+  res.send(
+    renderHTML(
+      <Layout>
+        <Form></Form>
+      </Layout>
     )
   )
-  .post("/", (req, res) => {
-    const inbox: Inbox = { name: req.body.name, token: newToken() };
-    fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
-    res.send(
-      renderHTML(
-        <Layout>
-          <Created inbox={inbox}></Created>
-        </Layout>
-      )
-    );
-  });
+);
+app.post("/", (req, res) => {
+  const inbox: Inbox = { name: req.body.name, token: newToken() };
+  fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
+  res.send(
+    renderHTML(
+      <Layout>
+        <Created inbox={inbox}></Created>
+      </Layout>
+    )
+  );
+});
 
 export const emailServer = new SMTPServer({
   authOptional: true,
@@ -65,29 +77,13 @@ export const emailServer = new SMTPServer({
   }
 });
 
-export let developmentWebServer: Server;
-
+export const webServer = app.listen(
+  process.env.NODE_ENV === "production" ? 80 : 8000
+);
 if (process.env.NODE_ENV === "production") {
-  const productionWebApp = express()
-    .use((req, res, next) => {
-      if (
-        req.protocol !== "https" ||
-        req.hostname !== "www.kill-the-newsletter.com"
-      )
-        return res.redirect(
-          301,
-          `https://www.kill-the-newsletter.com${req.originalUrl}`
-        );
-      next();
-    })
-    .use(webApp);
-  productionWebApp.listen(80);
-  productionWebApp.listen(443);
-  emailServer.listen(25);
-} else {
-  developmentWebServer = webApp.listen(8000);
-  emailServer.listen(2525);
+  app.listen(443);
 }
+emailServer.listen(process.env.NODE_ENV === "production" ? 25 : 2525);
 
 type Inbox = {
   name: string;

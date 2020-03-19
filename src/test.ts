@@ -1,4 +1,4 @@
-import { developmentWebServer, emailServer, feedPath, feedEmail } from ".";
+import { webServer, emailServer, feedPath, feedEmail } from ".";
 import { createTransport } from "nodemailer";
 import fetch from "node-fetch";
 import fs from "fs";
@@ -58,7 +58,7 @@ describe("receive email", () => {
 });
 
 afterAll(() => {
-  developmentWebServer.close();
+  webServer.close();
   emailServer.close(() => {});
 });
 
