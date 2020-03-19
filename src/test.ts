@@ -1,5 +1,4 @@
-import { webServer } from "./server";
-import { feedPath } from "./components";
+import { webServer, feedPath } from "./server";
 import fetch from "node-fetch";
 import fs from "fs";
 
