@@ -1,14 +1,20 @@
-import { app } from "./server";
+import { webServer } from "./server";
 import { feedPath } from "./components";
-import request from "supertest";
+import fetch from "node-fetch";
 import fs from "fs";
 
 test("create feed", async () => {
-  const response = await request(app)
-    .post("/")
-    .send("name=My Feed");
-  const token = response.text.match(/(\w{20}).xml/)![1];
+  const response = await fetch("http://localhost:8443", {
+    method: "POST",
+    body: new URLSearchParams({ name: "My Feed" })
+  });
+  const responseText = await response.text();
+  const token = responseText.match(/(\w{20}).xml/)![1];
   const feed = fs.readFileSync(feedPath(token)).toString();
 
   expect(feed).toMatch("My Feed");
+});
+
+afterAll(() => {
+  webServer.close();
 });

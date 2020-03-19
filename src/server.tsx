@@ -13,12 +13,12 @@ import {
 } from "./components";
 import fs from "fs";
 
-export const app = express();
+const webApp = express();
 
-app.use(express.static("static"));
-app.use(express.urlencoded({ extended: true }));
+webApp.use(express.static("static"));
+webApp.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) =>
+webApp.get("/", (req, res) =>
   res.send(
     renderHtml(
       <Layout>
@@ -28,7 +28,7 @@ app.get("/", (req, res) =>
   )
 );
 
-app.post("/", (req, res) => {
+webApp.post("/", (req, res) => {
   const inbox: Inbox = { name: req.body.name, token: newToken() };
   fs.writeFileSync(feedPath(inbox.token), renderXml(Feed(inbox)));
   res.send(
@@ -40,4 +40,4 @@ app.post("/", (req, res) => {
   );
 });
 
-if (require.main === module) app.listen(8000);
+export const webServer = webApp.listen(8443);
