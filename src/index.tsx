@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import https from "https";
 import { SMTPServer } from "smtp-server";
 import mailparser from "mailparser";
 import React from "react";
@@ -65,26 +67,40 @@ const emailApp = new SMTPServer({
   }
 });
 
-export const webServer = webApp.listen(
-  process.env.NODE_ENV === "production" ? 80 : 8000
-);
+export const webServer = http.createServer(webApp);
+export const emailServer = emailApp;
+
 if (process.env.NODE_ENV === "production") {
-  webApp.use((req, res, next) => {
-    if (
-      req.protocol !== "https" ||
-      req.hostname !== "www.kill-the-newsletter.com"
+  const productionWebApp = express()
+    .use((req, res, next) => {
+      if (
+        req.protocol !== "https" ||
+        req.hostname !== "www.kill-the-newsletter.com"
+      )
+        return res.redirect(
+          301,
+          `https://www.kill-the-newsletter.com${req.originalUrl}`
+        );
+      next();
+    })
+    .use(webApp);
+  const credentials = {
+    key: fs.readFileSync(
+      "/etc/letsencrypt/live/kill-the-newsletter.com/privkey.pem",
+      "utf8"
+    ),
+    cert: fs.readFileSync(
+      "/etc/letsencrypt/live/kill-the-newsletter.com/cert.pem",
+      "utf8"
     )
-      return res.redirect(
-        301,
-        `https://www.kill-the-newsletter.com${req.originalUrl}`
-      );
-    next();
-  });
-  webApp.listen(443);
+  };
+  http.createServer(productionWebApp).listen(80);
+  https.createServer(productionWebApp).listen(443);
+  emailServer.listen(25);
+} else {
+  webServer.listen(8000);
+  emailServer.listen(2525);
 }
-export const emailServer = emailApp.listen(
-  process.env.NODE_ENV === "production" ? 25 : 2525
-);
 
 type Inbox = {
   name: string;
