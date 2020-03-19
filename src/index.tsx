@@ -7,41 +7,29 @@ import xml2js from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
-const webApp = express();
-if (process.env.NODE_ENV === "production")
-  webApp.use((req, res, next) => {
-    if (
-      req.protocol !== "https" ||
-      req.hostname !== "www.kill-the-newsletter.com"
-    )
-      return res.redirect(
-        301,
-        `https://www.kill-the-newsletter.com${req.originalUrl}`
-      );
-    next();
-  });
-webApp.use(express.static("static"));
-webApp.use(express.urlencoded({ extended: true }));
-webApp.get("/", (req, res) =>
-  res.send(
-    renderHTML(
-      <Layout>
-        <Form></Form>
-      </Layout>
+const webApp = express()
+  .use(express.static("static"))
+  .use(express.urlencoded({ extended: true }))
+  .get("/", (req, res) =>
+    res.send(
+      renderHTML(
+        <Layout>
+          <Form></Form>
+        </Layout>
+      )
     )
   )
-);
-webApp.post("/", (req, res) => {
-  const inbox: Inbox = { name: req.body.name, token: newToken() };
-  fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
-  res.send(
-    renderHTML(
-      <Layout>
-        <Created inbox={inbox}></Created>
-      </Layout>
-    )
-  );
-});
+  .post("/", (req, res) => {
+    const inbox: Inbox = { name: req.body.name, token: newToken() };
+    fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
+    res.send(
+      renderHTML(
+        <Layout>
+          <Created inbox={inbox}></Created>
+        </Layout>
+      )
+    );
+  });
 
 const emailApp = new SMTPServer({
   authOptional: true,
@@ -81,6 +69,17 @@ export const webServer = webApp.listen(
   process.env.NODE_ENV === "production" ? 80 : 8000
 );
 if (process.env.NODE_ENV === "production") {
+  webApp.use((req, res, next) => {
+    if (
+      req.protocol !== "https" ||
+      req.hostname !== "www.kill-the-newsletter.com"
+    )
+      return res.redirect(
+        301,
+        `https://www.kill-the-newsletter.com${req.originalUrl}`
+      );
+    next();
+  });
   webApp.listen(443);
 }
 export const emailServer = emailApp.listen(
