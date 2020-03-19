@@ -33,6 +33,7 @@ const webApp = express()
   });
 
 export const emailServer = new SMTPServer({
+  authOptional: true,
   async onData(stream, session, callback) {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
       const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
@@ -44,7 +45,7 @@ export const emailServer = new SMTPServer({
     });
     if (paths.length === 0) return callback();
     const email = await simpleParser(stream);
-    const entry = Entry({
+    const { entry } = Entry({
       title: email.subject,
       author: email.from.text,
       content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
@@ -54,8 +55,10 @@ export const emailServer = new SMTPServer({
         fs.readFileSync(path).toString()
       );
       xml.feed.updated = now();
+      if (xml.feed.entry === undefined) xml.feed.entry = [];
       xml.feed.entry.unshift(entry);
-      while (renderXML(xml).length > 500_000) xml.feed.entry.pop();
+      while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
+        xml.feed.entry.pop();
       fs.writeFileSync(path, renderXML(xml));
     }
     callback();
@@ -275,7 +278,7 @@ function feedURL(token: string) {
   return `https://www.kill-the-newsletter.com/feeds/${token}.xml`;
 }
 
-function feedEmail(token: string) {
+export function feedEmail(token: string) {
   return `${token}@kill-the-newsletter.com`;
 }
 
