@@ -72,5 +72,5 @@ async function createFeed(): Promise<string> {
 }
 
 function readFeed(token: string): string {
-  return fs.readFileSync(feedPath(token)).toString();
+  return fs.readFileSync(feedPath(token), "utf8");
 }

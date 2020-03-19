@@ -64,7 +64,7 @@ export const emailServer = new SMTPServer({
     });
     for (const path of paths) {
       const xml = await new xml2js.Parser().parseStringPromise(
-        fs.readFileSync(path).toString()
+        fs.readFileSync(path, "utf8")
       );
       xml.feed.updated = now();
       if (xml.feed.entry === undefined) xml.feed.entry = [];
