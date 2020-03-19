@@ -59,6 +59,7 @@ export const emailServer = new SMTPServer({
     const { entry } = Entry({
       title: email.subject,
       author: email.from.text,
+      // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
       content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
     });
     for (const path of paths) {
