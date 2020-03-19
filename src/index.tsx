@@ -1,10 +1,9 @@
 import express from "express";
-import { Server } from "http";
 import { SMTPServer } from "smtp-server";
-import { simpleParser } from "mailparser";
+import mailparser from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import { Builder, Parser } from "xml2js";
+import xml2js from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
@@ -56,14 +55,14 @@ export const emailServer = new SMTPServer({
       return [path];
     });
     if (paths.length === 0) return callback();
-    const email = await simpleParser(stream);
+    const email = await mailparser.simpleParser(stream);
     const { entry } = Entry({
       title: email.subject,
       author: email.from.text,
       content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
     });
     for (const path of paths) {
-      const xml = await new Parser().parseStringPromise(
+      const xml = await new xml2js.Parser().parseStringPromise(
         fs.readFileSync(path).toString()
       );
       xml.feed.updated = now();
@@ -287,5 +286,5 @@ function renderHTML(component: React.ReactElement): string {
 }
 
 function renderXML(xml: object): string {
-  return new Builder().buildObject(xml);
+  return new xml2js.Builder().buildObject(xml);
 }
