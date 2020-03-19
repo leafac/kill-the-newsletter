@@ -1,7 +1,7 @@
 import express from "express";
 import http from "http";
 import https from "https";
-import { SMTPServer } from "smtp-server";
+import { SMTPServer, SMTPServerOptions } from "smtp-server";
 import mailparser from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
@@ -33,7 +33,7 @@ const webApp = express()
     );
   });
 
-const emailApp = new SMTPServer({
+const emailApp: SMTPServerOptions = {
   authOptional: true,
   async onData(stream, session, callback) {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
@@ -65,10 +65,10 @@ const emailApp = new SMTPServer({
     }
     callback();
   }
-});
+};
 
-export const webServer = http.createServer(webApp);
-export const emailServer = emailApp;
+export const developmentWebServer = http.createServer(webApp);
+export const developmentEmailServer = new SMTPServer(emailApp);
 
 if (process.env.NODE_ENV === "production") {
   const productionWebApp = express()
@@ -95,11 +95,11 @@ if (process.env.NODE_ENV === "production") {
     )
   };
   http.createServer(productionWebApp).listen(80);
-  https.createServer(productionWebApp).listen(443);
-  emailServer.listen(25);
+  https.createServer(credentials, productionWebApp).listen(443);
+  new SMTPServer({ ...credentials, ...emailApp }).listen(25);
 } else {
-  webServer.listen(8000);
-  emailServer.listen(2525);
+  developmentWebServer.listen(8000);
+  developmentEmailServer.listen(2525);
 }
 
 type Inbox = {

@@ -1,4 +1,9 @@
-import { webServer, emailServer, feedPath, feedEmail } from ".";
+import {
+  developmentWebServer,
+  developmentEmailServer,
+  feedPath,
+  feedEmail
+} from ".";
 import nodemailer from "nodemailer";
 import fetch from "node-fetch";
 import fs from "fs";
@@ -58,8 +63,8 @@ describe("receive email", () => {
 });
 
 afterAll(() => {
-  webServer.close();
-  emailServer.close(() => {});
+  developmentWebServer.close();
+  developmentEmailServer.close(() => {});
 });
 
 async function createFeed(): Promise<string> {
