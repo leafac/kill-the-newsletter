@@ -1,8 +1,8 @@
-import { webServer, feedPath } from ".";
+import { webServer, redirectServer, feedPath } from ".";
 import fetch from "node-fetch";
 import fs from "fs";
 
-test("create feed", async () => {
+test("webServer", async () => {
   const response = await fetch("http://localhost:8443", {
     method: "POST",
     body: new URLSearchParams({ name: "My Feed" })
@@ -14,6 +14,17 @@ test("create feed", async () => {
   expect(feed).toMatch("My Feed");
 });
 
+test("redirectServer", async () => {
+  const response = await fetch("http://localhost:8080/something?other", {
+    redirect: "manual"
+  });
+  expect(response.status).toBe(301);
+  expect(response.headers.get("Location")).toBe(
+    "https://www.kill-the-newsletter.com/something?other"
+  );
+});
+
 afterAll(() => {
   webServer.close();
+  redirectServer.close();
 });

@@ -30,6 +30,12 @@ export const webServer = express()
   })
   .listen(8443);
 
+export const redirectServer = express()
+  .all("*", (req, res) => {
+    res.redirect(301, `https://www.kill-the-newsletter.com${req.originalUrl}`);
+  })
+  .listen(8080);
+
 type Inbox = {
   name: string;
   token: string;
