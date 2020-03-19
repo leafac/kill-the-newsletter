@@ -1,5 +1,4 @@
 node_modules
 lib
-.caddy
 static/feeds/*
 !static/feeds/.gitkeep
