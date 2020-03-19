@@ -3,9 +3,10 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import { Builder } from "xml2js";
 import fs from "fs";
+import { Server } from "http";
 import cryptoRandomString from "crypto-random-string";
 
-export const webServer = express()
+const webApp = express()
   .use(express.static("static"))
   .use(express.urlencoded({ extended: true }))
   .get("/", (req, res) =>
@@ -27,14 +28,29 @@ export const webServer = express()
         </Layout>
       )
     );
-  })
-  .listen(8443);
+  });
 
-export const redirectServer = express()
-  .all("*", (req, res) => {
-    res.redirect(301, `https://www.kill-the-newsletter.com${req.originalUrl}`);
-  })
-  .listen(8080);
+export let developmentWebServer: Server;
+
+if (process.env.NODE_ENV === "production") {
+  const productionWebApp = express()
+    .use((req, res, next) => {
+      if (
+        req.protocol !== "https" ||
+        req.hostname !== "www.kill-the-newsletter.com"
+      )
+        return res.redirect(
+          301,
+          `https://www.kill-the-newsletter.com${req.originalUrl}`
+        );
+      next();
+    })
+    .use(webApp);
+  productionWebApp.listen(80);
+  productionWebApp.listen(443);
+} else {
+  developmentWebServer = webApp.listen(8000);
+}
 
 type Inbox = {
   name: string;
