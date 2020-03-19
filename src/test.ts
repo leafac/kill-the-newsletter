@@ -1,5 +1,5 @@
 import { webServer, emailServer, feedPath, feedEmail } from ".";
-import { createTransport } from "nodemailer";
+import nodemailer from "nodemailer";
 import fetch from "node-fetch";
 import fs from "fs";
 
@@ -10,7 +10,7 @@ test("create feed", async () => {
 });
 
 describe("receive email", () => {
-  const transporter = createTransport({
+  const transporter = nodemailer.createTransport({
     host: "localhost",
     port: 2525,
     tls: { rejectUnauthorized: false }
