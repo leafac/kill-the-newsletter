@@ -1,4 +1,4 @@
-import { developmentWebServer, developmentEmailServer, feedEmail } from ".";
+import { webServer, emailServer, feedEmail } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
@@ -58,9 +58,9 @@ describe("receive email", () => {
 });
 
 afterAll(() => {
-  developmentWebServer.close();
+  webServer.close();
   // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43268
-  developmentEmailServer.close(() => {});
+  emailServer.close(() => {});
 });
 
 async function createFeed(): Promise<string> {

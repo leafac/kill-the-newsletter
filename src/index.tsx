@@ -1,7 +1,5 @@
 import express from "express";
-import http from "http";
-import https from "https";
-import { SMTPServer, SMTPServerOptions } from "smtp-server";
+import { SMTPServer } from "smtp-server";
 import mailparser from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
@@ -9,7 +7,7 @@ import xml2js from "xml2js";
 import fs from "fs";
 import cryptoRandomString from "crypto-random-string";
 
-const webApp = express()
+export const webServer = express()
   .use(express.static("static"))
   .use(express.urlencoded({ extended: true }))
   .get("/", (req, res) =>
@@ -36,9 +34,10 @@ const webApp = express()
         </Layout>
       )
     );
-  });
+  })
+  .listen(8000, "localhost");
 
-const emailApp: SMTPServerOptions = {
+export const emailServer = new SMTPServer({
   authOptional: true,
   async onData(stream, session, callback) {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
@@ -69,43 +68,20 @@ const emailApp: SMTPServerOptions = {
       fs.writeFileSync(path, renderXML(xml));
     }
     callback();
-  }
-};
-
-export const developmentWebServer = http.createServer(webApp);
-export const developmentEmailServer = new SMTPServer(emailApp);
-
-if (process.env.NODE_ENV === "production") {
-  const productionWebApp = express()
-    .use((req, res, next) => {
-      if (
-        req.protocol !== "https" ||
-        req.hostname !== "www.kill-the-newsletter.com"
-      )
-        return res.redirect(
-          301,
-          `https://www.kill-the-newsletter.com${req.originalUrl}`
-        );
-      next();
-    })
-    .use(webApp);
-  const credentials = {
-    key: fs.readFileSync(
-      "/etc/letsencrypt/live/kill-the-newsletter.com/privkey.pem",
-      "utf8"
-    ),
-    cert: fs.readFileSync(
-      "/etc/letsencrypt/live/kill-the-newsletter.com/fullchain.pem",
-      "utf8"
-    )
-  };
-  http.createServer(productionWebApp).listen(80);
-  https.createServer(credentials, productionWebApp).listen(443);
-  new SMTPServer({ ...credentials, ...emailApp }).listen(25);
-} else {
-  developmentWebServer.listen(8000);
-  developmentEmailServer.listen(2525);
-}
+  },
+  ...(process.env.NODE_ENV === "production"
+    ? {
+        key: fs.readFileSync(
+          "/etc/letsencrypt/live/kill-the-newsletter.com/privkey.pem",
+          "utf8"
+        ),
+        cert: fs.readFileSync(
+          "/etc/letsencrypt/live/kill-the-newsletter.com/fullchain.pem",
+          "utf8"
+        )
+      }
+    : {})
+}).listen(process.env.NODE_ENV === "production" ? 25 : 2525);
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (

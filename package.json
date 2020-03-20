@@ -51,14 +51,14 @@
       "ref": "origin/master",
       "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
       "path": "/root/www.kill-the-newsletter.com",
-      "pre-setup": "(ssh -o StrictHostKeyChecking=no git@github.com || true) && apt-get update && apt-get install -y build-essential software-properties-common && (curl -sL https://deb.nodesource.com/setup_13.x | bash -) && add-apt-repository universe && add-apt-repository ppa:certbot/certbot && apt-get install -y nodejs certbot && certbot certonly --standalone --non-interactive --agree-tos --email kill-the-newsletter@leafac.com --domain kill-the-newsletter.com --domain www.kill-the-newsletter.com",
+      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && sudo apt-get install -y nodejs build-essential && (curl https://getcaddy.com | bash -s personal) && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "ssh_options": [
         "ForwardAgent=yes",
         "StrictHostKeyChecking=no"
       ],
       "TODO": [
-        "https://certbot.eff.org/docs/using.html",
-        "--pre-hook '/root/www.kill-the-newsletter.com/current/node_modules/.bin/pm2 stop all' --post-hook '/root/www.kill-the-newsletter.com/current/node_modules/.bin/pm2 start all'",
+        "Caddyfile",
+        "/root/www.kill-the-newsletter.com/current/node_modules/.bin/pm2 startOrRestart all",
         "env NODE_ENV=production npm ci",
         "rsync",
         "pm2 startup OR pm2 save",
