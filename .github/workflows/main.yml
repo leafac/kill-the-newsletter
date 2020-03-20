@@ -13,10 +13,5 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         if: github.ref == 'refs/heads/master'
       - run: |
-          ssh -o StrictHostKeyChecking=no -A root@204.48.21.111 'ssh git@github.com'
+          true
         if: github.ref == 'refs/heads/master'
-# - run: |
-#     mkdir ~/.ssh
-#     echo "${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}" > ~/.ssh/id_rsa
-#     chmod 600 ~/.ssh/id_rsa
-#     ssh-add
