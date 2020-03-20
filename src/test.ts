@@ -65,6 +65,7 @@ describe("receive email", () => {
 
 afterAll(() => {
   developmentWebServer.close();
+  // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43268
   developmentEmailServer.close(() => {});
 });
 
