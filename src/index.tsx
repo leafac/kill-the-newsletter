@@ -23,13 +23,16 @@ const webApp = express()
   )
   .post("/", (req, res) => {
     const name = req.body.name;
-    const token = newToken();
-    fs.writeFileSync(feedPath(token), renderXML(Feed({ name, token })));
+    const identifier = newIdentifier();
+    fs.writeFileSync(
+      feedPath(identifier),
+      renderXML(Feed({ name, identifier }))
+    );
     res.send(
       renderHTML(
         <Layout>
           <h1>“{name}” Inbox Created</h1>
-          <Created token={token}></Created>
+          <Created identifier={identifier}></Created>
         </Layout>
       )
     );
@@ -41,8 +44,8 @@ const emailApp: SMTPServerOptions = {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
       const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
       if (match === null) return [];
-      const token = match[1];
-      const path = feedPath(token);
+      const identifier = match[1];
+      const path = feedPath(identifier);
       if (!fs.existsSync(path)) return [];
       return [path];
     });
@@ -179,23 +182,23 @@ function Form() {
   );
 }
 
-function Created({ token }: { token: string }) {
+function Created({ identifier }: { identifier: string }) {
   return (
     <>
       <p>
         Sign up for the newsletter with
         <br />
-        <code>{feedEmail(token)}</code>
+        <code>{feedEmail(identifier)}</code>
       </p>
       <p>
         Subscribe to the Atom feed at
         <br />
-        <code>{feedURL(token)}</code>
+        <code>{feedURL(identifier)}</code>
       </p>
       <p>
         Don’t share these addresses.
         <br />
-        They contain a security token that other people could use
+        They contain an identifier that other people could use
         <br />
         to send you spam and to control your newsletter subscriptions.
       </p>
@@ -209,7 +212,7 @@ function Created({ token }: { token: string }) {
   );
 }
 
-function Feed({ name, token }: { name: string; token: string }) {
+function Feed({ name, identifier }: { name: string; identifier: string }) {
   return {
     feed: {
       $: { xmlns: "http://www.w3.org/2005/Atom" },
@@ -218,7 +221,7 @@ function Feed({ name, token }: { name: string; token: string }) {
           $: {
             rel: "self",
             type: "application/atom+xml",
-            href: feedURL(token)
+            href: feedURL(identifier)
           }
         },
         {
@@ -229,15 +232,17 @@ function Feed({ name, token }: { name: string; token: string }) {
           }
         }
       ],
-      id: id(token),
+      id: urn(identifier),
       title: name,
-      subtitle: `Kill the Newsletter! Inbox “${feedEmail(token)}”`,
+      subtitle: `Kill the Newsletter! Inbox: ${feedEmail(
+        identifier
+      )} → ${feedURL(identifier)}`,
       updated: now(),
       ...Entry({
         title: `“${name}” Inbox Created`,
         author: "Kill the Newsletter!",
         content: ReactDOMServer.renderToStaticMarkup(
-          <Created token={token}></Created>
+          <Created identifier={identifier}></Created>
         )
       })
     }
@@ -255,7 +260,7 @@ function Entry({
 }) {
   return {
     entry: {
-      id: id(newToken()),
+      id: urn(newIdentifier()),
       title,
       author: { name: author },
       updated: now(),
@@ -264,7 +269,7 @@ function Entry({
   };
 }
 
-function newToken(): string {
+function newIdentifier(): string {
   return cryptoRandomString({
     length: 20,
     characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
@@ -275,20 +280,20 @@ function now(): string {
   return new Date().toISOString();
 }
 
-function feedPath(token: string): string {
-  return `static/feeds/${token}.xml`;
+function feedPath(identifier: string): string {
+  return `static/feeds/${identifier}.xml`;
 }
 
-function feedURL(token: string): string {
-  return `https://www.kill-the-newsletter.com/feeds/${token}.xml`;
+function feedURL(identifier: string): string {
+  return `https://www.kill-the-newsletter.com/feeds/${identifier}.xml`;
 }
 
-export function feedEmail(token: string): string {
-  return `${token}@kill-the-newsletter.com`;
+export function feedEmail(identifier: string): string {
+  return `${identifier}@kill-the-newsletter.com`;
 }
 
-function id(token: string): string {
-  return `urn:kill-the-newsletter:${token}`;
+function urn(identifier: string): string {
+  return `urn:kill-the-newsletter:${identifier}`;
 }
 
 function renderHTML(component: React.ReactElement): string {

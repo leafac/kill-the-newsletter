@@ -4,9 +4,9 @@ import axios from "axios";
 import qs from "qs";
 
 test("create feed", async () => {
-  const token = await createFeed();
+  const identifier = await createFeed();
 
-  expect(await readFeed(token)).toMatch("My Feed");
+  expect(await readFeed(identifier)).toMatch("My Feed");
 });
 
 describe("receive email", () => {
@@ -17,41 +17,41 @@ describe("receive email", () => {
   });
 
   test("HTML content", async () => {
-    const token = await createFeed();
+    const identifier = await createFeed();
     await transporter.sendMail({
       from: "publisher@example.com",
-      to: feedEmail(token),
+      to: feedEmail(identifier),
       subject: "New Message",
       html: "<p>HTML content</p>"
     });
-    const feed = await readFeed(token);
+    const feed = await readFeed(identifier);
     expect(feed).toMatch("publisher@example.com");
     expect(feed).toMatch("New Message");
     expect(feed).toMatch("HTML content");
   });
 
   test("text content", async () => {
-    const token = await createFeed();
+    const identifier = await createFeed();
     await transporter.sendMail({
       from: "publisher@example.com",
-      to: feedEmail(token),
+      to: feedEmail(identifier),
       subject: "New Message",
       text: "TEXT content"
     });
-    const feed = await readFeed(token);
+    const feed = await readFeed(identifier);
     expect(feed).toMatch("TEXT content");
   });
 
   test("truncation", async () => {
-    const token = await createFeed();
+    const identifier = await createFeed();
     for (const repetition of [...new Array(4).keys()])
       await transporter.sendMail({
         from: "publisher@example.com",
-        to: feedEmail(token),
+        to: feedEmail(identifier),
         subject: "New Message",
         text: `REPETITION ${repetition} `.repeat(10_000)
       });
-    const feed = await readFeed(token);
+    const feed = await readFeed(identifier);
     expect(feed).toMatch("REPETITION 3");
     expect(feed).not.toMatch("REPETITION 0");
   }, 10_000);
@@ -74,6 +74,7 @@ async function createFeed(): Promise<string> {
   ).data.match(/(\w{20}).xml/)![1];
 }
 
-async function readFeed(token: string): Promise<string> {
-  return (await axios.get(`http://localhost:8000/feeds/${token}.xml`)).data;
+async function readFeed(identifier: string): Promise<string> {
+  return (await axios.get(`http://localhost:8000/feeds/${identifier}.xml`))
+    .data;
 }
