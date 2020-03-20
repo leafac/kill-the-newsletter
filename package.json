@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "tsc && jest && prettier --check 'src/**'",
-    "develop": "concurrently \"tsc --watch\" \"nodemon ./lib/index.js\""
+    "develop": "concurrently \"tsc --watch\" \"nodemon lib\""
   },
   "dependencies": {
     "crypto-random-string": "^3.2.0",
@@ -39,7 +39,7 @@
   "apps": [
     {
       "name": "kill-the-newsletter",
-      "script": "./lib/index.js"
+      "script": "lib"
     }
   ],
   "deploy": {
@@ -64,6 +64,7 @@
         "rsync",
         "pm2 startup OR pm2 save",
         "pm2 start env.js",
+        "https://pm2.keymetrics.io/docs/usage/deployment/",
         "https://pm2.keymetrics.io/docs/usage/startup/",
         "https://certbot.eff.org/docs/using.html"
       ],
