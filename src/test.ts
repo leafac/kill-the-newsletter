@@ -5,7 +5,8 @@ import {
   feedEmail
 } from ".";
 import nodemailer from "nodemailer";
-import fetch from "node-fetch";
+import axios from "axios";
+import qs from "qs";
 import fs from "fs";
 
 test("create feed", async () => {
@@ -68,12 +69,14 @@ afterAll(() => {
 });
 
 async function createFeed(): Promise<string> {
-  const response = await fetch("http://localhost:8000", {
-    method: "POST",
-    body: new URLSearchParams({ name: "My Feed" })
-  });
-  const responseText = await response.text();
-  return responseText.match(/(\w{20}).xml/)![1];
+  return (
+    await axios.post(
+      "http://localhost:8000",
+      qs.stringify({
+        name: "My Feed"
+      })
+    )
+  ).data.match(/(\w{20}).xml/)![1];
 }
 
 function readFeed(token: string): string {
