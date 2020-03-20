@@ -269,30 +269,30 @@ function Entry({
   };
 }
 
-function newToken() {
+function newToken(): string {
   return cryptoRandomString({
     length: 20,
     characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
   });
 }
 
-function now() {
+function now(): string {
   return new Date().toISOString();
 }
 
-export function feedPath(token: string) {
+export function feedPath(token: string): string {
   return `static/feeds/${token}.xml`;
 }
 
-function feedURL(token: string) {
+function feedURL(token: string): string {
   return `https://www.kill-the-newsletter.com/feeds/${token}.xml`;
 }
 
-export function feedEmail(token: string) {
+export function feedEmail(token: string): string {
   return `${token}@kill-the-newsletter.com`;
 }
 
-function id(token: string) {
+function id(token: string): string {
   return `urn:kill-the-newsletter:${token}`;
 }
 
