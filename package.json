@@ -1,7 +1,7 @@
 {
   "scripts": {
     "test": "tsc && jest && prettier --check 'src/**'",
-    "develop": "concurrently \"tsc --watch\" \"nodemon lib/index.js\""
+    "develop": "concurrently \"tsc --watch\" \"nodemon lib\""
   },
   "dependencies": {
     "crypto-random-string": "^3.2.0",
