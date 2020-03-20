@@ -4,12 +4,6 @@ switch (process.argv[2]) {
   case "provision":
     child_process.execSync(`ssh-add`);
 
-    exec(`ufw allow ssh`);
-    exec(`ufw allow http`);
-    exec(`ufw allow https`);
-    exec(`ufw allow smtp`);
-    exec(`ufw enable`);
-
     // https://github.com/nodesource/distributions#debinstall
     // https://certbot.eff.org/docs/install.html
     exec(`apt-get update`);
@@ -25,6 +19,10 @@ switch (process.argv[2]) {
     child_process.execSync(`ssh-add`);
 
     execInFolder(`git pull origin master`);
+    execInFolder(`npm ci`);
+    // TODO: rsync
+    // TODO: $ pm2 startup OR $ pm2 save
+    // TODO: $ pm2 start env.js --watch --ignore-watch="node_modules"
     break;
   default:
     console.error(
@@ -43,7 +41,7 @@ function exec(command: string): void {
 }
 
 function execInFolder(command: string): void {
-  exec(`cd www.kill-the-newsletter.com && ${command}`);
+  exec(`cd www.kill-the-newsletter.com && env NODE_ENV=production ${command}`);
 }
 
 // - run: |
@@ -54,29 +52,3 @@ function execInFolder(command: string): void {
 // https://github.com/webfactory/ssh-agent
 
 // root 'apt-get install -y curl file git'
-
-// desc "Setup production server"
-// task :setup do
-// end
-
-// desc "Deploy"
-// task :deploy do
-//   sh 'ssh-add'
-
-//   root 'systemctl stop server caddy exim || true'
-
-//   user_with_environment "git pull origin master"
-
-//   user_with_environment "brew bundle || true"
-//   user_with_environment "bundle install"
-
-//   root 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/exim.conf /home/linuxbrew/.linuxbrew/etc/exim.conf'
-
-//   root 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/server.service /etc/systemd/system/server.service'
-//   root 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/caddy.service /etc/systemd/system/caddy.service'
-//   root 'rsync -av --chown root:root ~kill-the-newsletter/www.kill-the-newsletter.com/exim.service /etc/systemd/system/exim.service'
-
-//   root 'systemctl daemon-reload'
-//   root 'systemctl start server caddy exim'
-//   root 'systemctl enable server caddy exim'
-// end

@@ -1,12 +1,13 @@
 {
   "scripts": {
     "test": "tsc && jest && prettier --check 'src/**'",
-    "develop": "concurrently \"tsc --watch\" \"nodemon lib\""
+    "develop": "concurrently \"tsc --watch\" \"nodemon ./lib/index.js\""
   },
   "dependencies": {
     "crypto-random-string": "^3.2.0",
     "express": "^4.17.1",
     "mailparser": "^2.7.7",
+    "pm2": "^4.2.3",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "smtp-server": "^3.6.0",
@@ -34,5 +35,23 @@
   "jest": {
     "rootDir": "lib",
     "testEnvironment": "node"
+  },
+  "apps": [
+    {
+      "name": "kill-the-newsletter",
+      "script": "./lib/index.js"
+    }
+  ],
+  "deploy": {
+    "production": {
+      "user": "root",
+      "host": "204.48.21.111",
+      "ref": "origin/master",
+      "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
+      "path": "/root/www.kill-the-newsletter.com",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
   }
 }
