@@ -49,7 +49,10 @@
       "ref": "origin/master",
       "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
       "path": "/root/www.kill-the-newsletter.com",
-      "ssh_options": "ForwardAgent=yes",
+      "ssh_options": [
+        "ForwardAgent=yes",
+        "StrictHostKeyChecking=no"
+      ],
       "env": {
         "NODE_ENV": "production"
       }
