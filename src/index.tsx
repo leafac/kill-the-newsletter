@@ -90,7 +90,7 @@ if (process.env.NODE_ENV === "production") {
       "utf8"
     ),
     cert: fs.readFileSync(
-      "/etc/letsencrypt/live/kill-the-newsletter.com/cert.pem",
+      "/etc/letsencrypt/live/kill-the-newsletter.com/fullchain.pem",
       "utf8"
     )
   };
