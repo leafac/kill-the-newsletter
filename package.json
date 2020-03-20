@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "concurrently \"tsc --watch\" \"nodemon lib\"",
-    "test": "tsc && jest && prettier --check 'src/**'"
+    "test": "tsc && jest && prettier --check 'src/**'",
+    "deploy": "pm2 deploy production"
   },
   "dependencies": {
     "crypto-random-string": "^3.2.0",
