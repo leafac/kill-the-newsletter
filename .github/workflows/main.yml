@@ -11,10 +11,10 @@ jobs:
       - uses: webfactory/ssh-agent@v0.2.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-        if: github.ref == 'ref/heads/master'
+        if: github.ref == 'refs/heads/master'
       - run: |
           ssh -o StrictHostKeyChecking=no -A root@204.48.21.111 'ssh git@github.com'
-        if: github.ref == 'ref/heads/master'
+        if: github.ref == 'refs/heads/master'
 # - run: |
 #     mkdir ~/.ssh
 #     echo "${{ secrets.SECRET_PRIVATE_DEPLOY_KEY }}" > ~/.ssh/id_rsa
