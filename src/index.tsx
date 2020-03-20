@@ -27,6 +27,7 @@ const webApp = express()
     res.send(
       renderHTML(
         <Layout>
+          <h1>“{name}” Inbox Created</h1>
           <Created inbox={inbox}></Created>
         </Layout>
       )
@@ -131,7 +132,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           sizes="16x16"
         />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="stylesheet" type="text/css" href="styles.css" />
+        <link rel="stylesheet" type="text/css" href="/styles.css" />
         <title>Kill the Newsletter!</title>
       </head>
       <body style={{ textAlign: "center" }}>
@@ -185,7 +186,6 @@ function Form() {
 function Created({ inbox: { name, token } }: { inbox: Inbox }) {
   return (
     <>
-      <h1>“{name}” Inbox Created</h1>
       <p>
         Sign up for the newsletter with
         <br />
