@@ -22,13 +22,14 @@ const webApp = express()
     )
   )
   .post("/", (req, res) => {
-    const inbox: Inbox = { name: req.body.name, token: newToken() };
-    fs.writeFileSync(feedPath(inbox.token), renderXML(Feed(inbox)));
+    const name = req.body.name;
+    const token = newToken();
+    fs.writeFileSync(feedPath(token), renderXML(Feed({ name, token })));
     res.send(
       renderHTML(
         <Layout>
           <h1>“{name}” Inbox Created</h1>
-          <Created inbox={inbox}></Created>
+          <Created token={token}></Created>
         </Layout>
       )
     );
@@ -102,11 +103,6 @@ if (process.env.NODE_ENV === "production") {
   developmentWebServer.listen(8000);
   developmentEmailServer.listen(2525);
 }
-
-type Inbox = {
-  name: string;
-  token: string;
-};
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -183,7 +179,7 @@ function Form() {
   );
 }
 
-function Created({ inbox: { name, token } }: { inbox: Inbox }) {
+function Created({ token }: { token: string }) {
   return (
     <>
       <p>
@@ -213,8 +209,7 @@ function Created({ inbox: { name, token } }: { inbox: Inbox }) {
   );
 }
 
-function Feed(inbox: Inbox) {
-  const { name, token } = inbox;
+function Feed({ name, token }: { name: string; token: string }) {
   return {
     feed: {
       $: { xmlns: "http://www.w3.org/2005/Atom" },
@@ -242,7 +237,7 @@ function Feed(inbox: Inbox) {
         title: `“${name}” Inbox Created`,
         author: "Kill the Newsletter!",
         content: ReactDOMServer.renderToStaticMarkup(
-          <Created inbox={inbox}></Created>
+          <Created token={token}></Created>
         )
       })
     }
@@ -280,7 +275,7 @@ function now(): string {
   return new Date().toISOString();
 }
 
-export function feedPath(token: string): string {
+function feedPath(token: string): string {
   return `static/feeds/${token}.xml`;
 }
 

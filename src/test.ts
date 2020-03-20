@@ -1,18 +1,12 @@
-import {
-  developmentWebServer,
-  developmentEmailServer,
-  feedPath,
-  feedEmail
-} from ".";
+import { developmentWebServer, developmentEmailServer, feedEmail } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
-import fs from "fs";
 
 test("create feed", async () => {
   const token = await createFeed();
 
-  expect(readFeed(token)).toMatch("My Feed");
+  expect(await readFeed(token)).toMatch("My Feed");
 });
 
 describe("receive email", () => {
@@ -30,7 +24,7 @@ describe("receive email", () => {
       subject: "New Message",
       html: "<p>HTML content</p>"
     });
-    const feed = readFeed(token);
+    const feed = await readFeed(token);
     expect(feed).toMatch("publisher@example.com");
     expect(feed).toMatch("New Message");
     expect(feed).toMatch("HTML content");
@@ -44,7 +38,7 @@ describe("receive email", () => {
       subject: "New Message",
       text: "TEXT content"
     });
-    const feed = readFeed(token);
+    const feed = await readFeed(token);
     expect(feed).toMatch("TEXT content");
   });
 
@@ -57,7 +51,7 @@ describe("receive email", () => {
         subject: "New Message",
         text: `REPETITION ${repetition} `.repeat(10_000)
       });
-    const feed = readFeed(token);
+    const feed = await readFeed(token);
     expect(feed).toMatch("REPETITION 3");
     expect(feed).not.toMatch("REPETITION 0");
   }, 10_000);
@@ -80,6 +74,6 @@ async function createFeed(): Promise<string> {
   ).data.match(/(\w{20}).xml/)![1];
 }
 
-function readFeed(token: string): string {
-  return fs.readFileSync(feedPath(token), "utf8");
+async function readFeed(token: string): Promise<string> {
+  return (await axios.get(`http://localhost:8000/feeds/${token}.xml`)).data;
 }
