@@ -213,9 +213,6 @@ function Created({ inbox: { name, token } }: { inbox: Inbox }) {
   );
 }
 
-// https://validator.w3.org/feed/docs/atom.html
-// https://validator.w3.org/feed/#validate_by_input
-
 function Feed(inbox: Inbox) {
   const { name, token } = inbox;
   return {
