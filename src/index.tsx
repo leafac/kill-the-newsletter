@@ -38,7 +38,7 @@ export const webServer = express()
   .listen(8000);
 
 export const emailServer = new SMTPServer({
-  authOptional: true,
+  disabledCommands: ["AUTH", "STARTTLS"],
   async onData(stream, session, callback) {
     const paths = session.envelope.rcptTo.flatMap(({ address }) => {
       const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
@@ -68,19 +68,7 @@ export const emailServer = new SMTPServer({
       fs.writeFileSync(path, renderXML(xml));
     }
     callback();
-  },
-  ...(process.env.NODE_ENV === "production"
-    ? {
-        key: fs.readFileSync(
-          "/etc/letsencrypt/live/kill-the-newsletter.com/privkey.pem",
-          "utf8"
-        ),
-        cert: fs.readFileSync(
-          "/etc/letsencrypt/live/kill-the-newsletter.com/fullchain.pem",
-          "utf8"
-        )
-      }
-    : {})
+  }
 }).listen(process.env.NODE_ENV === "production" ? 25 : 2525);
 
 function Layout({ children }: { children: React.ReactNode }) {
