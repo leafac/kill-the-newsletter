@@ -45,6 +45,9 @@
       "env": {
         "NODE_ENV": "production"
       }
+    },
+    {
+      "script": "caddy"
     }
   ],
   "deploy": {
@@ -54,13 +57,12 @@
       "ref": "origin/master",
       "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
       "path": "/root/www.kill-the-newsletter.com",
-      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && apt install -y nodejs build-essential && wget -O /usr/local/bin/caddy https://github.com/caddyserver/caddy/releases/download/v2.0.0-beta.18/caddy2_beta18_linux_amd64 && chmod +x /usr/local/bin/caddy && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
+      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && apt install -y nodejs build-essential && (curl https://getcaddy.com | bash -s personal) && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "ssh_options": [
         "ForwardAgent=yes",
         "StrictHostKeyChecking=no"
       ],
       "TODO": [
-        "Caddyfile",
         "/root/www.kill-the-newsletter.com/current/node_modules/.bin/pm2 startOrRestart all",
         "env NODE_ENV=production npm ci",
         "rsync",
