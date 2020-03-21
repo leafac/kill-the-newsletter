@@ -252,7 +252,7 @@ function feedURL(identifier: string): string {
   return `https://www.kill-the-newsletter.com/feeds/${identifier}.xml`;
 }
 
-export function feedEmail(identifier: string): string {
+function feedEmail(identifier: string): string {
   return `${identifier}@kill-the-newsletter.com`;
 }
 
