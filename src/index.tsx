@@ -21,7 +21,7 @@ export const webServer = express()
   )
   .post("/", (req, res) => {
     const name = req.body.name;
-    const identifier = newIdentifier();
+    const identifier = createIdentifier();
     fs.writeFileSync(
       feedPath(identifier),
       renderXML(Feed({ name, identifier }))
@@ -224,7 +224,7 @@ function Entry({
 }) {
   return {
     entry: {
-      id: urn(newIdentifier()),
+      id: urn(createIdentifier()),
       title,
       author: { name: author },
       updated: now(),
@@ -233,7 +233,7 @@ function Entry({
   };
 }
 
-function newIdentifier(): string {
+function createIdentifier(): string {
   return cryptoRandomString({
     length: 20,
     characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
