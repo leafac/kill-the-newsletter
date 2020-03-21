@@ -66,7 +66,7 @@
         "https://pm2.keymetrics.io/docs/usage/deployment/",
         "https://pm2.keymetrics.io/docs/usage/startup/",
         "host: kill-the-newsletter.com",
-        "firewall"
+        "test: basic application workflow, previously created newsletter, /feeds/ directory listing, port 8000 isn’t responding"
       ],
       "env": {
         "NODE_ENV": "production"
