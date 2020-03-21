@@ -65,7 +65,8 @@
         "pm2 start env.js",
         "https://pm2.keymetrics.io/docs/usage/deployment/",
         "https://pm2.keymetrics.io/docs/usage/startup/",
-        "host: kill-the-newsletter.com"
+        "host: kill-the-newsletter.com",
+        "firewall"
       ],
       "env": {
         "NODE_ENV": "production"
