@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ESNEXT",
+    "target": "ES2019",
     "module": "commonjs",
     "jsx": "react",
     "sourceMap": true,
