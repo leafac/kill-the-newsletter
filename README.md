@@ -46,7 +46,7 @@ The web server will be running at `http://localhost:8000` and the email server a
    | Hostname           | `kill-the-newsletter.com` |
    | Backups            | Enable                    |
 
-5. Configure DNS:
+5. Configure DNS in Namecheap:
 
    | Type    | Host  | Value                     |
    | ------- | ----- | ------------------------- |
