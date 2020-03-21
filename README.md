@@ -35,7 +35,16 @@ The web server will be running at `http://localhost:8000` and the email server a
 
 3. Add the private key (`id_rsa`) to GitHub as a **Secret** called `SSH_PRIVATE_KEY`.
 
-4. Create a DigitalOcean droplet.
+4. Create a DigitalOcean droplet:
+
+   |                    |                           |
+   | ------------------ | ------------------------- |
+   | Image              | Ubuntu 18.04.3 (LTS) x64  |
+   | Plan               | Starter Standard \$5/mo   |
+   | Additional options | Monitoring                |
+   | Authentication     | Deployment SSH Key        |
+   | Hostname           | `kill-the-newsletter.com` |
+   | Backups            | Enable                    |
 
 5. Configure DNS:
 
