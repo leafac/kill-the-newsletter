@@ -1,4 +1,4 @@
-import { webServer, emailServer, feedEmail } from ".";
+import { webServer, emailServer } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
@@ -20,7 +20,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await transporter.sendMail({
       from: "publisher@example.com",
-      to: feedEmail(identifier),
+      to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
       html: "<p>HTML content</p>"
     });
@@ -34,7 +34,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await transporter.sendMail({
       from: "publisher@example.com",
-      to: feedEmail(identifier),
+      to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
       text: "TEXT content"
     });
@@ -47,7 +47,7 @@ describe("receive email", () => {
     for (const repetition of [...new Array(4).keys()])
       await transporter.sendMail({
         from: "publisher@example.com",
-        to: feedEmail(identifier),
+        to: `${identifier}@kill-the-newsletter.com`,
         subject: "New Message",
         text: `REPETITION ${repetition} `.repeat(10_000)
       });
