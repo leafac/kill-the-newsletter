@@ -41,7 +41,10 @@
   "apps": [
     {
       "name": "kill-the-newsletter",
-      "script": "lib"
+      "script": "lib",
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   ],
   "deploy": {
@@ -51,7 +54,7 @@
       "ref": "origin/master",
       "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
       "path": "/root/www.kill-the-newsletter.com",
-      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && sudo apt-get install -y nodejs build-essential && (curl https://getcaddy.com | bash -s personal) && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
+      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && apt install -y nodejs build-essential && wget -O /usr/local/bin/caddy https://github.com/caddyserver/caddy/releases/download/v2.0.0-beta.18/caddy2_beta18_linux_amd64 && chmod +x /usr/local/bin/caddy && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "ssh_options": [
         "ForwardAgent=yes",
         "StrictHostKeyChecking=no"
@@ -67,10 +70,7 @@
         "https://pm2.keymetrics.io/docs/usage/startup/",
         "host: kill-the-newsletter.com",
         "test: basic application workflow, previously created newsletter, /feeds/ directory listing, port 8000 isn’t responding"
-      ],
-      "env": {
-        "NODE_ENV": "production"
-      }
+      ]
     }
   }
 }
