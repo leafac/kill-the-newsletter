@@ -57,7 +57,10 @@ The web server will be running at `http://localhost:8000` and the email server a
 4. Setup the server:
 
    ```console
+   $ ssh-add
    $ npx pm2 deploy package.json production setup
    ```
 
-5. Push to GitHub, which will trigger the Action that deploys the code and starts the server.
+5. Migrate the existing feeds.
+
+6. Push to GitHub, which will trigger the Action that deploys the code and starts the server.
