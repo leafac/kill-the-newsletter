@@ -31,11 +31,11 @@ The web server will be running at `http://localhost:8000` and the email server a
    $ ssh-keygen
    ```
 
-2. Add the public key (`id_rsa.pub`) to DigitalOcean and to GitHub as a **Deploy key** for the repository.
+   **Private key (`id_rsa`):** Add to GitHub as a **Secret** called `SSH_PRIVATE_KEY`.
 
-3. Add the private key (`id_rsa`) to GitHub as a **Secret** called `SSH_PRIVATE_KEY`.
+   **Public key (`id_rsa.pub`):** Add to DigitalOcean and to GitHub as a **Deploy key** for the repository.
 
-4. Create a DigitalOcean droplet:
+2. Create a DigitalOcean droplet:
 
    |                    |                           |
    | ------------------ | ------------------------- |
@@ -46,7 +46,7 @@ The web server will be running at `http://localhost:8000` and the email server a
    | Hostname           | `kill-the-newsletter.com` |
    | Backups            | Enable                    |
 
-5. Configure DNS in Namecheap:
+3. Configure DNS in Namecheap:
 
    | Type    | Host  | Value                     |
    | ------- | ----- | ------------------------- |
@@ -54,10 +54,10 @@ The web server will be running at `http://localhost:8000` and the email server a
    | `CNAME` | `www` | `kill-the-newsletter.com` |
    | `MX`    | `@`   | `kill-the-newsletter.com` |
 
-6. Setup the server:
+4. Setup the server:
 
    ```console
    $ npx pm2 deploy package.json production setup
    ```
 
-7. Push to GitHub, which will trigger the Action that deploys the code and starts the server.
+5. Push to GitHub, which will trigger the Action that deploys the code and starts the server.
