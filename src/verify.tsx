@@ -12,6 +12,6 @@ import fs from "fs";
       if (xml?.feed?.updated === undefined)
         throw new Error("Can’t find xml.feed.updated");
     } catch (error) {
-      console.log(`Error for ${feed}: ${error}`);
+      console.error(`Error for ${feed}: ${error}`);
     }
 })();
