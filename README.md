@@ -61,6 +61,12 @@ The web server will be running at `http://localhost:8000` and the email server a
    $ npx pm2 deploy package.json production setup
    ```
 
-5. Migrate the existing feeds.
+5. Migrate the existing feeds:
+
+   ```console
+   $ ssh-add
+   $ ssh -A root@kill-the-newsletter.com
+   root@kill-the-newsletter.com $ rsync -av <path-to-previous-feeds> /root/www.kill-the-newsletter.com/current/static/feeds/
+   ```
 
 6. Push to GitHub, which will trigger the Action that deploys the code and starts the server.
