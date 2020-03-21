@@ -12,5 +12,5 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         if: github.ref == 'refs/heads/master'
-      - run: npm run deploy
+      - run: npx pm2 deploy package.json production
         if: github.ref == 'refs/heads/master'

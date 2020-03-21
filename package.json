@@ -1,9 +1,7 @@
 {
   "scripts": {
     "start": "concurrently \"tsc --watch\" \"nodemon lib\"",
-    "test": "tsc && jest && prettier --check 'src/**'",
-    "deploy": "pm2 deploy package.json production",
-    "deploy:start": "pm2 startOrRestart package.json"
+    "test": "tsc && jest && prettier --check 'src/**'"
   },
   "dependencies": {
     "caddy-npm": "^2.0.0-beta.18",
@@ -62,7 +60,7 @@
       "path": "/root/www.kill-the-newsletter.com",
       "pre-setup": "(curl -sL https://deb.nodesource.com/setup_13.x | bash -) && apt install -y nodejs build-essential && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "pre-deploy-local": "rsync -av --delete lib/ root@kill-the-newsletter.com:www.kill-the-newsletter.com/current/lib/",
-      "post-deploy": "env NODE_ENV=production npm ci && npm deploy:start",
+      "post-deploy": "env NODE_ENV=production npm ci && npx pm2 startOrRestart package.json",
       "ssh_options": [
         "ForwardAgent=yes",
         "StrictHostKeyChecking=no"
