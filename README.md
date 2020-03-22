@@ -51,10 +51,11 @@ The web server will be running at `http://localhost:8000` and the email server a
    |               |                           |           |
    | ------------- | ------------------------- | --------- |
    | Name          | `kill-the-newsletter.com` |           |
-   | Inbound Rules | SSH                       | 22        |
+   | Inbound Rules | ICMP                      |           |
+   |               | SSH                       | 22        |
+   |               | Custom                    | 25 (SMTP) |
    |               | HTTP                      | 80        |
    |               | HTTPS                     | 443       |
-   |               | Custom                    | 25 (SMTP) |
 
    **Floating IP**
 
