@@ -4,7 +4,7 @@ import mailparser from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
 import xml2js from "xml2js";
-import fs from "fs";
+import { promises as fs } from "fs";
 import cryptoRandomString from "crypto-random-string";
 
 export const webServer = express()
@@ -19,21 +19,23 @@ export const webServer = express()
       )
     )
   )
-  .post("/", (req, res) => {
-    const name = req.body.name;
-    const identifier = createIdentifier();
-    fs.writeFileSync(
-      feedPath(identifier),
-      renderXML(Feed({ name, identifier }))
-    );
-    res.send(
-      renderHTML(
-        <Layout>
-          <h1>“{name}” Inbox Created</h1>
-          <Created identifier={identifier}></Created>
-        </Layout>
-      )
-    );
+  .post("/", (req, res, next) => {
+    (async () => {
+      const name = req.body.name;
+      const identifier = createIdentifier();
+      await fs.writeFile(
+        feedPath(identifier),
+        renderXML(Feed({ name, identifier }))
+      );
+      res.send(
+        renderHTML(
+          <Layout>
+            <h1>“{name}” Inbox Created</h1>
+            <Created identifier={identifier}></Created>
+          </Layout>
+        )
+      );
+    })().catch(next);
   })
   .listen(8000);
 
@@ -41,15 +43,6 @@ export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
   onData(stream, session, callback) {
     (async () => {
-      const paths = session.envelope.rcptTo.flatMap(({ address }) => {
-        const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
-        if (match === null) return [];
-        const identifier = match[1];
-        const path = feedPath(identifier);
-        if (!fs.existsSync(path)) return [];
-        return [path];
-      });
-      if (paths.length === 0) return callback();
       const email = await mailparser.simpleParser(stream);
       const { entry } = Entry({
         title: email.subject,
@@ -57,16 +50,20 @@ export const emailServer = new SMTPServer({
         // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
         content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
       });
-      for (const path of paths) {
-        const xml = await new xml2js.Parser().parseStringPromise(
-          fs.readFileSync(path, "utf8")
-        );
+      for (const { address } of session.envelope.rcptTo) {
+        const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
+        if (match === null) continue;
+        const identifier = match[1];
+        const path = feedPath(identifier);
+        const xmlText = await fs.readFile(path, "utf8").catch(() => null);
+        if (xmlText === null) continue;
+        const xml = await new xml2js.Parser().parseStringPromise(xmlText);
         xml.feed.updated = now();
         if (xml.feed.entry === undefined) xml.feed.entry = [];
         xml.feed.entry.unshift(entry);
         while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
           xml.feed.entry.pop();
-        fs.writeFileSync(path, renderXML(xml));
+        await fs.writeFile(path, renderXML(xml));
       }
       callback();
     })().catch(callback);
