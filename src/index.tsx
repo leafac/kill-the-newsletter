@@ -39,35 +39,37 @@ export const webServer = express()
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
-  async onData(stream, session, callback) {
-    const paths = session.envelope.rcptTo.flatMap(({ address }) => {
-      const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
-      if (match === null) return [];
-      const identifier = match[1];
-      const path = feedPath(identifier);
-      if (!fs.existsSync(path)) return [];
-      return [path];
-    });
-    if (paths.length === 0) return callback();
-    const email = await mailparser.simpleParser(stream);
-    const { entry } = Entry({
-      title: email.subject,
-      author: email.from.text,
-      // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
-      content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
-    });
-    for (const path of paths) {
-      const xml = await new xml2js.Parser().parseStringPromise(
-        fs.readFileSync(path, "utf8")
-      );
-      xml.feed.updated = now();
-      if (xml.feed.entry === undefined) xml.feed.entry = [];
-      xml.feed.entry.unshift(entry);
-      while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
-        xml.feed.entry.pop();
-      fs.writeFileSync(path, renderXML(xml));
-    }
-    callback();
+  onData(stream, session, callback) {
+    (async () => {
+      const paths = session.envelope.rcptTo.flatMap(({ address }) => {
+        const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
+        if (match === null) return [];
+        const identifier = match[1];
+        const path = feedPath(identifier);
+        if (!fs.existsSync(path)) return [];
+        return [path];
+      });
+      if (paths.length === 0) return callback();
+      const email = await mailparser.simpleParser(stream);
+      const { entry } = Entry({
+        title: email.subject,
+        author: email.from.text,
+        // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
+        content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
+      });
+      for (const path of paths) {
+        const xml = await new xml2js.Parser().parseStringPromise(
+          fs.readFileSync(path, "utf8")
+        );
+        xml.feed.updated = now();
+        if (xml.feed.entry === undefined) xml.feed.entry = [];
+        xml.feed.entry.unshift(entry);
+        while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
+          xml.feed.entry.pop();
+        fs.writeFileSync(path, renderXML(xml));
+      }
+      callback();
+    })().catch(callback);
   }
 }).listen(process.env.NODE_ENV === "production" ? 25 : 2525);
 
