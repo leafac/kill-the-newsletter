@@ -46,6 +46,18 @@ The web server will be running at `http://localhost:8000` and the email server a
    | Hostname           | `kill-the-newsletter.com` |
    | Backups            | Enable                    |
 
+   **Firewall**
+
+   |               |                           |           |
+   | ------------- | ------------------------- | --------- |
+   | Name          | `kill-the-newsletter.com` |           |
+   | Inbound Rules | SSH                       | 22        |
+   |               | HTTP                      | 80        |
+   |               | HTTPS                     | 443       |
+   |               | Custom                    | 25 (SMTP) |
+
+   **Floating IP**
+
 3. Configure DNS in Namecheap:
 
    | Type    | Host  | Value                     |

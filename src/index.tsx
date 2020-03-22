@@ -35,7 +35,7 @@ export const webServer = express()
       )
     );
   })
-  .listen(8000, "localhost");
+  .listen(8000);
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
