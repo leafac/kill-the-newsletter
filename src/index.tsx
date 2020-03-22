@@ -66,7 +66,10 @@ export const emailServer = new SMTPServer({
         await fs.writeFile(path, renderXML(xml));
       }
       callback();
-    })().catch(callback);
+    })().catch(error => {
+      console.error(error);
+      stream.end(() => callback(error));
+    });
   }
 }).listen(process.env.NODE_ENV === "production" ? 25 : 2525);
 
