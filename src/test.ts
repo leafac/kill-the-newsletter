@@ -53,7 +53,7 @@ describe("receive email", () => {
   test("non-existing address", async () => {
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `non-existing@kill-the-newsletter.com`,
+      to: "non-existing@kill-the-newsletter.com",
       subject: "New Message",
       html: "<p>HTML content</p>"
     });
