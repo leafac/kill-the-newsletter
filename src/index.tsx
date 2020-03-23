@@ -48,7 +48,9 @@ export const emailServer = new SMTPServer({
         title: email.subject,
         author: email.from.text,
         // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
-        content: typeof email.html !== "boolean" ? email.html : email.textAsHtml
+        ...(typeof email.html === "boolean"
+          ? { html: false, content: email.text ?? "" }
+          : { content: email.html })
       });
       for (const { address } of session.envelope.rcptTo) {
         const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
@@ -219,11 +221,13 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
 function Entry({
   title,
   author,
-  content
+  content,
+  html
 }: {
   title: string;
   author: string;
   content: string;
+  html?: boolean;
 }) {
   return {
     entry: {
@@ -231,7 +235,10 @@ function Entry({
       title,
       author: { name: author },
       updated: now(),
-      content: { $: { type: "html" }, _: content }
+      content: {
+        ...(html === false ? {} : { $: { type: "html" } }),
+        _: content
+      }
     }
   };
 }

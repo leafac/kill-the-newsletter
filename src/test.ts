@@ -36,6 +36,28 @@ describe("receive email", () => {
     expect(feed).toMatch("TEXT content");
   });
 
+  test("missing content", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("New Message");
+  });
+
+  test("missing subject", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      html: "<p>HTML content</p>"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("HTML content");
+  });
+
   test("truncation", async () => {
     const identifier = await createFeed();
     for (const repetition of [...new Array(4).keys()])
