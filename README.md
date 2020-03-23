@@ -3,12 +3,8 @@
 <p><strong>Convert email newsletters into Atom feeds</strong></p>
 <p><img alt="Convert email newsletters into Atom feeds" src="static/logo.png" width="150" /></p>
 <p>
-<a href="https://github.com/leafac/www.kill-the-newsletter.com">
-<img alt="Source" src="https://img.shields.io/badge/Source---" />
-</a>
-<a href="https://github.com/leafac/www.kill-the-newsletter.com/actions">
-<img alt=".github/workflows/main.yml" src="https://github.com/leafac/www.kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" />
-</a>
+<a href="https://github.com/leafac/www.kill-the-newsletter.com"><img alt="Source" src="https://img.shields.io/badge/Source---" /></a>
+<a href="https://github.com/leafac/www.kill-the-newsletter.com/actions"><img alt="Continuous Integration" src="https://github.com/leafac/www.kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" /></a>
 </p>
 </div>
 
