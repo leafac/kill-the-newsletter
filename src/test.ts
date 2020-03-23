@@ -36,6 +36,19 @@ describe("receive email", () => {
     expect(feed).toMatch("TEXT content");
   });
 
+  test("rich text content", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message",
+      text: "TEXT content\n\nhttps://www.kill-the-newsletter.com\n\nMore text"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("TEXT content");
+    expect(feed).toMatch(`href="https://www.kill-the-newsletter.com"`);
+  });
+
   test("missing content", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({

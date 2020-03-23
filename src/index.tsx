@@ -72,9 +72,8 @@ export const emailServer = new SMTPServer({
       const { entry } = Entry({
         title: email.subject ?? "",
         author: email.from?.text ?? "",
-        ...(typeof email.html === "string"
-          ? { content: email.html }
-          : { html: false, content: email.text ?? "" })
+        content:
+          typeof email.html === "string" ? email.html : email.textAsHtml ?? ""
       });
       for (const { address } of session.envelope.rcptTo) {
         const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
@@ -246,13 +245,11 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
 function Entry({
   title,
   author,
-  content,
-  html
+  content
 }: {
   title: string;
   author: string;
   content: string;
-  html?: boolean;
 }) {
   return {
     entry: {
@@ -267,10 +264,7 @@ function Entry({
           href: "https://www.kill-the-newsletter.com/entry"
         }
       },
-      content: {
-        ...(html === false ? {} : { $: { type: "html" } }),
-        _: content
-      }
+      content: { $: { type: "html" }, _: content }
     }
   };
 }
