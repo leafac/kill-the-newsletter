@@ -37,6 +37,31 @@ export const webServer = express()
       );
     })().catch(next);
   })
+  .get("/entry", (req, res) =>
+    res.send(
+      renderHTML(
+        <Layout>
+          <p>
+            Typically each entry on a feed includes a link
+            <br />
+            to an online version of the same content,
+            <br />
+            but the content from the entries on a{" "}
+            <strong>Kill the Newsletter!</strong>
+            <br /> feed come from emails—an online version may not even exist—
+            <br />
+            so you’re reading this instead.
+          </p>
+
+          <p>
+            <a href="https://www.kill-the-newsletter.com">
+              <strong>Create an Inbox</strong>
+            </a>
+          </p>
+        </Layout>
+      )
+    )
+  )
   .listen(8000);
 
 export const emailServer = new SMTPServer({
@@ -206,6 +231,7 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
         identifier
       )} → ${feedURL(identifier)}`,
       updated: now(),
+      author: { name: "Kill the Newsletter!" },
       ...Entry({
         title: `“${name}” Inbox Created`,
         author: "Kill the Newsletter!",
@@ -234,6 +260,13 @@ function Entry({
       title,
       author: { name: author },
       updated: now(),
+      link: {
+        $: {
+          rel: "alternate",
+          type: "text/html",
+          href: "https://www.kill-the-newsletter.com/entry"
+        }
+      },
       content: {
         ...(html === false ? {} : { $: { type: "html" } }),
         _: content
