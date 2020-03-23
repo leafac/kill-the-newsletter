@@ -45,12 +45,11 @@ export const emailServer = new SMTPServer({
     (async () => {
       const email = await mailparser.simpleParser(stream);
       const { entry } = Entry({
-        title: email.subject,
-        author: email.from.text,
-        // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43234 / typeof email.html !== "boolean" => email.html !== false
-        ...(typeof email.html === "boolean"
-          ? { html: false, content: email.text ?? "" }
-          : { content: email.html })
+        title: email.subject ?? "",
+        author: email.from?.text ?? "",
+        ...(typeof email.html === "string"
+          ? { content: email.html }
+          : { html: false, content: email.text ?? "" })
       });
       for (const { address } of session.envelope.rcptTo) {
         const match = address.match(/^(\w+)@kill-the-newsletter.com$/);

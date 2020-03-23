@@ -80,6 +80,17 @@ describe("receive email", () => {
       html: "<p>HTML content</p>"
     });
   });
+
+  test("missing from", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message",
+      html: "<p>HTML content</p>"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("HTML content");
+  });
 });
 
 afterAll(() => {
