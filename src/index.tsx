@@ -62,7 +62,7 @@ export const webServer = express()
       )
     )
   )
-  .listen(8000);
+  .listen(process.env.WEB_PORT ?? 8000);
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
@@ -97,7 +97,7 @@ export const emailServer = new SMTPServer({
       callback(error);
     });
   }
-}).listen(process.env.NODE_ENV === "production" ? 25 : 2525);
+}).listen(process.env.EMAIL_PORT ?? 2525);
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (

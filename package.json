@@ -43,7 +43,8 @@
       "name": "kill-the-newsletter",
       "script": "lib",
       "env": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "production",
+        "EMAIL_PORT": "25"
       }
     },
     {
