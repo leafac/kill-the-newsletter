@@ -1,12 +1,10 @@
-<div align="center">
-<h1><a href="https://www.kill-the-newsletter.com">Kill the Newsletter!</a></h1>
-<p><strong>Convert email newsletters into Atom feeds</strong></p>
-<p><img alt="Convert email newsletters into Atom feeds" src="static/logo.png" width="150" /></p>
-<p>
+<h1 align="center"><a href="https://www.kill-the-newsletter.com">Kill the Newsletter!</a></h1>
+<h3 align="center">Convert email newsletters into Atom feeds</h3>
+<p align="center"><img alt="Convert email newsletters into Atom feeds" src="static/logo.png" width="150" /></p>
+<p align="center">
 <a href="https://github.com/leafac/www.kill-the-newsletter.com"><img alt="Source" src="https://img.shields.io/badge/Source---" /></a>
 <a href="https://github.com/leafac/www.kill-the-newsletter.com/actions"><img alt="Continuous Integration" src="https://github.com/leafac/www.kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" /></a>
 </p>
-</div>
 
 # Running Locally
 
