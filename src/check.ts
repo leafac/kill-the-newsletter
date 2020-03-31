@@ -1,6 +1,7 @@
 import * as xmlbuilder2 from "xmlbuilder2";
 import fs from "fs";
 
+console.log("STARTED");
 for (const feed of fs
   .readdirSync("static/feeds")
   .filter(file => !file.startsWith("."))) {

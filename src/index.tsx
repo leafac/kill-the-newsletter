@@ -20,9 +20,11 @@ export const webServer = express()
     )
   )
   .post("/", (req, res, next) => {
+    let name: string;
+    let identifier: string;
     (async () => {
-      const name = req.body.name;
-      const identifier = createIdentifier();
+      name = req.body.name;
+      identifier = createIdentifier();
       await fs.writeFile(
         feedPath(identifier),
         renderXML(Feed({ name, identifier }))
@@ -35,7 +37,16 @@ export const webServer = express()
           </Layout>
         )
       );
-    })().catch(next);
+    })().catch(error => {
+      console.error(
+        `Error creating feed: ${JSON.stringify(
+          { name, identifier, error },
+          null,
+          2
+        )}`
+      );
+      next(error);
+    });
   })
   .get("/entry", (req, res) =>
     res.send(
@@ -67,8 +78,9 @@ export const webServer = express()
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
   onData(stream, session, callback) {
+    let email: mailparser.ParsedMail;
     (async () => {
-      const email = await mailparser.simpleParser(stream);
+      email = await mailparser.simpleParser(stream);
       const { entry } = Entry({
         title: email.subject ?? "",
         author: email.from?.text ?? "",
@@ -93,7 +105,13 @@ export const emailServer = new SMTPServer({
       }
       callback();
     })().catch(error => {
-      console.error(error);
+      console.error(
+        `Error receiving email: ${JSON.stringify(
+          { session, email, error },
+          null,
+          2
+        )}`
+      );
       stream.resume();
       callback(new Error("Failed to receive message. Please try again."));
     });
