@@ -40,12 +40,9 @@ export const webServer = express()
       );
     })().catch(error => {
       console.error(
-        `Error creating feed: ${JSON.stringify(
-          { name, identifier, error },
-          null,
-          2
-        )}`
+        `Error creating feed: ${JSON.stringify({ name, identifier }, null, 2)}`
       );
+      console.error(error);
       next(error);
     });
   })
@@ -107,12 +104,9 @@ export const emailServer = new SMTPServer({
       callback();
     })().catch(error => {
       console.error(
-        `Error receiving email: ${JSON.stringify(
-          { session, email, error },
-          null,
-          2
-        )}`
+        `Error receiving email: ${JSON.stringify({ session, email }, null, 2)}`
       );
+      console.error(error);
       stream.resume();
       callback(new Error("Failed to receive message. Please try again."));
     });
