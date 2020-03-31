@@ -7,7 +7,7 @@ for (const feed of fs
   try {
     const xml: any = xmlbuilder2.convert(
       fs.readFileSync(`static/feeds/${feed}`, "utf8"),
-      { format: "object", wellFormed: true }
+      { format: "object" }
     );
     if (xml?.feed?.updated === undefined)
       throw new Error("Can’t find xml.feed.updated");

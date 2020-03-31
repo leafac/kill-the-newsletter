@@ -298,7 +298,6 @@ function renderHTML(component: React.ReactElement): string {
 function renderXML(xml: object): string {
   return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
     format: "xml",
-    wellFormed: true,
     noDoubleEncoding: true,
     prettyPrint: true
   });
@@ -307,7 +306,6 @@ function renderXML(xml: object): string {
 function parseXML(xml: string): any {
   return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
     format: "object",
-    wellFormed: true,
     noDoubleEncoding: true
   });
 }
