@@ -109,8 +109,7 @@ describe("receive email", () => {
 
 afterAll(() => {
   webServer.close();
-  // FIXME: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/43268
-  emailServer.close(() => {});
+  emailServer.close();
 });
 
 const webClient = axios.create({

@@ -4,7 +4,7 @@
     "test": "tsc && jest && prettier --check 'src/**'"
   },
   "dependencies": {
-    "caddy-npm": "^2.0.0-beta.18",
+    "caddy-npm": "^2.0.0-beta.20",
     "crypto-random-string": "^3.2.0",
     "express": "^4.17.1",
     "mailparser": "^2.7.7",
@@ -17,21 +17,21 @@
   "devDependencies": {
     "@types/express": "^4.17.3",
     "@types/jest": "^25.1.4",
-    "@types/mailparser": "^2.7.0",
-    "@types/node": "^13.9.1",
+    "@types/mailparser": "^2.7.2",
+    "@types/node": "^13.9.8",
     "@types/nodemailer": "^6.4.0",
     "@types/qs": "^6.9.1",
-    "@types/react": "^16.9.23",
+    "@types/react": "^16.9.29",
     "@types/react-dom": "^16.9.5",
-    "@types/smtp-server": "^3.5.3",
+    "@types/smtp-server": "^3.5.4",
     "@types/xml2js": "^0.4.5",
     "axios": "^0.19.2",
     "concurrently": "^5.1.0",
-    "jest": "^25.1.0",
-    "nodemailer": "^6.4.5",
+    "jest": "^25.2.4",
+    "nodemailer": "^6.4.6",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
-    "qs": "^6.9.1",
+    "qs": "^6.9.3",
     "typescript": "^3.8.3"
   },
   "jest": {
