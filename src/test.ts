@@ -11,6 +11,21 @@ test("create feed", async () => {
 });
 
 describe("receive email", () => {
+  test("‘updated’ field is updated", async () => {
+    const identifier = await createFeed();
+    const before = await getFeed(identifier);
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message",
+      html: "<p>HTML content</p>"
+    });
+    const after = await getFeed(identifier);
+    expect(after.match(/<updated>(.*)<\/updated>/)![1]).not.toMatch(
+      before.match(/<updated>(.*)<\/updated>/)![1]
+    );
+  });
+
   test("HTML content", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
@@ -48,6 +63,32 @@ describe("receive email", () => {
     const feed = await getFeed(identifier);
     expect(feed).toMatch("TEXT content");
     expect(feed).toMatch(`href="https://www.kill-the-newsletter.com"`);
+  });
+
+  test("invalid XML character in HTML", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message",
+      html: "<p>Invalid XML character (backspace): ‘\b’</p>"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("Invalid XML character (backspace): ‘’");
+  });
+
+  test("invalid XML character in text", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@kill-the-newsletter.com`,
+      subject: "New Message",
+      text: "Invalid XML character (backspace): ‘\b’"
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch(
+      "Invalid XML character (backspace): &lsquo;&#x8;&rsquo;"
+    );
   });
 
   test("missing content", async () => {

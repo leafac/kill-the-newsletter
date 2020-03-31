@@ -3,7 +3,7 @@ import { SMTPServer } from "smtp-server";
 import mailparser from "mailparser";
 import React from "react";
 import ReactDOMServer from "react-dom/server";
-import xml2js from "xml2js";
+import * as xmlbuilder2 from "xmlbuilder2";
 import { promises as fs } from "fs";
 import cryptoRandomString from "crypto-random-string";
 
@@ -82,9 +82,10 @@ export const emailServer = new SMTPServer({
         const path = feedPath(identifier);
         const xmlText = await fs.readFile(path, "utf8").catch(() => null);
         if (xmlText === null) continue;
-        const xml = await new xml2js.Parser().parseStringPromise(xmlText);
+        const xml = parseXML(xmlText);
         xml.feed.updated = now();
         if (xml.feed.entry === undefined) xml.feed.entry = [];
+        if (!Array.isArray(xml.feed.entry)) xml.feed.entry = [xml.feed.entry];
         xml.feed.entry.unshift(entry);
         while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
           xml.feed.entry.pop();
@@ -94,7 +95,7 @@ export const emailServer = new SMTPServer({
     })().catch(error => {
       console.error(error);
       stream.resume();
-      callback(error);
+      callback(new Error("Failed to receive message. Please try again."));
     });
   }
 }).listen(process.env.EMAIL_PORT ?? 2525);
@@ -207,21 +208,17 @@ function Created({ identifier }: { identifier: string }) {
 function Feed({ name, identifier }: { name: string; identifier: string }) {
   return {
     feed: {
-      $: { xmlns: "http://www.w3.org/2005/Atom" },
+      "@xmlns": "http://www.w3.org/2005/Atom",
       link: [
         {
-          $: {
-            rel: "self",
-            type: "application/atom+xml",
-            href: feedURL(identifier)
-          }
+          "@rel": "self",
+          "@type": "application/atom+xml",
+          "@href": feedURL(identifier)
         },
         {
-          $: {
-            rel: "alternate",
-            type: "text/html",
-            href: "https://www.kill-the-newsletter.com/"
-          }
+          "@rel": "alternate",
+          "@type": "text/html",
+          "@href": "https://www.kill-the-newsletter.com/"
         }
       ],
       id: urn(identifier),
@@ -258,13 +255,11 @@ function Entry({
       author: { name: author },
       updated: now(),
       link: {
-        $: {
-          rel: "alternate",
-          type: "text/html",
-          href: "https://www.kill-the-newsletter.com/entry"
-        }
+        "@rel": "alternate",
+        "@type": "text/html",
+        "@href": "https://www.kill-the-newsletter.com/entry"
       },
-      content: { $: { type: "html" }, _: content }
+      content: { "@type": "html", "#": content }
     }
   };
 }
@@ -301,5 +296,18 @@ function renderHTML(component: React.ReactElement): string {
 }
 
 function renderXML(xml: object): string {
-  return new xml2js.Builder().buildObject(xml);
+  return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
+    format: "xml",
+    wellFormed: true,
+    noDoubleEncoding: true,
+    prettyPrint: true
+  });
+}
+
+function parseXML(xml: string): any {
+  return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
+    format: "object",
+    wellFormed: true,
+    noDoubleEncoding: true
+  });
 }
