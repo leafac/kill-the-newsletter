@@ -12,6 +12,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "smtp-server": "^3.6.0",
+    "write-file-atomic": "^3.0.3",
     "xmlbuilder2": "^2.1.0"
   },
   "devDependencies": {
@@ -24,6 +25,7 @@
     "@types/react": "^16.9.29",
     "@types/react-dom": "^16.9.5",
     "@types/smtp-server": "^3.5.4",
+    "@types/write-file-atomic": "^3.0.0",
     "axios": "^0.19.2",
     "concurrently": "^5.1.0",
     "jest": "^25.2.4",

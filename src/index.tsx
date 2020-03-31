@@ -5,6 +5,7 @@ import React from "react";
 import ReactDOMServer from "react-dom/server";
 import * as xmlbuilder2 from "xmlbuilder2";
 import { promises as fs } from "fs";
+import writeFileAtomic from "write-file-atomic";
 import cryptoRandomString from "crypto-random-string";
 
 export const webServer = express()
@@ -101,7 +102,7 @@ export const emailServer = new SMTPServer({
         xml.feed.entry.unshift(entry);
         while (xml.feed.entry.length > 0 && renderXML(xml).length > 500_000)
           xml.feed.entry.pop();
-        await fs.writeFile(path, renderXML(xml));
+        await writeFileAtomic(path, renderXML(xml));
       }
       callback();
     })().catch(error => {
