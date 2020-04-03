@@ -18,7 +18,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      html: "<p>HTML content</p>"
+      html: "<p>HTML content</p>",
     });
     const after = await getFeed(identifier);
     expect(after.match(/<updated>(.*)<\/updated>/)![1]).not.toMatch(
@@ -32,7 +32,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      html: "<p>HTML content</p>"
+      html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("publisher@example.com");
@@ -46,7 +46,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      text: "TEXT content"
+      text: "TEXT content",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("TEXT content");
@@ -58,7 +58,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      text: "TEXT content\n\nhttps://www.kill-the-newsletter.com\n\nMore text"
+      text: "TEXT content\n\nhttps://www.kill-the-newsletter.com\n\nMore text",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("TEXT content");
@@ -71,7 +71,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      html: "<p>Invalid XML character (backspace): ‘\b’</p>"
+      html: "<p>Invalid XML character (backspace): ‘\b’</p>",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("Invalid XML character (backspace): ‘’");
@@ -83,7 +83,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      text: "Invalid XML character (backspace): ‘\b’"
+      text: "Invalid XML character (backspace): ‘\b’",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch(
@@ -96,7 +96,7 @@ describe("receive email", () => {
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
-      subject: "New Message"
+      subject: "New Message",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("New Message");
@@ -107,7 +107,7 @@ describe("receive email", () => {
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `${identifier}@kill-the-newsletter.com`,
-      html: "<p>HTML content</p>"
+      html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("HTML content");
@@ -120,7 +120,7 @@ describe("receive email", () => {
         from: "publisher@example.com",
         to: `${identifier}@kill-the-newsletter.com`,
         subject: "New Message",
-        text: `REPETITION ${repetition} `.repeat(10_000)
+        text: `REPETITION ${repetition} `.repeat(10_000),
       });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("REPETITION 3");
@@ -132,7 +132,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: "nonexistent@kill-the-newsletter.com",
       subject: "New Message",
-      html: "<p>HTML content</p>"
+      html: "<p>HTML content</p>",
     });
   });
 
@@ -141,7 +141,7 @@ describe("receive email", () => {
     await emailClient.sendMail({
       to: `${identifier}@kill-the-newsletter.com`,
       subject: "New Message",
-      html: "<p>HTML content</p>"
+      html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("HTML content");
@@ -154,7 +154,7 @@ afterAll(() => {
 });
 
 const webClient = axios.create({
-  baseURL: `http://localhost:${(webServer.address() as AddressInfo).port}`
+  baseURL: `http://localhost:${(webServer.address() as AddressInfo).port}`,
 });
 const emailClient = nodemailer.createTransport(
   `smtp://localhost:${(emailServer.address() as AddressInfo).port}`
@@ -165,7 +165,7 @@ async function createFeed(): Promise<string> {
     await webClient.post(
       "/",
       qs.stringify({
-        name: "My Feed"
+        name: "My Feed",
       })
     )
   ).data.match(/(\w{20}).xml/)![1];

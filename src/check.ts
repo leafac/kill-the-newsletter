@@ -4,7 +4,7 @@ import fs from "fs";
 console.log("STARTED");
 for (const feed of fs
   .readdirSync("static/feeds")
-  .filter(file => !file.startsWith("."))) {
+  .filter((file) => !file.startsWith("."))) {
   try {
     const xml: any = xmlbuilder2.convert(
       fs.readFileSync(`static/feeds/${feed}`, "utf8"),

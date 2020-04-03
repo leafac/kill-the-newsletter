@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "concurrently \"tsc --watch\" \"nodemon lib\"",
-    "test": "tsc && jest && prettier --check 'src/**'"
+    "test": "tsc && jest && prettier --check src"
   },
   "dependencies": {
     "caddy-npm": "^2.0.0-beta.20",
@@ -31,7 +31,7 @@
     "jest": "^25.2.4",
     "nodemailer": "^6.4.6",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.2",
     "qs": "^6.9.3",
     "typescript": "^3.8.3"
   },

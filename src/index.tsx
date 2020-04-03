@@ -38,7 +38,7 @@ export const webServer = express()
           </Layout>
         )
       );
-    })().catch(error => {
+    })().catch((error) => {
       console.error(
         `Error creating feed: ${JSON.stringify({ name, identifier }, null, 2)}`
       );
@@ -83,7 +83,7 @@ export const emailServer = new SMTPServer({
         title: email.subject ?? "",
         author: email.from?.text ?? "",
         content:
-          typeof email.html === "string" ? email.html : email.textAsHtml ?? ""
+          typeof email.html === "string" ? email.html : email.textAsHtml ?? "",
       });
       for (const { address } of session.envelope.rcptTo) {
         const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
@@ -102,7 +102,7 @@ export const emailServer = new SMTPServer({
         await writeFileAtomic(path, renderXML(xml));
       }
       callback();
-    })().catch(error => {
+    })().catch((error) => {
       console.error(
         `Error receiving email: ${JSON.stringify({ session, email }, null, 2)}`
       );
@@ -110,7 +110,7 @@ export const emailServer = new SMTPServer({
       stream.resume();
       callback(new Error("Failed to receive message. Please try again."));
     });
-  }
+  },
 }).listen(process.env.EMAIL_PORT ?? 2525);
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -226,13 +226,13 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
         {
           "@rel": "self",
           "@type": "application/atom+xml",
-          "@href": feedURL(identifier)
+          "@href": feedURL(identifier),
         },
         {
           "@rel": "alternate",
           "@type": "text/html",
-          "@href": "https://www.kill-the-newsletter.com/"
-        }
+          "@href": "https://www.kill-the-newsletter.com/",
+        },
       ],
       id: urn(identifier),
       title: name,
@@ -246,16 +246,16 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
         author: "Kill the Newsletter!",
         content: ReactDOMServer.renderToStaticMarkup(
           <Created identifier={identifier}></Created>
-        )
-      })
-    }
+        ),
+      }),
+    },
   };
 }
 
 function Entry({
   title,
   author,
-  content
+  content,
 }: {
   title: string;
   author: string;
@@ -270,17 +270,17 @@ function Entry({
       link: {
         "@rel": "alternate",
         "@type": "text/html",
-        "@href": "https://www.kill-the-newsletter.com/entry"
+        "@href": "https://www.kill-the-newsletter.com/entry",
       },
-      content: { "@type": "html", "#": content }
-    }
+      content: { "@type": "html", "#": content },
+    },
   };
 }
 
 function createIdentifier(): string {
   return cryptoRandomString({
     length: 20,
-    characters: "1234567890qwertyuiopasdfghjklzxcvbnm"
+    characters: "1234567890qwertyuiopasdfghjklzxcvbnm",
   });
 }
 
@@ -312,13 +312,13 @@ function renderXML(xml: object): string {
   return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
     format: "xml",
     noDoubleEncoding: true,
-    prettyPrint: true
+    prettyPrint: true,
   });
 }
 
 function parseXML(xml: string): any {
   return xmlbuilder2.convert({ invalidCharReplacement: "" }, xml, {
     format: "object",
-    noDoubleEncoding: true
+    noDoubleEncoding: true,
   });
 }
