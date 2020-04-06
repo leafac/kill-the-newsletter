@@ -11,8 +11,7 @@ import cryptoRandomString from "crypto-random-string";
 export const WEB_PORT = process.env.WEB_PORT ?? 8000;
 export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
 export const BASE_URL = process.env.BASE_URL ?? "http://localhost:8000";
-export const EMAIL_DOMAIN =
-  process.env.EMAIL_DOMAIN ?? "kill-the-newsletter.com";
+export const EMAIL_DOMAIN = process.env.EMAIL_DOMAIN ?? "localhost";
 export const ISSUE_REPORT =
   process.env.ISSUE_REPORT ?? "mailto:kill-the-newsletter@leafac.com";
 
