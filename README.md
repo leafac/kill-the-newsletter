@@ -81,7 +81,7 @@
     root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-feeds> /root/www.kill-the-newsletter.com/current/static/feeds/
     ```
 
-13. Push to your fork, which will trigger the Action that deploys the code and starts the server.
+13. Push to your fork, which will trigger the GitHub Action that deploys the code and starts the server.
 
 # Run Locally
 
