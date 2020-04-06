@@ -49,7 +49,7 @@
         "EMAIL_PORT": "25",
         "BASE_URL": "https://www.kill-the-newsletter.com",
         "EMAIL_DOMAIN": "kill-the-newsletter.com",
-        "ISSUE_REPORT_EMAIL": "kill-the-newsletter@leafac.com"
+        "ISSUE_REPORT": "mailto:kill-the-newsletter@leafac.com"
       }
     },
     {

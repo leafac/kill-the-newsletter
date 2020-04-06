@@ -13,8 +13,8 @@ export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
 export const BASE_URL = process.env.BASE_URL ?? "http://localhost:8000";
 export const EMAIL_DOMAIN =
   process.env.EMAIL_DOMAIN ?? "kill-the-newsletter.com";
-export const ISSUE_REPORT_EMAIL =
-  process.env.ISSUE_REPORT_EMAIL ?? "kill-the-newsletter@leafac.com";
+export const ISSUE_REPORT =
+  process.env.ISSUE_REPORT ?? "mailto:kill-the-newsletter@leafac.com";
 
 export const webServer = express()
   .use(express.static("static"))
@@ -169,7 +169,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             <a href="https://github.com/leafac/www.kill-the-newsletter.com">
               Source
             </a>{" "}
-            · <a href={`mailto:${ISSUE_REPORT_EMAIL}`}>Report an Issue</a>
+            · <a href={ISSUE_REPORT}>Report an Issue</a>
           </p>
         </footer>
       </body>
