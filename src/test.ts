@@ -1,8 +1,7 @@
-import { webServer, emailServer } from ".";
+import { webServer, emailServer, WEB_PORT, EMAIL_PORT } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
-import { AddressInfo } from "net";
 
 test("create feed", async () => {
   const identifier = await createFeed();
@@ -154,10 +153,10 @@ afterAll(() => {
 });
 
 const webClient = axios.create({
-  baseURL: `http://localhost:${(webServer.address() as AddressInfo).port}`,
+  baseURL: `http://localhost:${WEB_PORT}`,
 });
 const emailClient = nodemailer.createTransport(
-  `smtp://localhost:${(emailServer.address() as AddressInfo).port}`
+  `smtp://localhost:${EMAIL_PORT}`
 );
 
 async function createFeed(): Promise<string> {

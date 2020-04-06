@@ -8,6 +8,9 @@ import { promises as fs } from "fs";
 import writeFileAtomic from "write-file-atomic";
 import cryptoRandomString from "crypto-random-string";
 
+export const WEB_PORT = process.env.WEB_PORT ?? 8000;
+export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
+
 export const webServer = express()
   .use(express.static("static"))
   .use(express.urlencoded({ extended: true }))
@@ -71,7 +74,7 @@ export const webServer = express()
       )
     )
   )
-  .listen(process.env.WEB_PORT ?? 8000);
+  .listen(WEB_PORT);
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
@@ -111,7 +114,7 @@ export const emailServer = new SMTPServer({
       callback(new Error("Failed to receive message. Please try again."));
     });
   },
-}).listen(process.env.EMAIL_PORT ?? 2525);
+}).listen(EMAIL_PORT);
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
