@@ -10,6 +10,9 @@ import cryptoRandomString from "crypto-random-string";
 
 export const WEB_PORT = process.env.WEB_PORT ?? 8000;
 export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
+export const BASE_URL = process.env.BASE_URL ?? "http://localhost:8000";
+export const EMAIL_DOMAIN =
+  process.env.EMAIL_DOMAIN ?? "kill-the-newsletter.com";
 
 export const webServer = express()
   .use(express.static("static"))
@@ -49,7 +52,7 @@ export const webServer = express()
       next(error);
     });
   })
-  .get("/entry", (req, res) =>
+  .get("/alternate", (req, res) =>
     res.send(
       renderHTML(
         <Layout>
@@ -66,7 +69,7 @@ export const webServer = express()
           </p>
 
           <p>
-            <a href="https://www.kill-the-newsletter.com">
+            <a href={BASE_URL}>
               <strong>Create an Inbox</strong>
             </a>
           </p>
@@ -89,7 +92,7 @@ export const emailServer = new SMTPServer({
           typeof email.html === "string" ? email.html : email.textAsHtml ?? "",
       });
       for (const { address } of session.envelope.rcptTo) {
-        const match = address.match(/^(\w+)@kill-the-newsletter.com$/);
+        const match = address.match(new RegExp(`^(\\w+)@${EMAIL_DOMAIN}$`));
         if (match === null) continue;
         const identifier = match[1];
         const path = feedPath(identifier);
@@ -213,7 +216,7 @@ function Created({ identifier }: { identifier: string }) {
       </p>
       <p>Enjoy your readings!</p>
       <p>
-        <a href="https://www.kill-the-newsletter.com">
+        <a href={BASE_URL}>
           <strong>Create Another Inbox</strong>
         </a>
       </p>
@@ -234,7 +237,7 @@ function Feed({ name, identifier }: { name: string; identifier: string }) {
         {
           "@rel": "alternate",
           "@type": "text/html",
-          "@href": "https://www.kill-the-newsletter.com/",
+          "@href": `${BASE_URL}/alternate`,
         },
       ],
       id: urn(identifier),
@@ -273,7 +276,7 @@ function Entry({
       link: {
         "@rel": "alternate",
         "@type": "text/html",
-        "@href": "https://www.kill-the-newsletter.com/entry",
+        "@href": `${BASE_URL}/alternate`,
       },
       content: { "@type": "html", "#": content },
     },
@@ -296,11 +299,11 @@ function feedPath(identifier: string): string {
 }
 
 function feedURL(identifier: string): string {
-  return `https://www.kill-the-newsletter.com/feeds/${identifier}.xml`;
+  return `${BASE_URL}/feeds/${identifier}.xml`;
 }
 
 function feedEmail(identifier: string): string {
-  return `${identifier}@kill-the-newsletter.com`;
+  return `${identifier}@${EMAIL_DOMAIN}`;
 }
 
 function urn(identifier: string): string {

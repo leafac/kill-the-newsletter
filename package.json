@@ -46,7 +46,9 @@
       "env": {
         "NODE_ENV": "production",
         "WEB_PORT": "8000",
-        "EMAIL_PORT": "25"
+        "EMAIL_PORT": "25",
+        "BASE_URL": "https://www.kill-the-newsletter.com",
+        "EMAIL_DOMAIN": "kill-the-newsletter.com"
       }
     },
     {

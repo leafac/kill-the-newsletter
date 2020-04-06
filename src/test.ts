@@ -1,4 +1,4 @@
-import { webServer, emailServer, WEB_PORT, EMAIL_PORT } from ".";
+import { webServer, emailServer, WEB_PORT, EMAIL_PORT, EMAIL_DOMAIN } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
@@ -15,7 +15,7 @@ describe("receive email", () => {
     const before = await getFeed(identifier);
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       html: "<p>HTML content</p>",
     });
@@ -29,7 +29,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       html: "<p>HTML content</p>",
     });
@@ -43,7 +43,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       text: "TEXT content",
     });
@@ -55,20 +55,20 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      text: "TEXT content\n\nhttps://www.kill-the-newsletter.com\n\nMore text",
+      text: "TEXT content\n\nhttps://www.leafac.com\n\nMore text",
     });
     const feed = await getFeed(identifier);
     expect(feed).toMatch("TEXT content");
-    expect(feed).toMatch(`href="https://www.kill-the-newsletter.com"`);
+    expect(feed).toMatch(`href="https://www.leafac.com"`);
   });
 
   test("invalid XML character in HTML", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       html: "<p>Invalid XML character (backspace): ‘\b’</p>",
     });
@@ -80,7 +80,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       text: "Invalid XML character (backspace): ‘\b’",
     });
@@ -94,7 +94,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
     });
     const feed = await getFeed(identifier);
@@ -105,7 +105,7 @@ describe("receive email", () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
@@ -117,7 +117,7 @@ describe("receive email", () => {
     for (const repetition of [...new Array(4).keys()])
       await emailClient.sendMail({
         from: "publisher@example.com",
-        to: `${identifier}@kill-the-newsletter.com`,
+        to: `${identifier}@${EMAIL_DOMAIN}`,
         subject: "New Message",
         text: `REPETITION ${repetition} `.repeat(10_000),
       });
@@ -129,7 +129,7 @@ describe("receive email", () => {
   test("nonexistent address", async () => {
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: "nonexistent@kill-the-newsletter.com",
+      to: `nonexistent@${EMAIL_DOMAIN}`,
       subject: "New Message",
       html: "<p>HTML content</p>",
     });
@@ -138,7 +138,7 @@ describe("receive email", () => {
   test("missing from", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
-      to: `${identifier}@kill-the-newsletter.com`,
+      to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
       html: "<p>HTML content</p>",
     });
