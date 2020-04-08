@@ -70,10 +70,10 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      html: "<p>Invalid XML character (backspace): ‘\b’</p>",
+      html: "<p>Invalid XML character (backspace): |\b|</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("Invalid XML character (backspace): ‘’");
+    expect(feed).toMatch("Invalid XML character (backspace): ||");
   });
 
   test("invalid XML character in text", async () => {
@@ -82,12 +82,10 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      text: "Invalid XML character (backspace): ‘\b’",
+      text: "Invalid XML character (backspace): |\b|",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch(
-      "Invalid XML character (backspace): &lsquo;&#x8;&rsquo;"
-    );
+    expect(feed).toMatch("Invalid XML character (backspace): |&amp;#x8;|");
   });
 
   test("missing content", async () => {
