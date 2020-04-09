@@ -144,6 +144,16 @@ function Layout({ children }: { children: React.ReactNode }) {
           sizes="16x16"
         />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="/fonts/typeface-pt-serif/index.css"
+        />
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="/fonts/typeface-pt-mono/index.css"
+        />
         <link rel="stylesheet" type="text/css" href="/styles.css" />
         <title>Kill the Newsletter!</title>
       </head>

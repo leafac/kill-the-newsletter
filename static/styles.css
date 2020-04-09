@@ -1,5 +1,5 @@
 body {
-  font-family: Charter, Georgia, serif;
+  font-family: "PT Serif", Charter, Georgia, serif;
   line-height: 1.5;
   max-width: 600px;
   padding: 0 2em;
@@ -11,8 +11,7 @@ a {
 }
 
 code {
-  font-family: Menlo, Consolas, monospace;
-  font-size: 0.875em;
+  font-family: "PT Mono", Menlo, Consolas, monospace;
 }
 
 h1,

@@ -1,0 +1,48 @@
+{
+  "_from": "typeface-pt-mono",
+  "_id": "typeface-pt-mono@0.0.72",
+  "_inBundle": false,
+  "_integrity": "sha512-7AMVSvB0oT2TDPyCJlVKSIxPjspI08Rlhg/SEUwQORSyalZgtSt2pDJEvVZuJbBIak70oB2ts6vL4iunYPUGKA==",
+  "_location": "/typeface-pt-mono",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "typeface-pt-mono",
+    "name": "typeface-pt-mono",
+    "escapedName": "typeface-pt-mono",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/typeface-pt-mono/-/typeface-pt-mono-0.0.72.tgz",
+  "_shasum": "1ce4a636d335c77bb01712ba136a99f764647a04",
+  "_spec": "typeface-pt-mono",
+  "_where": "/Users/leafac/Projects/www.leafac.com",
+  "author": {
+    "name": "Kyle Mathews",
+    "email": "mathews.kyle@gmail.com"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "PT Mono typeface",
+  "keywords": [
+    "typeface",
+    "font",
+    "font family",
+    "google fonts",
+    "pt-mono"
+  ],
+  "license": "MIT",
+  "main": "index.css",
+  "name": "typeface-pt-mono",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KyleAMathews/typefaces/tree/master/packages/pt-mono"
+  },
+  "version": "0.0.72"
+}

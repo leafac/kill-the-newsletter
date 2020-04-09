@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "concurrently \"tsc --watch\" \"nodemon lib\"",
+    "start": "tsc && concurrently \"tsc --watch\" \"nodemon lib\"",
     "test": "tsc && jest && prettier --check src"
   },
   "dependencies": {

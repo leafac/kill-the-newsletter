@@ -1,0 +1,52 @@
+/* pt-serif-400normal - latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src:
+    local('PT Serif Regular '),
+    local('PT Serif-Regular'),
+    url('./files/pt-serif-latin-400.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./files/pt-serif-latin-400.woff') format('woff'); /* Modern Browsers */
+}
+
+/* pt-serif-400italic - latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src:
+    local('PT Serif Regular italic'),
+    local('PT Serif-Regularitalic'),
+    url('./files/pt-serif-latin-400italic.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./files/pt-serif-latin-400italic.woff') format('woff'); /* Modern Browsers */
+}
+
+/* pt-serif-700normal - latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src:
+    local('PT Serif Bold '),
+    local('PT Serif-Bold'),
+    url('./files/pt-serif-latin-700.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./files/pt-serif-latin-700.woff') format('woff'); /* Modern Browsers */
+}
+
+/* pt-serif-700italic - latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src:
+    local('PT Serif Bold italic'),
+    local('PT Serif-Bolditalic'),
+    url('./files/pt-serif-latin-700italic.woff2') format('woff2'), /* Super Modern Browsers */
+    url('./files/pt-serif-latin-700italic.woff') format('woff'); /* Modern Browsers */
+}
+
