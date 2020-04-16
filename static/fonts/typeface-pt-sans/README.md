@@ -1,11 +1,11 @@
 
-# typeface-pt-serif
+# typeface-pt-sans
 
-The CSS and web font files to easily self-host “PT Serif”.
+The CSS and web font files to easily self-host “PT Sans”.
 
 ## Install
 
-`npm install --save typeface-pt-serif`
+`npm install --save typeface-pt-sans`
 
 ## Use
 
@@ -20,8 +20,8 @@ and [Create React App](https://github.com/facebookincubator/create-react-app).
 To use, simply require the package in your project’s entry file e.g.
 
 ```javascript
-// Load PT Serif typeface
-require('typeface-pt-serif')
+// Load PT Sans typeface
+require('typeface-pt-sans')
 ```
 
 ## About the Typefaces project.

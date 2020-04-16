@@ -40,7 +40,9 @@ export const webServer = express()
       res.send(
         renderHTML(
           <Layout>
-            <h1>“{name}” Inbox Created</h1>
+            <p>
+              <strong>“{name}” Inbox Created</strong>
+            </p>
             <Created identifier={identifier}></Created>
           </Layout>
         )
@@ -147,7 +149,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <link
           rel="stylesheet"
           type="text/css"
-          href="/fonts/typeface-pt-serif/index.css"
+          href="/fonts/typeface-pt-sans/index.css"
         />
         <link
           rel="stylesheet"
