@@ -159,7 +159,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <link rel="stylesheet" type="text/css" href="/styles.css" />
         <title>Kill the Newsletter!</title>
       </head>
-      <body style={{ textAlign: "center" }}>
+      <body>
         <header>
           <h1>
             <a href="/">Kill the Newsletter!</a>
