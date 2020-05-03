@@ -1,4 +1,4 @@
-node_modules
-lib
-static/feeds/*
-!static/feeds/.gitkeep
+/node_modules
+/lib
+/static/feeds/*
+/!static/feeds/.gitkeep
