@@ -70,10 +70,10 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      html: "<p>Invalid XML character (backspace): |\b|</p>",
+      html: "<p>Invalid XML character (backspace): |\b|💩</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("Invalid XML character (backspace): ||");
+    expect(feed).toMatch("Invalid XML character (backspace): ||💩");
   });
 
   test("invalid XML character in text", async () => {
@@ -82,10 +82,12 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      text: "Invalid XML character (backspace): |\b|",
+      text: "Invalid XML character (backspace): |\b|💩",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("Invalid XML character (backspace): |&amp;#x8;|");
+    expect(feed).toMatch(
+      "Invalid XML character (backspace): |&amp;#x8;|&amp;#x1F4A9;"
+    );
   });
 
   test("missing content", async () => {
@@ -122,6 +124,26 @@ describe("receive email", () => {
     const feed = await getFeed(identifier);
     expect(feed).toMatch("REPETITION 3");
     expect(feed).not.toMatch("REPETITION 0");
+  });
+
+  test("too big entry", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@${EMAIL_DOMAIN}`,
+      subject: "New Message",
+      text: `TOO BIG`.repeat(100_000),
+    });
+    expect(await getFeed(identifier)).not.toMatch("<entry>");
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@${EMAIL_DOMAIN}`,
+      subject: "New Message",
+      text: `NORMAL SIZE`,
+    });
+    const feed = await getFeed(identifier);
+    expect(feed).toMatch("<entry>");
+    expect(feed).toMatch("NORMAL SIZE");
   });
 
   test("nonexistent address", async () => {

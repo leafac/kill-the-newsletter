@@ -1,29 +1,28 @@
 {
   "scripts": {
-    "start": "tsc && concurrently \"tsc --watch\" \"nodemon lib\"",
+    "start": "tsc && open http://localhost:8000 && concurrently \"tsc --watch\" \"nodemon lib\"",
     "test": "tsc && jest && prettier --check src"
   },
   "dependencies": {
     "caddy-npm": "^2.0.0-beta.20",
     "crypto-random-string": "^3.2.0",
+    "entities": "^2.0.0",
     "express": "^4.17.1",
+    "jsdom": "^16.2.2",
     "mailparser": "^2.7.7",
     "pm2": "^4.2.3",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "sanitize-xml-string": "^1.1.0",
     "smtp-server": "^3.6.0",
-    "write-file-atomic": "^3.0.3",
-    "xmlbuilder2": "^2.1.2"
+    "write-file-atomic": "^3.0.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.3",
     "@types/jest": "^25.1.4",
+    "@types/jsdom": "^16.2.1",
     "@types/mailparser": "^2.7.2",
     "@types/node": "^13.9.8",
     "@types/nodemailer": "^6.4.0",
     "@types/qs": "^6.9.1",
-    "@types/react": "^16.9.29",
-    "@types/react-dom": "^16.9.5",
     "@types/smtp-server": "^3.5.4",
     "@types/write-file-atomic": "^3.0.0",
     "axios": "^0.19.2",
