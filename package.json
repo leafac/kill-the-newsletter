@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "tsc && open http://localhost:8000 && concurrently \"tsc --watch\" \"nodemon lib\"",
-    "test": "tsc && jest && prettier --check src"
+    "start": "open-cli http://localhost:8000 && nodemon --ext ts --exec 'ts-node .'",
+    "test": "prettier --check '**/*.{ts,css}' && jest"
   },
   "dependencies": {
     "caddy-npm": "^2.0.0-beta.20",
@@ -13,6 +13,7 @@
     "pm2": "^4.2.3",
     "sanitize-xml-string": "^1.1.0",
     "smtp-server": "^3.6.0",
+    "ts-node": "^8.10.1",
     "write-file-atomic": "^3.0.3"
   },
   "devDependencies": {
@@ -26,22 +27,23 @@
     "@types/smtp-server": "^3.5.4",
     "@types/write-file-atomic": "^3.0.0",
     "axios": "^0.19.2",
-    "concurrently": "^5.1.0",
     "jest": "^25.2.4",
     "nodemailer": "^6.4.6",
     "nodemon": "^2.0.2",
+    "open-cli": "^6.0.1",
     "prettier": "^2.0.2",
     "qs": "^6.9.3",
+    "ts-jest": "^25.5.0",
     "typescript": "^3.8.3"
   },
   "jest": {
-    "rootDir": "lib",
+    "preset": "ts-jest",
     "testEnvironment": "node"
   },
   "apps": [
     {
       "name": "kill-the-newsletter",
-      "script": "lib",
+      "script": "ts-node .",
       "env": {
         "NODE_ENV": "production",
         "WEB_PORT": "8000",
@@ -65,7 +67,7 @@
       "path": "/root/www.kill-the-newsletter.com",
       "pre-setup": "(curl -sL https://deb.nodesource.com/setup_14.x | bash -) && apt install -y nodejs build-essential && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "post-setup": "env NODE_ENV=production npm ci && npx pm2 startup",
-      "pre-deploy-local": "(ssh -o StrictHostKeyChecking=no root@kill-the-newsletter.com || true) && rsync -av --delete lib/ root@kill-the-newsletter.com:www.kill-the-newsletter.com/current/lib/",
+      "pre-deploy-local": "(ssh -o StrictHostKeyChecking=no root@kill-the-newsletter.com || true)",
       "post-deploy": "env NODE_ENV=production npm ci && npx pm2 startOrRestart package.json && npx pm2 save",
       "ssh_options": [
         "ForwardAgent=yes",
