@@ -5,7 +5,6 @@ import qs from "qs";
 
 test("create feed", async () => {
   const identifier = await createFeed();
-
   expect(await getFeed(identifier)).toMatch("My Feed");
 });
 
