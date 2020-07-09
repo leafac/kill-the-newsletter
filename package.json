@@ -4,6 +4,12 @@
     "test": "prettier --check '**/*.{ts,css}' && jest"
   },
   "dependencies": {
+    "@types/express": "^4.17.3",
+    "@types/jsdom": "^16.2.1",
+    "@types/mailparser": "^2.7.2",
+    "@types/node": "^13.9.8",
+    "@types/smtp-server": "^3.5.4",
+    "@types/write-file-atomic": "^3.0.0",
     "caddy-npm": "^2.0.0-beta.20",
     "crypto-random-string": "^3.2.0",
     "entities": "^2.0.0",
@@ -14,18 +20,13 @@
     "sanitize-xml-string": "^1.1.0",
     "smtp-server": "^3.6.0",
     "ts-node": "^8.10.1",
+    "typescript": "^3.8.3",
     "write-file-atomic": "^3.0.3"
   },
   "devDependencies": {
-    "@types/express": "^4.17.3",
     "@types/jest": "^25.1.4",
-    "@types/jsdom": "^16.2.1",
-    "@types/mailparser": "^2.7.2",
-    "@types/node": "^13.9.8",
     "@types/nodemailer": "^6.4.0",
     "@types/qs": "^6.9.1",
-    "@types/smtp-server": "^3.5.4",
-    "@types/write-file-atomic": "^3.0.0",
     "axios": "^0.19.2",
     "jest": "^25.2.4",
     "nodemailer": "^6.4.6",
@@ -33,8 +34,7 @@
     "open-cli": "^6.0.1",
     "prettier": "^2.0.2",
     "qs": "^6.9.3",
-    "ts-jest": "^25.5.0",
-    "typescript": "^3.8.3"
+    "ts-jest": "^25.5.0"
   },
   "jest": {
     "preset": "ts-jest",
