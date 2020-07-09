@@ -64,7 +64,7 @@
    - `deploy.production.host`.
    - `deploy.production.repo`.
 
-10. Configure [Caddy](https://caddyserver.com), the reverse proxy, on `Caddyfile`.
+10. Configure [Caddy](https://caddyserver.com), the reverse proxy, on [`Caddyfile`](Caddyfile).
 
 11. Setup the server:
 
