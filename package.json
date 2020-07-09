@@ -67,7 +67,6 @@
       "path": "/root/www.kill-the-newsletter.com",
       "pre-setup": "(curl -sL https://deb.nodesource.com/setup_14.x | bash -) && apt install -y nodejs build-essential && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
       "post-setup": "env NODE_ENV=production npm ci && npx pm2 startup",
-      "pre-deploy-local": "(ssh -o StrictHostKeyChecking=no root@kill-the-newsletter.com || true)",
       "post-deploy": "env NODE_ENV=production npm ci && npx pm2 startOrRestart package.json && npx pm2 save",
       "ssh_options": [
         "ForwardAgent=yes",
