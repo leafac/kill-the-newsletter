@@ -34,6 +34,7 @@ export const webServer = express()
     try {
       const { name } = req.body;
       const identifier = createIdentifier();
+      await writeFileAtomic(alternatePath(identifier), created(identifier));
       await writeFileAtomic(feedPath(identifier), feed(X(name), identifier));
       res.send(
         layout(`
@@ -61,10 +62,15 @@ export const emailServer = new SMTPServer({
   async onData(stream, session, callback) {
     try {
       const email = await mailparser.simpleParser(stream);
+      const identifier = createIdentifier();
+      const content =
+        typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
+      await writeFileAtomic(alternatePath(identifier), content);
       const newEntry = entry(
         X(email.subject ?? ""),
         X(email.from?.text ?? ""),
-        X(typeof email.html === "string" ? email.html : email.textAsHtml ?? "")
+        X(content),
+        identifier
       );
       for (const { address } of session.envelope.rcptTo) {
         const match = address.match(
@@ -154,7 +160,9 @@ function feed(name: string, identifier: string): string {
       <link rel="self" type="application/atom+xml" href="${feedURL(
         identifier
       )}"/>
-      <link rel="alternate" type="text/html" href="${BASE_URL}/alternate"/>
+      <link rel="alternate" type="text/html" href="${alternateURL(
+        identifier
+      )}"/>
       <id>${urn(identifier)}</id>
       <title>${name}</title>
       <subtitle>Kill the Newsletter! Inbox: ${feedEmail(
@@ -165,20 +173,28 @@ function feed(name: string, identifier: string): string {
       ${entry(
         `“${name}” Inbox Created`,
         "Kill the Newsletter!",
-        X(created(identifier))
+        X(created(identifier)),
+        identifier
       )}
     </feed>
   `;
 }
 
-function entry(title: string, author: string, content: string): string {
+function entry(
+  title: string,
+  author: string,
+  content: string,
+  identifier: string
+): string {
   return `
     <entry>
-      <id>${urn(createIdentifier())}</id>
+      <id>${urn(identifier)}</id>
       <title>${title}</title>
       <author><name>${author}</name></author>
       <updated>${now()}</updated>
-      <link rel="alternate" type="text/html" href="${BASE_URL}/alternate"/>
+      <link rel="alternate" type="text/html" href="${alternateURL(
+        identifier
+      )}"/>
       <content type="html">${content}</content>
     </entry>
   `.trim();
@@ -205,6 +221,14 @@ function feedURL(identifier: string): string {
 
 function feedEmail(identifier: string): string {
   return `${identifier}@${EMAIL_DOMAIN}`;
+}
+
+function alternatePath(identifier: string): string {
+  return `static/alternate/${identifier}.html`;
+}
+
+function alternateURL(identifier: string): string {
+  return `${BASE_URL}/alternate/${identifier}.html`;
 }
 
 function urn(identifier: string): string {

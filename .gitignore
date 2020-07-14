@@ -1,3 +1,5 @@
 /node_modules
 /static/feeds/*
 !/static/feeds/.gitkeep
+/static/alternate/*
+!/static/alternate/.gitkeep
