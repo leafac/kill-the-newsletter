@@ -2,6 +2,7 @@ import { webServer, emailServer, WEB_PORT, EMAIL_PORT, EMAIL_DOMAIN } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
+import { JSDOM } from "jsdom";
 
 test("create feed", async () => {
   const identifier = await createFeed();
@@ -166,6 +167,28 @@ describe("receive email", () => {
   });
 });
 
+describe("alternate", () => {
+  test("HTML content", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@${EMAIL_DOMAIN}`,
+      subject: "New Message",
+      html: "<p>HTML content</p>",
+    });
+    const feed = await getFeed(identifier);
+    const xml = new JSDOM(feed, { contentType: "text/xml" });
+    const document = xml.window.document;
+    const href = document
+      .querySelector("feed > entry link")!
+      .getAttribute("href") as string;
+    const alternate = await getAlternate(href);
+    expect(feed).toMatch("publisher@example.com");
+    expect(feed).toMatch("New Message");
+    expect(feed).toMatch("HTML content");
+  });
+});
+
 afterAll(() => {
   webServer.close();
   emailServer.close();
@@ -191,4 +214,8 @@ async function createFeed(): Promise<string> {
 
 async function getFeed(identifier: string): Promise<string> {
   return (await webClient.get(`/feeds/${identifier}.xml`)).data;
+}
+
+async function getAlternate(url: string): Promise<string> {
+  return (await webClient.get(url)).data;
 }
