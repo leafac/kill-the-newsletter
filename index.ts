@@ -96,8 +96,14 @@ export const emailServer = new SMTPServer({
         while (
           document.querySelector("feed > entry") !== null &&
           xml.serialize().length > 500_000
-        )
-          document.querySelector("feed > entry:last-of-type")!.remove();
+        ) {
+          const lastEntry = document.querySelector("feed > entry:last-of-type");
+          const identifier = removeUrn(
+            lastEntry!.querySelector("id")!.textContent as string
+          );
+          await fs.unlink(alternatePath(identifier));
+          lastEntry!.remove();
+        }
         await writeFileAtomic(
           path,
           `<?xml version="1.0" encoding="utf-8"?>${xml.serialize()}`
@@ -233,6 +239,10 @@ function alternateURL(identifier: string): string {
 
 function urn(identifier: string): string {
   return `urn:kill-the-newsletter:${identifier}`;
+}
+
+function removeUrn(identifier: string): string {
+  return identifier.replace(urn(""), "");
 }
 
 function X(string: string): string {
