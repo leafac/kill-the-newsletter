@@ -101,3 +101,12 @@ Install [Node.js](https://nodejs.org/) and run:
 ```console
 $ npm install-test
 ```
+
+# Docker Support
+
+Install [Docker](https://www.docker.com/get-started) and run:
+
+```console
+$ docker build -t kill-the-newsletter:latest .
+$ docker run kill-the-newsletter:latest
+```
