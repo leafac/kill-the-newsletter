@@ -13,6 +13,7 @@
     "caddy-npm": "^2.1.1",
     "crypto-random-string": "^3.2.0",
     "entities": "^2.0.0",
+    "escape-string-regexp": "^4.0.0",
     "express": "^4.17.1",
     "jsdom": "^16.2.2",
     "mailparser": "^2.7.7",

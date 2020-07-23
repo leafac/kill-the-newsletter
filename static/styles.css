@@ -2,8 +2,7 @@
 @import "node_modules/typeface-pt-mono/index.css";
 
 body {
-  font-family: "PT Sans", sans-serif;
-  line-height: 1.5;
+  font: 16px/1.5 "PT Sans", sans-serif;
   text-align: center;
   padding: 0 1em;
   margin: 2em 0;

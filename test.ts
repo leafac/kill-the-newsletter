@@ -1,4 +1,4 @@
-import { webServer, emailServer, WEB_PORT, EMAIL_PORT, EMAIL_DOMAIN } from ".";
+import { webServer, emailServer, BASE_URL, EMAIL_DOMAIN, EMAIL_PORT } from ".";
 import nodemailer from "nodemailer";
 import axios from "axios";
 import qs from "qs";
@@ -6,7 +6,18 @@ import { JSDOM } from "jsdom";
 
 test("create feed", async () => {
   const identifier = await createFeed();
-  expect(await getFeed(identifier)).toMatch("My Feed");
+  const feed = await getFeed(identifier);
+  const entry = feed.querySelector("feed > entry:first-of-type")!;
+  const alternate = await getAlternate(
+    entry.querySelector("link")!.getAttribute("href")!
+  );
+  expect(feed.querySelector("feed > title")!.textContent).toBe("My Feed");
+  expect(entry.querySelector("title")!.textContent).toBe(
+    "“My Feed” Inbox Created"
+  );
+  expect(alternate.querySelector("p")!.textContent).toMatch(
+    "Sign up for the newsletter with"
+  );
 });
 
 describe("receive email", () => {
@@ -20,8 +31,8 @@ describe("receive email", () => {
       html: "<p>HTML content</p>",
     });
     const after = await getFeed(identifier);
-    expect(after.match(/<updated>(.*)<\/updated>/)![1]).not.toMatch(
-      before.match(/<updated>(.*)<\/updated>/)![1]
+    expect(after.querySelector("feed > updated")!.textContent).not.toBe(
+      before.querySelector("feed > updated")!.textContent
     );
   });
 
@@ -34,9 +45,16 @@ describe("receive email", () => {
       html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("publisher@example.com");
-    expect(feed).toMatch("New Message");
-    expect(feed).toMatch("HTML content");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    const alternate = await getAlternate(
+      entry.querySelector("link")!.getAttribute("href")!
+    );
+    expect(entry.querySelector("author > name")!.textContent).toBe(
+      "publisher@example.com"
+    );
+    expect(entry.querySelector("title")!.textContent).toBe("New Message");
+    expect(entry.querySelector("content")!.textContent).toMatch("HTML content");
+    expect(alternate.querySelector("p")!.textContent).toMatch("HTML content");
   });
 
   test("text content", async () => {
@@ -48,7 +66,12 @@ describe("receive email", () => {
       text: "TEXT content",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("TEXT content");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    const alternate = await getAlternate(
+      entry.querySelector("link")!.getAttribute("href")!
+    );
+    expect(entry.querySelector("content")!.textContent).toMatch("TEXT content");
+    expect(alternate.querySelector("p")!.textContent).toMatch("TEXT content");
   });
 
   test("rich text content", async () => {
@@ -60,8 +83,13 @@ describe("receive email", () => {
       text: "TEXT content\n\nhttps://www.leafac.com\n\nMore text",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("TEXT content");
-    expect(feed).toMatch(`href="https://www.leafac.com"`);
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    const alternate = await getAlternate(
+      entry.querySelector("link")!.getAttribute("href")!
+    );
+    expect(alternate.querySelector("a")!.getAttribute("href")).toBe(
+      "https://www.leafac.com"
+    );
   });
 
   test("invalid XML character in HTML", async () => {
@@ -73,7 +101,11 @@ describe("receive email", () => {
       html: "<p>Invalid XML character (backspace): |\b|💩</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("Invalid XML character (backspace): ||💩");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    expect(entry.querySelector("content")!.textContent).toMatchInlineSnapshot(`
+      "<p>Invalid XML character (backspace): ||💩</p>
+      "
+    `);
   });
 
   test("invalid XML character in text", async () => {
@@ -85,68 +117,26 @@ describe("receive email", () => {
       text: "Invalid XML character (backspace): |\b|💩",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch(
-      "Invalid XML character (backspace): |&amp;#x8;|&amp;#x1F4A9;"
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    expect(entry.querySelector("content")!.textContent).toMatchInlineSnapshot(
+      `"<p>Invalid XML character (backspace): |&#x8;|&#x1F4A9;</p>"`
     );
   });
 
-  test("missing content", async () => {
+  test("missing ‘from’", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
-      from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-    });
-    const feed = await getFeed(identifier);
-    expect(feed).toMatch("New Message");
-  });
-
-  test("missing subject", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
       html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("HTML content");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    expect(entry.querySelector("author > name")!.textContent).toBe("");
+    expect(entry.querySelector("title")!.textContent).toBe("New Message");
   });
 
-  test("truncation", async () => {
-    const identifier = await createFeed();
-    for (const repetition of [...new Array(4).keys()])
-      await emailClient.sendMail({
-        from: "publisher@example.com",
-        to: `${identifier}@${EMAIL_DOMAIN}`,
-        subject: "New Message",
-        text: `REPETITION ${repetition} `.repeat(10_000),
-      });
-    const feed = await getFeed(identifier);
-    expect(feed).toMatch("REPETITION 3");
-    expect(feed).not.toMatch("REPETITION 0");
-  });
-
-  test("too big entry", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: `TOO BIG`.repeat(100_000),
-    });
-    expect(await getFeed(identifier)).not.toMatch("<entry>");
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: `NORMAL SIZE`,
-    });
-    const feed = await getFeed(identifier);
-    expect(feed).toMatch("<entry>");
-    expect(feed).toMatch("NORMAL SIZE");
-  });
-
-  test("nonexistent address", async () => {
+  test("nonexistent ‘to’", async () => {
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `nonexistent@${EMAIL_DOMAIN}`,
@@ -155,67 +145,114 @@ describe("receive email", () => {
     });
   });
 
-  test("missing from", async () => {
+  test("missing ‘subject’", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
+      from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
       html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
-    expect(feed).toMatch("HTML content");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    expect(entry.querySelector("title")!.textContent).toBe("");
+    expect(entry.querySelector("author > name")!.textContent).toBe(
+      "publisher@example.com"
+    );
   });
-});
 
-describe("alternate", () => {
-  test("HTML content", async () => {
+  test("missing ‘content’", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      html: "<p>HTML content</p>",
     });
     const feed = await getFeed(identifier);
-    const xml = new JSDOM(feed, { contentType: "text/xml" });
-    const document = xml.window.document;
-    const href = document
-      .querySelector("feed > entry link")!
-      .getAttribute("href") as string;
-    const alternate = await getAlternate(href);
-    expect(feed).toMatch("publisher@example.com");
-    expect(feed).toMatch("New Message");
-    expect(feed).toMatch("HTML content");
+    const entry = feed.querySelector("feed > entry:first-of-type")!;
+    expect(entry.querySelector("content")!.textContent!.trim()).toBe("");
+    expect(entry.querySelector("title")!.textContent).toBe("New Message");
+  });
+
+  test("truncation", async () => {
+    const identifier = await createFeed();
+    const alternatesURLs = new Array<string>();
+    for (const repetition of [...new Array(4).keys()]) {
+      await emailClient.sendMail({
+        from: "publisher@example.com",
+        to: `${identifier}@${EMAIL_DOMAIN}`,
+        subject: "New Message",
+        text: `REPETITION ${repetition} `.repeat(10_000),
+      });
+      const feed = await getFeed(identifier);
+      const entry = feed.querySelector("feed > entry:first-of-type")!;
+      alternatesURLs.push(entry.querySelector("link")!.getAttribute("href")!);
+    }
+    const feed = await getFeed(identifier);
+    expect(
+      feed.querySelector("entry:first-of-type > content")!.textContent
+    ).toMatch("REPETITION 3");
+    expect(
+      feed.querySelector("entry:last-of-type > content")!.textContent
+    ).toMatch("REPETITION 1");
+    expect((await getAlternate(alternatesURLs[3]!)).textContent).toMatch(
+      "REPETITION 3"
+    );
+    await expect(getAlternate(alternatesURLs[0]!)).rejects.toThrowError();
+  });
+
+  test("too big entry", async () => {
+    const identifier = await createFeed();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@${EMAIL_DOMAIN}`,
+      subject: "New Message",
+      text: "TOO BIG".repeat(100_000),
+    });
+    expect((await getFeed(identifier)).querySelector("entry")).toBeNull();
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${identifier}@${EMAIL_DOMAIN}`,
+      subject: "New Message",
+      text: `NORMAL SIZE`,
+    });
+    expect(
+      (await getFeed(identifier)).querySelector("entry > content")!.textContent
+    ).toMatchInlineSnapshot(`"<p>NORMAL SIZE</p>"`);
   });
 });
 
+const webClient = axios.create({
+  baseURL: BASE_URL,
+});
+const emailClient = nodemailer.createTransport(
+  `smtp://${EMAIL_DOMAIN}:${EMAIL_PORT}`
+);
 afterAll(() => {
   webServer.close();
   emailServer.close();
 });
 
-const webClient = axios.create({
-  baseURL: `http://localhost:${WEB_PORT}`,
-});
-const emailClient = nodemailer.createTransport(
-  `smtp://localhost:${EMAIL_PORT}`
-);
-
 async function createFeed(): Promise<string> {
-  return (
-    await webClient.post(
-      "/",
-      qs.stringify({
-        name: "My Feed",
-      })
-    )
-  ).data.match(/(\w{20}).xml/)![1];
+  return JSDOM.fragment(
+    (
+      await webClient.post(
+        "/",
+        qs.stringify({
+          name: "My Feed",
+        })
+      )
+    ).data
+  )
+    .querySelector("code")!
+    .textContent!.split("@")[0];
 }
 
-async function getFeed(identifier: string): Promise<string> {
-  return (await webClient.get(`/feeds/${identifier}.xml`)).data;
+async function getFeed(identifier: string): Promise<Document> {
+  return new JSDOM((await webClient.get(`/feeds/${identifier}.xml`)).data, {
+    contentType: "text/xml",
+  }).window.document;
 }
 
-async function getAlternate(url: string): Promise<string> {
-  return (await webClient.get(url)).data;
+async function getAlternate(url: string): Promise<DocumentFragment> {
+  return JSDOM.fragment((await webClient.get(url)).data);
 }
