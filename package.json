@@ -67,8 +67,8 @@
       "repo": "git@github.com:leafac/www.kill-the-newsletter.com.git",
       "path": "/root/www.kill-the-newsletter.com",
       "pre-setup": "(curl -sL https://deb.nodesource.com/setup_14.x | bash -) && apt install -y nodejs build-essential && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
-      "post-setup": "env NODE_ENV=production npm ci && npx pm2 startup",
-      "post-deploy": "env NODE_ENV=production npm ci && npx pm2 startOrRestart package.json && npx pm2 save",
+      "post-setup": "npm ci --production && npx pm2 startup",
+      "post-deploy": "npm ci --production && npx pm2 startOrRestart package.json && npx pm2 save",
       "ssh_options": [
         "ForwardAgent=yes",
         "StrictHostKeyChecking=no"
