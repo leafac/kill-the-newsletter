@@ -1,34 +1,21 @@
-# use latest stable node
-FROM node:lts-alpine
+FROM node:latest
 
-# set build arguments
-ARG VERSION=1.0.0
+WORKDIR /kill-the-newsletter
 
-# set environment variables for container
-ENV BASE_URL=https://www.kill-the-newsletter.com \
-    EMAIL_DOMAIN=kill-the-newsletter.com \
-    ISSUE_REPORT=mailto:kill-the-newsletter@leafac.com
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
 
-WORKDIR /src
+VOLUME /kill-the-newsletter/static/feeds/
+VOLUME /kill-the-newsletter/static/alternate/
 
-RUN apk --no-cache add git
+ENV WEB_PORT=8000
+ENV EMAIL_PORT=2525
+ENV BASE_URL=http://localhost:8000
+ENV EMAIL_DOMAIN=localhost
+ENV ISSUE_REPORT=mailto:kill-the-newsletter@leafac.com
 
-# download release and unpack archive
-RUN wget -q -O release.tar.gz https://github.com/leafac/www.kill-the-newsletter.com/archive/$VERSION.tar.gz \
-	&& tar -C . -xzf release.tar.gz \
-	&& rm release.tar.gz \
-	&& mv www.kill-the-newsletter.com-$VERSION/* . \
-	&& rm -rf www.kill-the-newsletter.com-$VERSION/
+EXPOSE 8000
+EXPOSE 2525
 
-# install dependencies
-RUN npm install \
-    && npm audit fix
-
-VOLUME /static/feeds/
-
-# expose http & smtp
-EXPOSE 8000 \
-       25
-
-# start application
-CMD [ "npm", "start" ]
+CMD npx ts-node .
