@@ -1,5 +1,5 @@
-@import "node_modules/typeface-pt-sans/index.css";
-@import "node_modules/typeface-pt-mono/index.css";
+@import "typeface-pt-sans/index.css";
+@import "typeface-pt-mono/index.css";
 
 body {
   font: 16px/1.5 "PT Sans", sans-serif;
