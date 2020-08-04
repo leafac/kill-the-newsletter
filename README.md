@@ -79,6 +79,7 @@
     $ ssh-add
     $ ssh -A root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>
     root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-feeds> /root/www.kill-the-newsletter.com/current/static/feeds/
+    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-alternate> /root/www.kill-the-newsletter.com/current/static/alternate/
     ```
 
 13. Push to your fork, which will trigger the GitHub Action that deploys the code and starts the server.
