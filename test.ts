@@ -80,7 +80,7 @@ describe("receive email", () => {
       from: "publisher@example.com",
       to: `${identifier}@${EMAIL_DOMAIN}`,
       subject: "New Message",
-      text: "TEXT content\n\nhttps://www.leafac.com\n\nMore text",
+      text: "TEXT content\n\nhttps://leafac.com\n\nMore text",
     });
     const feed = await getFeed(identifier);
     const entry = feed.querySelector("feed > entry:first-of-type")!;
@@ -88,7 +88,7 @@ describe("receive email", () => {
       entry.querySelector("link")!.getAttribute("href")!
     );
     expect(alternate.querySelector("a")!.getAttribute("href")).toBe(
-      "https://www.leafac.com"
+      "https://leafac.com"
     );
   });
 

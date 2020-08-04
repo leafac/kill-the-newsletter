@@ -1,16 +1,16 @@
-<h1 align="center"><a href="https://www.kill-the-newsletter.com">Kill the Newsletter!</a></h1>
+<h1 align="center"><a href="https://kill-the-newsletter.com">Kill the Newsletter!</a></h1>
 <h3 align="center">Convert email newsletters into Atom feeds</h3>
 <p align="center"><img alt="Convert email newsletters into Atom feeds" src="static/logo.svg"></p>
 <p align="center">
-<a href="https://github.com/leafac/www.kill-the-newsletter.com"><img alt="Source" src="https://img.shields.io/badge/Source---"></a>
-<a href="https://github.com/leafac/www.kill-the-newsletter.com/actions"><img alt="Continuous Integration" src="https://github.com/leafac/www.kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg"></a>
+<a href="https://github.com/leafac/kill-the-newsletter.com"><img alt="Source" src="https://img.shields.io/badge/Source---"></a>
+<a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img alt="Continuous Integration" src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg"></a>
 </p>
 
 # Deploy Your Own Instance (Self-Host)
 
 1. Create accounts on [GitHub](https://github.com), [Namecheap](https://www.namecheap.com), and [DigitalOcean](https://www.digitalocean.com).
 
-2. [Fork](https://github.com/leafac/www.kill-the-newsletter.com/fork) this repository.
+2. [Fork](https://github.com/leafac/kill-the-newsletter.com/fork) this repository.
 
 3. Create a deployment SSH key pair:
 
@@ -78,8 +78,8 @@
     ```console
     $ ssh-add
     $ ssh -A root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>
-    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-feeds> /root/www.kill-the-newsletter.com/current/static/feeds/
-    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-alternate> /root/www.kill-the-newsletter.com/current/static/alternate/
+    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-feeds> /root/kill-the-newsletter.com/current/static/feeds/
+    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-alternate> /root/kill-the-newsletter.com/current/static/alternate/
     ```
 
 13. Push to your fork, which will trigger the GitHub Action that deploys the code and starts the server.
