@@ -1,7 +1,10 @@
 {
   "scripts": {
-    "start": "open-cli http://localhost:8000 && nodemon --ext ts --exec 'ts-node .'",
-    "test": "prettier --check '**/*.{ts,css}' && jest"
+    "start": "ts-node .",
+    "develop": "open-cli http://localhost:8000 && nodemon --ext ts --exec 'ts-node .'",
+    "test": "prettier --check '**/*.{ts,css}' && jest",
+    "deploy": "pm2 deploy package.json production",
+    "deploy:setup": "pm2 deploy package.json production setup"
   },
   "dependencies": {
     "@types/express": "^4.17.3",
@@ -44,7 +47,7 @@
   "apps": [
     {
       "name": "kill-the-newsletter",
-      "script": "ts-node .",
+      "script": "npm start",
       "env": {
         "NODE_ENV": "production",
         "WEB_PORT": "8000",

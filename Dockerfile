@@ -18,4 +18,4 @@ ENV ISSUE_REPORT=mailto:kill-the-newsletter@leafac.com
 EXPOSE 8000
 EXPOSE 2525
 
-CMD npx ts-node .
+CMD npm start

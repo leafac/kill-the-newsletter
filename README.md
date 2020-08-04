@@ -70,7 +70,7 @@
 
     ```console
     $ ssh-add
-    $ npx pm2 deploy package.json production setup
+    $ npm run deploy:setup
     ```
 
 12. Migrate the existing feeds (if any):
