@@ -90,7 +90,7 @@ Install [Node.js](https://nodejs.org/) and run:
 
 ```console
 $ npm install
-$ npm start
+$ npm run develop
 ```
 
 The web server will be running at `http://localhost:8000` and the email server at `smtp://localhost:2525`.
