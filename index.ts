@@ -128,6 +128,7 @@ async function addEntryToFeed(
 function layout(content: string): string {
   return `<!DOCTYPE html>
     <html lang="en">
+    <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kill the Newsletter!</title>
@@ -137,6 +138,8 @@ function layout(content: string): string {
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" type="text/css" href="/styles.css">
+    </head>
+    <body>
     <header>
       <h1><a href="/">Kill the Newsletter!</a></h1>
       <p>Convert email newsletters into Atom feeds</p>
@@ -144,6 +147,8 @@ function layout(content: string): string {
     </header>
     <main>${content}</main>
     <footer><p>By <a href="https://leafac.com">Leandro Facchinetti</a> · <a href="https://github.com/leafac/kill-the-newsletter.com">Source</a> · <a href="${ISSUE_REPORT}">Report an Issue</a></p></footer>
+    </body>
+    </html>
   `;
 }
 
