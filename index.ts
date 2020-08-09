@@ -143,7 +143,7 @@ function layout(content: string): string {
     <header>
       <h1><a href="/">Kill the Newsletter!</a></h1>
       <p>Convert email newsletters into Atom feeds</p>
-      <p><img alt="Convert email newsletters into Atom feeds" src="/logo.svg"></p>
+      <p><img src="/logo.svg" alt="Convert email newsletters into Atom feeds"></p>
     </header>
     <main>${content}</main>
     <footer><p>By <a href="https://leafac.com">Leandro Facchinetti</a> · <a href="https://github.com/leafac/kill-the-newsletter.com">Source</a> · <a href="${ISSUE_REPORT}">Report an Issue</a></p></footer>

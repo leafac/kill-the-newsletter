@@ -1,9 +1,9 @@
 <h1 align="center"><a href="https://kill-the-newsletter.com">Kill the Newsletter!</a></h1>
 <h3 align="center">Convert email newsletters into Atom feeds</h3>
-<p align="center"><img alt="Convert email newsletters into Atom feeds" src="static/logo.svg"></p>
+<p align="center"><img src="static/logo.svg" alt="Convert email newsletters into Atom feeds"></p>
 <p align="center">
-<a href="https://github.com/leafac/kill-the-newsletter.com"><img alt="Source" src="https://img.shields.io/badge/Source---"></a>
-<a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img alt="Continuous Integration" src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg"></a>
+<a href="https://github.com/leafac/kill-the-newsletter.com"><img src="https://img.shields.io/badge/Source---" alt="Source"></a>
+<a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" alt="Continuous Integration"></a>
 </p>
 
 # Deploy Your Own Instance (Self-Host)
