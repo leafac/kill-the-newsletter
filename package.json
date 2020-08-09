@@ -23,6 +23,7 @@
     "pm2": "^4.2.3",
     "sanitize-xml-string": "^1.1.0",
     "smtp-server": "^3.6.0",
+    "tagged-template-noop": "^2.1.1",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3",
     "write-file-atomic": "^3.0.3"

@@ -8,6 +8,7 @@ import { JSDOM } from "jsdom";
 import { promises as fs } from "fs";
 import writeFileAtomic from "write-file-atomic";
 import cryptoRandomString from "crypto-random-string";
+import html from "tagged-template-noop";
 
 export const WEB_PORT = process.env.WEB_PORT ?? 8000;
 export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
@@ -36,7 +37,7 @@ export const webServer = express()
         )
       );
       res.send(
-        layout(`
+        layout(html`
           <p><strong>“${H(name)}” Inbox Created</strong></p>
           ${renderedCreated}
         `)
@@ -121,42 +122,76 @@ async function addEntryToFeed(
   }
   await writeFileAtomic(
     path,
-    `<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`
+    html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
   );
 }
 
 function layout(content: string): string {
-  return `<!DOCTYPE html>
+  return html`
+    <!DOCTYPE html>
     <html lang="en">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kill the Newsletter!</title>
-    <meta name="author" content="Leandro Facchinetti">
-    <meta name="description" content="Convert email newsletters into Atom feeds.">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/styles.css">
-    </head>
-    <body>
-    <header>
-      <h1><a href="/">Kill the Newsletter!</a></h1>
-      <p>Convert email newsletters into Atom feeds</p>
-      <p><img src="/logo.svg" alt="Convert email newsletters into Atom feeds"></p>
-    </header>
-    <main>${content}</main>
-    <footer><p>By <a href="https://leafac.com">Leandro Facchinetti</a> · <a href="https://github.com/leafac/kill-the-newsletter.com">Source</a> · <a href="${ISSUE_REPORT}">Report an Issue</a></p></footer>
-    </body>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Kill the Newsletter!</title>
+        <meta name="author" content="Leandro Facchinetti" />
+        <meta
+          name="description"
+          content="Convert email newsletters into Atom feeds."
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="/styles.css" />
+      </head>
+      <body>
+        <header>
+          <h1><a href="/">Kill the Newsletter!</a></h1>
+          <p>Convert email newsletters into Atom feeds</p>
+          <p>
+            <img
+              src="/logo.svg"
+              alt="Convert email newsletters into Atom feeds"
+            />
+          </p>
+        </header>
+        <main>${content}</main>
+        <footer>
+          <p>
+            By <a href="https://leafac.com">Leandro Facchinetti</a> ·
+            <a href="https://github.com/leafac/kill-the-newsletter.com"
+              >Source</a
+            >
+            · <a href="${ISSUE_REPORT}">Report an Issue</a>
+          </p>
+        </footer>
+      </body>
     </html>
-  `;
+  `.trim();
 }
 
 function newInbox(): string {
-  return `
+  return html`
     <form method="POST" action="/">
       <p>
-        <input type="text" name="name" placeholder="Newsletter Name…" maxlength="500" size="30" required>
+        <input
+          type="text"
+          name="name"
+          placeholder="Newsletter Name…"
+          maxlength="500"
+          size="30"
+          required
+        />
         <button>Create Inbox</button>
       </p>
     </form>
@@ -164,33 +199,45 @@ function newInbox(): string {
 }
 
 function created(identifier: string): string {
-  return `
-    <p>Sign up for the newsletter with<br><code>${feedEmail(
-      identifier
-    )}</code></p>
-    <p>Subscribe to the Atom feed at<br><code>${feedURL(identifier)}</code></p>
-    <p>Don’t share these addresses.<br>They contain an identifier that other people could use<br>to send you spam and to control your newsletter subscriptions.</p>
+  return html`
+    <p>
+      Sign up for the newsletter with<br /><code>${feedEmail(identifier)}</code>
+    </p>
+    <p>
+      Subscribe to the Atom feed at<br /><code>${feedURL(identifier)}</code>
+    </p>
+    <p>
+      Don’t share these addresses.<br />They contain an identifier that other
+      people could use<br />to send you spam and to control your newsletter
+      subscriptions.
+    </p>
     <p>Enjoy your readings!</p>
-    <p><a href="${BASE_URL}"><strong>Create Another Inbox</strong></a></p>
+    <p>
+      <a href="${BASE_URL}"><strong>Create Another Inbox</strong></a>
+    </p>
   `.trim();
 }
 
 function feed(identifier: string, name: string): string {
-  return `<?xml version="1.0" encoding="utf-8"?>
+  return html`
+    <?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
-      <link rel="self" type="application/atom+xml" href="${feedURL(
-        identifier
-      )}"/>
-      <link rel="alternate" type="text/html" href="${BASE_URL}"/>
+      <link
+        rel="self"
+        type="application/atom+xml"
+        href="${feedURL(identifier)}"
+      />
+      <link rel="alternate" type="text/html" href="${BASE_URL}" />
       <id>${urn(identifier)}</id>
       <title>${name}</title>
-      <subtitle>Kill the Newsletter! Inbox: ${feedEmail(
-        identifier
-      )} → ${feedURL(identifier)}</subtitle>
+      <subtitle
+        >Kill the Newsletter! Inbox: ${feedEmail(identifier)} →
+        ${feedURL(identifier)}</subtitle
+      >
       <updated>${now()}</updated>
       <author><name>Kill the Newsletter!</name></author>
     </feed>
-  `;
+  `.trim();
 }
 
 function entry(
@@ -199,15 +246,17 @@ function entry(
   author: string,
   content: string
 ): string {
-  return `
+  return html`
     <entry>
       <id>${urn(identifier)}</id>
       <title>${title}</title>
       <author><name>${author}</name></author>
       <updated>${now()}</updated>
-      <link rel="alternate" type="text/html" href="${alternateURL(
-        identifier
-      )}"/>
+      <link
+        rel="alternate"
+        type="text/html"
+        href="${alternateURL(identifier)}"
+      />
       <content type="html">${content}</content>
     </entry>
   `.trim();
