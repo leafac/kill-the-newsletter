@@ -6,6 +6,8 @@
 <a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" alt="Continuous Integration"></a>
 </p>
 
+# [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
+
 # Deploy Your Own Instance (Self-Host)
 
 1. Create accounts on [GitHub](https://github.com), [Namecheap](https://www.namecheap.com), and [DigitalOcean](https://www.digitalocean.com).
