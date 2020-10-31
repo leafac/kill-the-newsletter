@@ -1,8 +1,8 @@
-@import "typeface-pt-sans/index.css";
-@import "typeface-pt-mono/index.css";
-
 body {
-  font: 16px/1.5 "PT Sans", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   text-align: center;
   padding: 0 1em;
   margin: 2em 0;
@@ -14,7 +14,7 @@ a {
 }
 
 code {
-  font-family: "PT Mono", monospace;
+  font-family: Menlo, Monaco, "Courier New", monospace;
 }
 
 h1 {
@@ -22,7 +22,7 @@ h1 {
 }
 
 footer {
-  font-size: 0.875em;
+  font-size: 0.857em;
 }
 
 input {
