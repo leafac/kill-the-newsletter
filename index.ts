@@ -27,15 +27,15 @@ export const webServer = express()
       const identifier = createIdentifier();
       await writeFileAtomic(feedPath(identifier), feed(identifier, X(name)));
       const renderedCreated = created(identifier);
-      await addEntryToFeed(
-        identifier,
-        entry(
-          createIdentifier(),
-          `“${X(name)}” Inbox Created`,
-          "Kill the Newsletter!",
-          X(renderedCreated)
-        )
-      );
+      // await addEntryToFeed(
+      //   identifier,
+      //   entry(
+      //     createIdentifier(),
+      //     `“${X(name)}” Inbox Created`,
+      //     "Kill the Newsletter!",
+      //     X(renderedCreated)
+      //   )
+      // );
       res.send(
         layout(html`
           <p><strong>“${H(name)}” Inbox Created</strong></p>
@@ -230,12 +230,9 @@ function feed(identifier: string, name: string): string {
       <link rel="alternate" type="text/html" href="${BASE_URL}" />
       <id>${urn(identifier)}</id>
       <title>${name}</title>
-      <subtitle
-        >Kill the Newsletter! Inbox: ${feedEmail(identifier)} →
-        ${feedURL(identifier)}</subtitle
-      >
+      <subtitle>Welcome to your Reachme RSS feed!</subtitle>
       <updated>${now()}</updated>
-      <author><name>Kill the Newsletter!</name></author>
+      <author><name>reachme.fyi</name></author>
     </feed>
   `.trim();
 }
@@ -298,7 +295,7 @@ function alternateURL(identifier: string): string {
 }
 
 function urn(identifier: string): string {
-  return `urn:kill-the-newsletter:${identifier}`;
+  return `urn:reachmefyi:${identifier}`;
 }
 
 function X(string: string): string {
