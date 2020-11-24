@@ -25,15 +25,19 @@ export const webServer = express()
     try {
       const { name } = req.body;
       const identifier = createIdentifier();
-      await writeFileAtomic(feedPath(identifier), feed(identifier, X(name)));
       const renderedCreated = created(identifier);
-      await addEntryToFeed(
-        identifier,
-        entry(
-          createIdentifier(),
-          `“${X(name)}” Inbox Created`,
-          "Kill the Newsletter!",
-          X(renderedCreated)
+      await writeFileAtomic(
+        feedFilePath(identifier),
+        feed(
+          identifier,
+          X(name),
+          entry(
+            identifier,
+            createIdentifier(),
+            `“${X(name)}” Inbox Created`,
+            "Kill the Newsletter!",
+            X(renderedCreated)
+          )
         )
       );
       res.send(
@@ -47,6 +51,35 @@ export const webServer = express()
       next(error);
     }
   })
+  .get(
+    alternatePath(":feedIdentifier", ":entryIdentifier"),
+    async (req, res, next) => {
+      try {
+        const { feedIdentifier, entryIdentifier } = req.params;
+        const path = feedFilePath(feedIdentifier);
+        let text;
+        try {
+          text = await fs.readFile(path, "utf8");
+        } catch {
+          return res.sendStatus(404);
+        }
+        const feed = new JSDOM(text, { contentType: "text/xml" });
+        const document = feed.window.document;
+        const link = document.querySelector(
+          `link[href="${alternateURL(feedIdentifier, entryIdentifier)}"]`
+        );
+        if (link === null) return res.sendStatus(404);
+        res.send(
+          entities.decodeXML(
+            link.parentElement!.querySelector("content")!.textContent!
+          )
+        );
+      } catch (error) {
+        console.error(error);
+        next(error);
+      }
+    }
+  )
   .listen(WEB_PORT);
 
 export const emailServer = new SMTPServer({
@@ -62,17 +95,43 @@ export const emailServer = new SMTPServer({
         );
         if (match?.groups === undefined) continue;
         const identifier = match.groups.identifier.toLowerCase();
-        await addEntryToFeed(
+        const path = feedFilePath(identifier);
+        let text;
+        try {
+          text = await fs.readFile(path, "utf8");
+        } catch {
+          continue;
+        }
+        const feed = new JSDOM(text, { contentType: "text/xml" });
+        const document = feed.window.document;
+        const updated = document.querySelector("feed > updated");
+        if (updated === null) {
+          console.error(`Field ‘updated’ not found: ‘${path}’`);
+          continue;
+        }
+        updated.textContent = now();
+        const renderedEntry = entry(
           identifier,
-          entry(
-            createIdentifier(),
-            X(email.subject ?? ""),
-            X(email.from?.text ?? ""),
-            X(content)
-          )
-        ).catch((error) => {
-          console.error(error);
-        });
+          createIdentifier(),
+          X(email.subject ?? ""),
+          X(email.from?.text ?? ""),
+          X(content)
+        );
+        const firstEntry = document.querySelector("feed > entry:first-of-type");
+        if (firstEntry === null)
+          document
+            .querySelector("feed")!
+            .insertAdjacentHTML("beforeend", renderedEntry);
+        else firstEntry.insertAdjacentHTML("beforebegin", renderedEntry);
+        while (feed.serialize().length > 500_000) {
+          const lastEntry = document.querySelector("feed > entry:last-of-type");
+          if (lastEntry === null) break;
+          lastEntry.remove();
+        }
+        await writeFileAtomic(
+          path,
+          html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
+        );
       }
       callback();
     } catch (error) {
@@ -85,46 +144,6 @@ export const emailServer = new SMTPServer({
     }
   },
 }).listen(EMAIL_PORT);
-
-async function addEntryToFeed(
-  identifier: string,
-  entry: string
-): Promise<void> {
-  const path = feedPath(identifier);
-  let text;
-  try {
-    text = await fs.readFile(path, "utf8");
-  } catch {
-    return;
-  }
-  const feed = new JSDOM(text, { contentType: "text/xml" });
-  const document = feed.window.document;
-  const updated = document.querySelector("feed > updated");
-  if (updated === null) throw new Error(`Field ‘updated’ not found: ‘${path}’`);
-  updated.textContent = now();
-  const firstEntry = document.querySelector("feed > entry:first-of-type");
-  if (firstEntry === null)
-    document.querySelector("feed")!.insertAdjacentHTML("beforeend", entry);
-  else firstEntry.insertAdjacentHTML("beforebegin", entry);
-  const entryDocument = JSDOM.fragment(entry);
-  await writeFileAtomic(
-    alternatePath(getEntryIdentifier(entryDocument)),
-    entities.decodeXML(entryDocument.querySelector("content")!.textContent!)
-  );
-  while (feed.serialize().length > 500_000) {
-    const entry = document.querySelector("feed > entry:last-of-type");
-    if (entry === null) break;
-    entry.remove();
-    const path = alternatePath(getEntryIdentifier(entry));
-    await fs.unlink(path).catch(() => {
-      console.error(`File not found: ‘${path}’`);
-    });
-  }
-  await writeFileAtomic(
-    path,
-    html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
-  );
-}
 
 function layout(content: string): string {
   return html`
@@ -218,7 +237,7 @@ function created(identifier: string): string {
   `.trim();
 }
 
-function feed(identifier: string, name: string): string {
+function feed(identifier: string, name: string, initialEntry: string): string {
   return html`
     <?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
@@ -236,26 +255,28 @@ function feed(identifier: string, name: string): string {
       >
       <updated>${now()}</updated>
       <author><name>Kill the Newsletter!</name></author>
+      ${initialEntry}
     </feed>
   `.trim();
 }
 
 function entry(
-  identifier: string,
+  feedIdentifier: string,
+  entryIdentifier: string,
   title: string,
   author: string,
   content: string
 ): string {
   return html`
     <entry>
-      <id>${urn(identifier)}</id>
+      <id>${urn(entryIdentifier)}</id>
       <title>${title}</title>
       <author><name>${author}</name></author>
       <updated>${now()}</updated>
       <link
         rel="alternate"
         type="text/html"
-        href="${alternateURL(identifier)}"
+        href="${alternateURL(feedIdentifier, entryIdentifier)}"
       />
       <content type="html">${content}</content>
     </entry>
@@ -269,15 +290,11 @@ function createIdentifier(): string {
   });
 }
 
-function getEntryIdentifier(entry: ParentNode): string {
-  return entry.querySelector("id")!.textContent!.split(":")[2];
-}
-
 function now(): string {
   return new Date().toISOString();
 }
 
-function feedPath(identifier: string): string {
+function feedFilePath(identifier: string): string {
   return `static/feeds/${identifier}.xml`;
 }
 
@@ -289,12 +306,15 @@ function feedEmail(identifier: string): string {
   return `${identifier}@${EMAIL_DOMAIN}`;
 }
 
-function alternatePath(identifier: string): string {
-  return `static/alternate/${identifier}.html`;
+function alternatePath(
+  feedIdentifier: string,
+  entryIdentifier: string
+): string {
+  return `/alternate/${feedIdentifier}/${entryIdentifier}.html`;
 }
 
-function alternateURL(identifier: string): string {
-  return `${BASE_URL}/alternate/${identifier}.html`;
+function alternateURL(feedIdentifier: string, entryIdentifier: string): string {
+  return `${BASE_URL}${alternatePath(feedIdentifier, entryIdentifier)}`;
 }
 
 function urn(identifier: string): string {
