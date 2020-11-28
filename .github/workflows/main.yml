@@ -8,7 +8,7 @@ jobs:
         with:
           node-version: "14.x"
       - run: npm install-ci-test
-      - uses: webfactory/ssh-agent@v0.2.0
+      - uses: webfactory/ssh-agent@v0.4.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
         if: github.ref == 'refs/heads/master'
