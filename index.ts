@@ -89,7 +89,9 @@ export const emailServer = new SMTPServer({
       const email = await mailparser.simpleParser(stream);
       const content =
         typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
-      for (const { address } of session.envelope.rcptTo) {
+      for (const address of new Set(
+        session.envelope.rcptTo.map(({ address }) => address)
+      )) {
         const match = address.match(
           new RegExp(`^(?<identifier>\\w+)@${R(EMAIL_DOMAIN)}$`)
         );
