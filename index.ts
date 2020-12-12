@@ -196,6 +196,8 @@ function layout(content: string): string {
             · <a href="${ISSUE_REPORT}">Report an Issue</a>
           </p>
         </footer>
+        <script src="/clipboard.min.js"></script>
+        <script src="/scripts.js"></script>
       </body>
     </html>
   `.trim();
@@ -222,10 +224,14 @@ function newInbox(): string {
 function created(identifier: string): string {
   return html`
     <p>
-      Sign up for the newsletter with<br /><code>${feedEmail(identifier)}</code>
+      Sign up for the newsletter with<br /><code class="copyable"
+        >${feedEmail(identifier)}</code
+      >
     </p>
     <p>
-      Subscribe to the Atom feed at<br /><code>${feedURL(identifier)}</code>
+      Subscribe to the Atom feed at<br /><code class="copyable"
+        >${feedURL(identifier)}</code
+      >
     </p>
     <p>
       Don’t share these addresses.<br />They contain an identifier that other
