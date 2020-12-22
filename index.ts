@@ -164,24 +164,24 @@ function layout(content: string): string {
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="/favicon-32x32.png"
+          href="${BASE_URL}/favicon-32x32.png"
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="/favicon-16x16.png"
+          href="${BASE_URL}/favicon-16x16.png"
         />
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="stylesheet" type="text/css" href="/styles.css" />
+        <link rel="icon" type="image/x-icon" href="${BASE_URL}/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="${BASE_URL}/styles.css" />
       </head>
       <body>
         <header>
-          <h1><a href="/">Kill the Newsletter!</a></h1>
+          <h1><a href="${BASE_URL}/">Kill the Newsletter!</a></h1>
           <p>Convert email newsletters into Atom feeds</p>
           <p>
             <img
-              src="/logo.svg"
+              src="${BASE_URL}/logo.svg"
               alt="Convert email newsletters into Atom feeds"
             />
           </p>
@@ -196,8 +196,8 @@ function layout(content: string): string {
             · <a href="${ISSUE_REPORT}">Report an Issue</a>
           </p>
         </footer>
-        <script src="/clipboard.min.js"></script>
-        <script src="/scripts.js"></script>
+        <script src="${BASE_URL}/clipboard.min.js"></script>
+        <script src="${BASE_URL}/scripts.js"></script>
       </body>
     </html>
   `.trim();
@@ -205,7 +205,7 @@ function layout(content: string): string {
 
 function newInbox(): string {
   return html`
-    <form method="POST" action="/">
+    <form method="POST" action="${BASE_URL}/">
       <p>
         <input
           type="text"
