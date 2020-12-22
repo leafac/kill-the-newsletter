@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "ts-node .",
-    "develop": "open-cli http://localhost:8000 && nodemon --ext ts --exec 'ts-node .'",
+    "develop": "nodemon --ext ts --exec 'ts-node .'",
     "test": "prettier --check '**/*.{ts,css}' && jest",
     "deploy": "pm2 deploy package.json production",
     "deploy:setup": "pm2 deploy package.json production setup"
@@ -36,7 +36,6 @@
     "jest": "^25.2.4",
     "nodemailer": "^6.4.6",
     "nodemon": "^2.0.2",
-    "open-cli": "^6.0.1",
     "prettier": "^2.0.2",
     "qs": "^6.9.3",
     "ts-jest": "^25.5.0"

@@ -80,7 +80,7 @@ export const webServer = express()
       }
     }
   )
-  .listen(WEB_PORT);
+  .listen(WEB_PORT, () => console.log(`Server started: ${BASE_URL}`));
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
