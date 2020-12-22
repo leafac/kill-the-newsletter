@@ -221,6 +221,20 @@ describe("receive email", () => {
   });
 });
 
+test("‘noindex’ header", async () => {
+  const identifier = await createFeed();
+  const feed = await getFeed(identifier);
+  const entry = feed.querySelector("feed > entry:first-of-type")!;
+  const alternatePath = entry.querySelector("link")!.getAttribute("href")!;
+  expect((await webClient.get(`/`)).headers["x-robots-tag"]).toBeUndefined();
+  expect(
+    (await webClient.get(`/feeds/${identifier}.xml`)).headers["x-robots-tag"]
+  ).toBe("noindex");
+  expect((await webClient.get(alternatePath)).headers["x-robots-tag"]).toBe(
+    "noindex"
+  );
+});
+
 const webClient = axios.create({
   baseURL: BASE_URL,
 });

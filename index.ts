@@ -18,6 +18,10 @@ export const ISSUE_REPORT =
   process.env.ISSUE_REPORT ?? "mailto:kill-the-newsletter@leafac.com";
 
 export const webServer = express()
+  .use(["/feeds", "/alternate"], (req, res, next) => {
+    res.header("X-Robots-Tag", "noindex");
+    next();
+  })
   .use(express.static("static"))
   .use(express.urlencoded({ extended: true }))
   .get("/", (req, res) => res.send(layout(newInbox())))
