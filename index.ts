@@ -297,7 +297,7 @@ function entry(
 
 function createIdentifier(): string {
   return cryptoRandomString({
-    length: 20,
+    length: 16,
     characters: "1234567890qwertyuiopasdfghjklzxcvbnm",
   });
 }
