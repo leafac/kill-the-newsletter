@@ -5,6 +5,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: webfactory/ssh-agent@v0.4.1
+        if: github.ref == 'refs/heads/master'
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - uses: actions/setup-node@v1
