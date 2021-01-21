@@ -2,7 +2,6 @@ kill-the-newsletter.com {
   reverse_proxy localhost:8000
 }
 
-
 www.kill-the-newsletter.com {
-  redir https://kill-the-newsletter.com{uri} permanent
+  redir https://kill-the-newsletter.com{uri}
 }
