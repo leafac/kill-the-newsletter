@@ -2,7 +2,7 @@
   "scripts": {
     "start": "ts-node .",
     "develop": "nodemon --ext ts --exec \"ts-node .\"",
-    "test": "prettier --check \"**/*.{ts,css}\" && jest",
+    "test": "prettier --check \"**/*.{ts,css}\" --end-of-line auto && jest",
     "deploy": "pm2 deploy package.json production",
     "deploy:setup": "pm2 deploy package.json production setup"
   },
