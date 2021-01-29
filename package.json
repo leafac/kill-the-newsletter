@@ -1,8 +1,8 @@
 {
   "scripts": {
     "start": "ts-node .",
-    "develop": "nodemon --ext ts --exec 'ts-node .'",
-    "test": "prettier --check '**/*.{ts,css}' && jest",
+    "develop": "nodemon --ext ts --exec \"ts-node .\"",
+    "test": "prettier --check \"**/*.{ts,css}\" && jest",
     "deploy": "pm2 deploy package.json production",
     "deploy:setup": "pm2 deploy package.json production setup"
   },
