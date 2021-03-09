@@ -1,81 +1,56 @@
 {
+  "name": "kill-the-newsletter",
+  "version": "0.0.0",
+  "description": "Convert email newsletters into Atom feeds",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": "lib/index.js",
+  "repository": "leafac/kill-the-newsletter",
+  "keywords": [
+    "newsletter",
+    "atom feeds",
+    "news"
+  ],
+  "author": "Leandro Facchinetti <kill-the-newsletter@leafac.com> (https://leafac.com)",
+  "license": "MIT",
+  "bugs": "https://github.com/leafac/kill-the-newsletter/issues",
+  "homepage": "https://github.com/leafac/kill-the-newsletter#readme",
   "scripts": {
-    "start": "ts-node .",
-    "develop": "nodemon --ext ts --exec \"ts-node .\"",
-    "test": "prettier --check \"**/*.{ts,css}\" --end-of-line auto && jest",
-    "deploy": "pm2 deploy package.json production",
-    "deploy:setup": "pm2 deploy package.json production setup"
+    "start": "ts-node-dev --poll src/index.ts",
+    "test": "prettier --check \"src/**/*\" --end-of-line auto && jest",
+    "prepare": "tsc"
   },
   "dependencies": {
-    "@types/express": "^4.17.3",
-    "@types/jsdom": "^16.2.1",
-    "@types/mailparser": "^2.7.2",
-    "@types/node": "^13.9.8",
-    "@types/smtp-server": "^3.5.4",
-    "@types/write-file-atomic": "^3.0.0",
-    "caddy-npm": "^2.1.1",
-    "crypto-random-string": "^3.2.0",
-    "entities": "^2.0.0",
+    "@leafac/css": "^0.0.1",
+    "@leafac/html": "^1.3.0",
+    "@leafac/sqlite": "^1.1.2",
+    "@leafac/sqlite-migration": "^1.0.3",
+    "crypto-random-string": "^3.3.1",
     "escape-string-regexp": "^4.0.0",
     "express": "^4.17.1",
-    "jsdom": "^16.2.2",
-    "mailparser": "^2.7.7",
-    "pm2": "^4.2.3",
-    "sanitize-xml-string": "^1.1.0",
-    "smtp-server": "^3.6.0",
-    "tagged-template-noop": "^2.1.1",
-    "ts-node": "^8.10.1",
-    "typescript": "^3.8.3",
-    "write-file-atomic": "^3.0.3"
+    "mailparser": "^3.1.0",
+    "smtp-server": "^3.8.0"
   },
   "devDependencies": {
-    "@types/jest": "^25.1.4",
+    "@types/express": "^4.17.11",
+    "@types/jest": "^26.0.20",
+    "@types/mailparser": "^3.0.2",
+    "@types/node": "^14.14.33",
     "@types/nodemailer": "^6.4.0",
-    "@types/qs": "^6.9.1",
-    "axios": "^0.21.1",
-    "jest": "^25.2.4",
-    "nodemailer": "^6.4.6",
-    "nodemon": "^2.0.2",
-    "prettier": "^2.0.2",
-    "qs": "^6.9.3",
-    "ts-jest": "^25.5.0"
+    "@types/smtp-server": "^3.5.6",
+    "caxa": "^1.0.0",
+    "got": "^11.8.2",
+    "jest": "^26.6.3",
+    "nodemailer": "^6.4.18",
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.5.3",
+    "ts-node": "^9.1.1",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.2.3"
   },
   "jest": {
+    "rootDir": "src",
     "preset": "ts-jest",
     "testEnvironment": "node"
-  },
-  "apps": [
-    {
-      "name": "kill-the-newsletter",
-      "script": "npm start",
-      "env": {
-        "NODE_ENV": "production",
-        "WEB_PORT": "8000",
-        "EMAIL_PORT": "25",
-        "BASE_URL": "https://kill-the-newsletter.com",
-        "EMAIL_DOMAIN": "kill-the-newsletter.com",
-        "ISSUE_REPORT": "mailto:kill-the-newsletter@leafac.com"
-      }
-    },
-    {
-      "name": "caddy",
-      "script": "caddy run"
-    }
-  ],
-  "deploy": {
-    "production": {
-      "user": "root",
-      "host": "kill-the-newsletter.com",
-      "ref": "origin/master",
-      "repo": "git@github.com:leafac/kill-the-newsletter.com.git",
-      "path": "/root/kill-the-newsletter.com",
-      "pre-setup": "(curl -sL https://deb.nodesource.com/setup_14.x | bash -) && apt install -y nodejs build-essential && (ssh -o StrictHostKeyChecking=no git@github.com || true)",
-      "post-setup": "npm ci --production && npx pm2 startup",
-      "post-deploy": "npm ci --production && npx pm2 startOrRestart package.json && npx pm2 save",
-      "ssh_options": [
-        "ForwardAgent=yes",
-        "StrictHostKeyChecking=no"
-      ]
-    }
   }
 }

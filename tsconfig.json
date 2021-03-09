@@ -1,8 +1,16 @@
 {
   "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "lib",
+
     "target": "ES2019",
     "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    "strict": true
   }
 }
