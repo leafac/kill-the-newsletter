@@ -1,22 +1,41 @@
+import path from "path";
 import express from "express";
 import { SMTPServer } from "smtp-server";
 import mailparser from "mailparser";
-import * as sanitizeXMLString from "sanitize-xml-string";
-import * as entities from "entities";
-import R from "escape-string-regexp";
-import { JSDOM } from "jsdom";
-import { promises as fs } from "fs";
-import writeFileAtomic from "write-file-atomic";
+import escapeStringRegexp from "escape-string-regexp";
+import fs from "fs-extra";
 import cryptoRandomString from "crypto-random-string";
-import html from "tagged-template-noop";
 
-export const WEB_PORT = process.env.WEB_PORT ?? 8000;
-export const EMAIL_PORT = process.env.EMAIL_PORT ?? 2525;
-export const BASE_URL = process.env.BASE_URL ?? "http://localhost:8000";
-export const EMAIL_DOMAIN = process.env.EMAIL_DOMAIN ?? "localhost";
-export const ISSUE_REPORT =
-  process.env.ISSUE_REPORT ?? "mailto:kill-the-newsletter@leafac.com";
+const VERSION = require("../package.json").version;
 
+export default function killTheNewsletter(
+  rootDirectory: string
+): { webApplication: express.Express; emailApplication: SMTPServer } {
+  const webApplication = express();
+
+  webApplication.set("url", "http://localhost:4000");
+  webApplication.set("email port", 2525);
+  webApplication.set("email host", "localhost");
+  webApplication.set("administrator", "kill-the-newsletter@leafac.com");
+
+  const emailApplication = new SMTPServer();
+
+  return { webApplication, emailApplication };
+}
+
+if (require.main === module) {
+  console.log(`Kill the Newsletter!/${VERSION}`);
+
+  const configurationFile = path.resolve(
+    process.argv[2] ?? path.join(process.cwd(), "configuration.js")
+  );
+
+  require(configurationFile)(require);
+
+  console.log(`Configuration file loaded from ‘${configurationFile}’.`);
+}
+
+/*
 export const webServer = express()
   .use(["/feeds", "/alternate"], (req, res, next) => {
     res.header("X-Robots-Tag", "noindex");
@@ -97,7 +116,9 @@ export const emailServer = new SMTPServer({
         session.envelope.rcptTo.map(({ address }) => address)
       )) {
         const match = address.match(
-          new RegExp(`^(?<identifier>\\w+)@${R(EMAIL_DOMAIN)}$`)
+          new RegExp(
+            `^(?<identifier>\\w+)@${escapeStringRegexp(EMAIL_DOMAIN)}$`
+          )
         );
         if (match?.groups === undefined) continue;
         const identifier = match.groups.identifier.toLowerCase();
@@ -340,3 +361,4 @@ function X(string: string): string {
 function H(string: string): string {
   return entities.encodeHTML(sanitizeXMLString.sanitize(string));
 }
+*/
