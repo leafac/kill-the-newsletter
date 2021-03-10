@@ -7,6 +7,8 @@ import fs from "fs-extra";
 import cryptoRandomString from "crypto-random-string";
 import { html, HTML } from "@leafac/html";
 import { css, process as processCSS } from "@leafac/css";
+import { sql, Database } from "@leafac/sqlite";
+import databaseMigrate from "@leafac/sqlite-migration";
 
 const VERSION = require("../package.json").version;
 
@@ -19,6 +21,31 @@ export default function killTheNewsletter(
   webApplication.set("email port", 2525);
   webApplication.set("email host", "localhost");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
+
+  const database = new Database(
+    path.join(rootDirectory, "kill-the-newsletter.db")
+  );
+  databaseMigrate(database, [
+    sql`
+      CREATE TABLE "feeds" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "reference" TEXT NOT NULL UNIQUE,
+        "title" TEXT NOT NULL
+      );
+
+      CREATE TABLE "entries" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "reference" TEXT NOT NULL UNIQUE,
+        "feed" INTEGER NOT NULL REFERENCES "feeds",
+        "title" TEXT NOT NULL,
+        "author" TEXT NOT NULL,
+        "content" TEXT NOT NULL
+      );
+    `,
+  ]);
 
   webApplication.use(express.static(path.join(__dirname, "../public")));
   webApplication.use(express.urlencoded({ extended: true }));
@@ -153,10 +180,6 @@ export default function killTheNewsletter(
                   path {
                     fill: #ffffffd4;
                   }
-
-                  rect {
-                    stroke: #ffffffd4;
-                  }
                 }
               `}"
             >
@@ -189,7 +212,7 @@ export default function killTheNewsletter(
             <input
               type="text"
               name="name"
-              placeholder="Newsletter Name…"
+              placeholder="Newsletter name…"
               maxlength="500"
               required
               autocomplete="off"
@@ -222,7 +245,6 @@ export const webServer = express()
     res.header("X-Robots-Tag", "noindex");
     next();
   })
-  .get("/", (req, res) => res.send(layout(newInbox())))
   .post("/", async (req, res, next) => {
     try {
       const { name } = req.body;
