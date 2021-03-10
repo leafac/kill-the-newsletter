@@ -410,11 +410,6 @@ function layout(content: string): string {
   `.trim();
 }
 
-function newInbox(): string {
-  return html`
-  `;
-}
-
 function created(identifier: string): string {
   return html`
     <p>
