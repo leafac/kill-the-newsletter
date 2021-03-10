@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import path from "path";
 import express from "express";
 import { SMTPServer } from "smtp-server";
@@ -22,6 +24,7 @@ export default function killTheNewsletter(
   webApplication.set("email host", "localhost");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
+  fs.ensureDirSync(rootDirectory);
   const database = new Database(
     path.join(rootDirectory, "kill-the-newsletter.db")
   );
