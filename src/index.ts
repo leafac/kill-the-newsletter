@@ -5,6 +5,8 @@ import mailparser from "mailparser";
 import escapeStringRegexp from "escape-string-regexp";
 import fs from "fs-extra";
 import cryptoRandomString from "crypto-random-string";
+import { html, HTML } from "@leafac/html";
+import { css, process as processCSS } from "@leafac/css";
 
 const VERSION = require("../package.json").version;
 
@@ -16,7 +18,189 @@ export default function killTheNewsletter(
   webApplication.set("url", "http://localhost:4000");
   webApplication.set("email port", 2525);
   webApplication.set("email host", "localhost");
-  webApplication.set("administrator", "kill-the-newsletter@leafac.com");
+  webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
+
+  webApplication.use(express.static(path.join(__dirname, "../public")));
+  webApplication.use(express.urlencoded({ extended: true }));
+
+  const logo = fs.readFileSync(path.join(__dirname, "../public/logo.svg"));
+
+  function layout(body: HTML): HTML {
+    return processCSS(html`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+          />
+          <title>Kill the Newsletter!</title>
+        </head>
+        <body
+          style="${css`
+            @at-root {
+              body {
+                font-size: 14px;
+                font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
+                  Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+                  "Helvetica Neue", sans-serif;
+                line-height: 1.5;
+                max-width: 400px;
+                padding: 0 1em;
+                margin: 1em auto;
+                text-align: center;
+              }
+
+              code {
+                font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+                  monospace;
+              }
+
+              a {
+                color: inherit;
+                text-decoration: none;
+                transition: color 0.2s;
+
+                &:hover {
+                  color: #58a6ff;
+                }
+              }
+
+              h1 {
+                font-size: 1.5em;
+              }
+
+              footer {
+                font-size: 0.875em;
+              }
+
+              input,
+              button {
+                font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
+                  Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+                  "Helvetica Neue", sans-serif;
+                font-size: 1em;
+                line-height: 1.5;
+                color: inherit;
+                background-color: transparent;
+                padding: 0.2em 1em;
+                border: 1px solid darkgray;
+                border-radius: 10px;
+                margin: 0;
+                outline: none;
+                box-shadow: inset 0px 1px #ffffff22, 0px 1px #00000022;
+              }
+
+              input {
+                box-sizing: border-box;
+                width: 100%;
+                -webkit-appearance: none;
+                transition: border-color 0.2s;
+
+                &:focus {
+                  border-color: #58a6ff;
+                }
+              }
+
+              button {
+                color: #ffffffd4;
+                background-color: #83769c;
+                border-color: #83769c;
+                transition-property: color, background-color, border-color;
+                transition-duration: 0.2s;
+                cursor: pointer;
+
+                @media (prefers-color-scheme: dark) {
+                  background-color: #584f69;
+                  border-color: #584f69;
+                }
+
+                &:hover {
+                  color: #ffffffd4;
+                  background-color: #6e6382;
+                }
+
+                &:active {
+                  color: #ffffffd4;
+                  background-color: #584f69;
+                }
+              }
+
+              @media (prefers-color-scheme: light) {
+                body {
+                  color: #000000d4;
+                }
+              }
+
+              @media (prefers-color-scheme: dark) {
+                body {
+                  color: #ffffffd4;
+                  background-color: #1e1e1e;
+                }
+              }
+            }
+          `}"
+        >
+          <header>
+            <h1>
+              <a href="${webApplication.get("url")}/">Kill the Newsletter!</a>
+            </h1>
+            <p>Convert email newsletters into Atom feeds</p>
+            <p
+              style="${css`
+                @media (prefers-color-scheme: dark) {
+                  path {
+                    fill: #ffffffd4;
+                  }
+
+                  rect {
+                    stroke: #ffffffd4;
+                  }
+                }
+              `}"
+            >
+              $${logo}
+            </p>
+          </header>
+          <main>$${body}</main>
+          <footer>
+            <p>
+              By <a href="https://leafac.com">Leandro Facchinetti</a> ·
+              <a href="https://github.com/leafac/kill-the-newsletter.com"
+                >Source</a
+              >
+              ·
+              <a href="${webApplication.get("administrator")}"
+                >Report an Issue</a
+              >
+            </p>
+          </footer>
+        </body>
+      </html>
+    `);
+  }
+
+  webApplication.get<{}, HTML, {}, {}, {}>("/", (req, res) => {
+    res.send(
+      layout(html`
+        <form method="POST" action="${webApplication.get("url")}/">
+          <p>
+            <input
+              type="text"
+              name="name"
+              placeholder="Newsletter Name…"
+              maxlength="500"
+              required
+              autocomplete="off"
+              autofocus
+            />
+          </p>
+          <p><button>Create inbox</button></p>
+        </form>
+      `)
+    );
+  });
 
   const emailApplication = new SMTPServer();
 
@@ -25,13 +209,10 @@ export default function killTheNewsletter(
 
 if (require.main === module) {
   console.log(`Kill the Newsletter!/${VERSION}`);
-
   const configurationFile = path.resolve(
     process.argv[2] ?? path.join(process.cwd(), "configuration.js")
   );
-
   require(configurationFile)(require);
-
   console.log(`Configuration file loaded from ‘${configurationFile}’.`);
 }
 
@@ -41,8 +222,6 @@ export const webServer = express()
     res.header("X-Robots-Tag", "noindex");
     next();
   })
-  .use(express.static("static"))
-  .use(express.urlencoded({ extended: true }))
   .get("/", (req, res) => res.send(layout(newInbox())))
   .post("/", async (req, res, next) => {
     try {
@@ -103,7 +282,7 @@ export const webServer = express()
       }
     }
   )
-  .listen(WEB_PORT, () => console.log(`Server started: ${BASE_URL}`));
+  .listen(WEB_PORT, () => console.log(`Server started: ${webApplication.get("url")}`));
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
@@ -189,40 +368,21 @@ function layout(content: string): string {
           rel="icon"
           type="image/png"
           sizes="32x32"
-          href="${BASE_URL}/favicon-32x32.png"
+          href="${webApplication.get("url")}/favicon-32x32.png"
         />
         <link
           rel="icon"
           type="image/png"
           sizes="16x16"
-          href="${BASE_URL}/favicon-16x16.png"
+          href="${webApplication.get("url")}/favicon-16x16.png"
         />
-        <link rel="icon" type="image/x-icon" href="${BASE_URL}/favicon.ico" />
-        <link rel="stylesheet" type="text/css" href="${BASE_URL}/styles.css" />
+        <link rel="icon" type="image/x-icon" href="${webApplication.get("url")}/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="${webApplication.get("url")}/styles.css" />
       </head>
       <body>
-        <header>
-          <h1><a href="${BASE_URL}/">Kill the Newsletter!</a></h1>
-          <p>Convert email newsletters into Atom feeds</p>
-          <p>
-            <img
-              src="${BASE_URL}/logo.svg"
-              alt="Convert email newsletters into Atom feeds"
-            />
-          </p>
-        </header>
         <main>${content}</main>
-        <footer>
-          <p>
-            By <a href="https://leafac.com">Leandro Facchinetti</a> ·
-            <a href="https://github.com/leafac/kill-the-newsletter.com"
-              >Source</a
-            >
-            · <a href="${ISSUE_REPORT}">Report an Issue</a>
-          </p>
-        </footer>
-        <script src="${BASE_URL}/clipboard.min.js"></script>
-        <script src="${BASE_URL}/scripts.js"></script>
+        <script src="${webApplication.get("url")}/clipboard.min.js"></script>
+        <script src="${webApplication.get("url")}/scripts.js"></script>
       </body>
     </html>
   `.trim();
@@ -230,19 +390,6 @@ function layout(content: string): string {
 
 function newInbox(): string {
   return html`
-    <form method="POST" action="${BASE_URL}/">
-      <p>
-        <input
-          type="text"
-          name="name"
-          placeholder="Newsletter Name…"
-          maxlength="500"
-          size="30"
-          required
-        />
-        <button>Create Inbox</button>
-      </p>
-    </form>
   `;
 }
 
@@ -265,7 +412,7 @@ function created(identifier: string): string {
     </p>
     <p>Enjoy your readings!</p>
     <p>
-      <a href="${BASE_URL}"><strong>Create Another Inbox</strong></a>
+      <a href="${webApplication.get("url")}"><strong>Create Another Inbox</strong></a>
     </p>
   `.trim();
 }
@@ -279,7 +426,7 @@ function feed(identifier: string, name: string, initialEntry: string): string {
         type="application/atom+xml"
         href="${feedURL(identifier)}"
       />
-      <link rel="alternate" type="text/html" href="${BASE_URL}" />
+      <link rel="alternate" type="text/html" href="${webApplication.get("url")}" />
       <id>${urn(identifier)}</id>
       <title>${name}</title>
       <subtitle
@@ -332,7 +479,7 @@ function feedFilePath(identifier: string): string {
 }
 
 function feedURL(identifier: string): string {
-  return `${BASE_URL}/feeds/${identifier}.xml`;
+  return `${webApplication.get("url")}/feeds/${identifier}.xml`;
 }
 
 function feedEmail(identifier: string): string {
@@ -347,7 +494,7 @@ function alternatePath(
 }
 
 function alternateURL(feedIdentifier: string, entryIdentifier: string): string {
-  return `${BASE_URL}${alternatePath(feedIdentifier, entryIdentifier)}`;
+  return `${webApplication.get("url")}${alternatePath(feedIdentifier, entryIdentifier)}`;
 }
 
 function urn(identifier: string): string {
