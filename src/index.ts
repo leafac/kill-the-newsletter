@@ -378,6 +378,19 @@ export default function killTheNewsletter(
     }
   );
 
+  webApplication.get<{ entryReference: string }, HTML, {}, {}, {}>(
+    "/alternates/:entryReference.html",
+    (req, res, next) => {
+      const entry = database.get<{ content: string }>(
+        sql`SELECT "content" FROM "entries" WHERE "reference" = ${req.params.entryReference}`
+      );
+      if (entry === undefined) return next();
+      res.header("X-Robots-Tag", "noindex").send(entry.content);
+    }
+  );
+
+  // TODO: 404
+
   const emailApplication = new SMTPServer();
 
   function newReference(): string {
@@ -400,41 +413,6 @@ if (require.main === module) {
 }
 
 /*
-export const webServer = express()
-  .use(["/feeds", "/alternate"], (req, res, next) => {
-    res.header("X-Robots-Tag", "noindex");
-    next();
-  })
-  .get(
-    alternatePath(":feedIdentifier", ":entryIdentifier"),
-    async (req, res, next) => {
-      try {
-        const { feedIdentifier, entryIdentifier } = req.params;
-        const path = feedFilePath(feedIdentifier);
-        let text;
-        try {
-          text = await fs.readFile(path, "utf8");
-        } catch {
-          return res.sendStatus(404);
-        }
-        const feed = new JSDOM(text, { contentType: "text/xml" });
-        const document = feed.window.document;
-        const link = document.querySelector(
-          `link[href="${alternateURL(feedIdentifier, entryIdentifier)}"]`
-        );
-        if (link === null) return res.sendStatus(404);
-        res.send(
-          entities.decodeXML(
-            link.parentElement!.querySelector("content")!.textContent!
-          )
-        );
-      } catch (error) {
-        console.error(error);
-        next(error);
-      }
-    }
-  )
-
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
   async onData(stream, session, callback) {
@@ -501,19 +479,4 @@ export const emailServer = new SMTPServer({
     }
   },
 }).listen(EMAIL_PORT);
-
-function alternatePath(
-  feedIdentifier: string,
-  entryIdentifier: string
-): string {
-  return `/alternate/${feedIdentifier}/${entryIdentifier}.html`;
-}
-
-function alternateURL(feedIdentifier: string, entryIdentifier: string): string {
-  return `${webApplication.get("url")}${alternatePath(feedIdentifier, entryIdentifier)}`;
-}
-
-function urn(identifier: string): string {
-  return `urn:kill-the-newsletter:${identifier}`;
-}
 */
