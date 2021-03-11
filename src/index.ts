@@ -428,7 +428,78 @@ export default function killTheNewsletter(
     );
   });
 
-  const emailApplication = new SMTPServer();
+  const emailApplication = new SMTPServer({
+    disabledCommands: ["AUTH", "STARTTLS"],
+    async onData(stream, session, callback) {
+      /*
+      try {
+        const email = await mailparser.simpleParser(stream);
+        const content =
+          typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
+        for (const address of new Set(
+          session.envelope.rcptTo.map(({ address }) => address)
+        )) {
+          const match = address.match(
+            new RegExp(
+              `^(?<identifier>\\w+)@${escapeStringRegexp(EMAIL_DOMAIN)}$`
+            )
+          );
+          if (match?.groups === undefined) continue;
+          const identifier = match.groups.identifier.toLowerCase();
+          const path = feedFilePath(identifier);
+          let text;
+          try {
+            text = await fs.readFile(path, "utf8");
+          } catch {
+            continue;
+          }
+          const feed = new JSDOM(text, { contentType: "text/xml" });
+          const document = feed.window.document;
+          const updated = document.querySelector("feed > updated");
+          if (updated === null) {
+            console.error(`Field ‘updated’ not found: ‘${path}’`);
+            continue;
+          }
+          updated.textContent = now();
+          const renderedEntry = entry(
+            identifier,
+            createIdentifier(),
+            X(email.subject ?? ""),
+            X(email.from?.text ?? ""),
+            X(content)
+          );
+          const firstEntry = document.querySelector(
+            "feed > entry:first-of-type"
+          );
+          if (firstEntry === null)
+            document
+              .querySelector("feed")!
+              .insertAdjacentHTML("beforeend", renderedEntry);
+          else firstEntry.insertAdjacentHTML("beforebegin", renderedEntry);
+          while (feed.serialize().length > 500_000) {
+            const lastEntry = document.querySelector(
+              "feed > entry:last-of-type"
+            );
+            if (lastEntry === null) break;
+            lastEntry.remove();
+          }
+          await writeFileAtomic(
+            path,
+            html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
+          );
+        }
+        callback();
+      } catch (error) {
+        console.error(
+          `Failed to receive message: ‘${JSON.stringify(session, null, 2)}’`
+        );
+        console.error(error);
+        stream.resume();
+        callback(new Error("Failed to receive message. Please try again."));
+      }
+      */
+    },
+  });
 
   function newReference(): string {
     return cryptoRandomString({
@@ -448,72 +519,3 @@ if (require.main === module) {
   require(configurationFile)(require);
   console.log(`Configuration file loaded from ‘${configurationFile}’.`);
 }
-
-/*
-export const emailServer = new SMTPServer({
-  disabledCommands: ["AUTH", "STARTTLS"],
-  async onData(stream, session, callback) {
-    try {
-      const email = await mailparser.simpleParser(stream);
-      const content =
-        typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
-      for (const address of new Set(
-        session.envelope.rcptTo.map(({ address }) => address)
-      )) {
-        const match = address.match(
-          new RegExp(
-            `^(?<identifier>\\w+)@${escapeStringRegexp(EMAIL_DOMAIN)}$`
-          )
-        );
-        if (match?.groups === undefined) continue;
-        const identifier = match.groups.identifier.toLowerCase();
-        const path = feedFilePath(identifier);
-        let text;
-        try {
-          text = await fs.readFile(path, "utf8");
-        } catch {
-          continue;
-        }
-        const feed = new JSDOM(text, { contentType: "text/xml" });
-        const document = feed.window.document;
-        const updated = document.querySelector("feed > updated");
-        if (updated === null) {
-          console.error(`Field ‘updated’ not found: ‘${path}’`);
-          continue;
-        }
-        updated.textContent = now();
-        const renderedEntry = entry(
-          identifier,
-          createIdentifier(),
-          X(email.subject ?? ""),
-          X(email.from?.text ?? ""),
-          X(content)
-        );
-        const firstEntry = document.querySelector("feed > entry:first-of-type");
-        if (firstEntry === null)
-          document
-            .querySelector("feed")!
-            .insertAdjacentHTML("beforeend", renderedEntry);
-        else firstEntry.insertAdjacentHTML("beforebegin", renderedEntry);
-        while (feed.serialize().length > 500_000) {
-          const lastEntry = document.querySelector("feed > entry:last-of-type");
-          if (lastEntry === null) break;
-          lastEntry.remove();
-        }
-        await writeFileAtomic(
-          path,
-          html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
-        );
-      }
-      callback();
-    } catch (error) {
-      console.error(
-        `Failed to receive message: ‘${JSON.stringify(session, null, 2)}’`
-      );
-      console.error(error);
-      stream.resume();
-      callback(new Error("Failed to receive message. Please try again."));
-    }
-  },
-}).listen(EMAIL_PORT);
-*/
