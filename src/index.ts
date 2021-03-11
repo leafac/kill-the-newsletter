@@ -325,82 +325,83 @@ export default function killTheNewsletter(
     );
   });
 
-  webApplication.get<{ feedReference: string }, HTML, {}, {}, {}>(
-    "/feeds/:feedReference.xml",
-    (req, res, next) => {
-      const feed = database.get<{
-        id: number;
-        updatedAt: string;
-        title: string;
-      }>(
-        sql`SELECT "id", "updatedAt", "title" FROM "feeds" WHERE "reference" = ${req.params.feedReference}`
-      );
-      if (feed === undefined) return next();
-      const entries = database.all<{
-        createdAt: string;
-        reference: string;
-        title: string;
-        author: string;
-        content: string;
-      }>(
-        sql`
-          SELECT "createdAt", "reference", "title", "author", "content"
-          FROM "entries"
-          WHERE "feed" = ${feed.id}
-        `
-      );
-      res
-        .contentType("application/atom+xml")
-        .header("X-Robots-Tag", "noindex")
-        .send(
-          html`
-            <?xml version="1.0" encoding="utf-8"?>
-            <feed xmlns="http://www.w3.org/2005/Atom">
-              <link
-                rel="self"
-                type="application/atom+xml"
-                href="${webApplication.get("url")}/feeds/${req.params
-                  .feedReference}.xml"
-              />
+  function renderFeed(feedReference: string): HTML | undefined {
+    const feed = database.get<{
+      id: number;
+      updatedAt: string;
+      title: string;
+    }>(
+      sql`SELECT "id", "updatedAt", "title" FROM "feeds" WHERE "reference" = ${feedReference}`
+    );
+    if (feed === undefined) return;
+
+    const entries = database.all<{
+      createdAt: string;
+      reference: string;
+      title: string;
+      author: string;
+      content: string;
+    }>(
+      sql`
+        SELECT "createdAt", "reference", "title", "author", "content"
+        FROM "entries"
+        WHERE "feed" = ${feed.id}
+      `
+    );
+
+    return html`
+      <?xml version="1.0" encoding="utf-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <link
+          rel="self"
+          type="application/atom+xml"
+          href="${webApplication.get("url")}/feeds/${feedReference}.xml"
+        />
+        <link
+          rel="alternate"
+          type="text/html"
+          href="${webApplication.get("url")}/"
+        />
+        <id>urn:kill-the-newsletter:${feedReference}</id>
+        <title>${feed.title}</title>
+        <subtitle
+          >Kill the Newsletter! Inbox:
+          ${feedReference}@${webApplication.get("email host")} →
+          ${webApplication.get("url")}/feeds/${feedReference}.xml</subtitle
+        >
+        <updated>${new Date(feed.updatedAt).toISOString()}</updated>
+        <author><name>Kill the Newsletter!</name></author>
+        $${entries.map(
+          (entry) => html`
+            <entry>
+              <id>urn:kill-the-newsletter:${entry.reference}</id>
+              <title>${entry.title}</title>
+              <author><name>${entry.author}</name></author>
+              <updated>${new Date(entry.createdAt).toISOString()}</updated>
               <link
                 rel="alternate"
                 type="text/html"
-                href="${webApplication.get("url")}/"
+                href="${webApplication.get(
+                  "url"
+                )}/alternates/${entry.reference}.html"
               />
-              <id>urn:kill-the-newsletter:${req.params.feedReference}</id>
-              <title>${feed.title}</title>
-              <subtitle
-                >Kill the Newsletter! Inbox:
-                ${req.params.feedReference}@${webApplication.get("email host")}
-                →
-                ${webApplication.get("url")}/feeds/${req.params
-                  .feedReference}.xml</subtitle
-              >
-              <updated>${new Date(feed.updatedAt).toISOString()}</updated>
-              <author><name>Kill the Newsletter!</name></author>
-              $${entries.map(
-                (entry) => html`
-                  <entry>
-                    <id>urn:kill-the-newsletter:${entry.reference}</id>
-                    <title>${entry.title}</title>
-                    <author><name>${entry.author}</name></author>
-                    <updated
-                      >${new Date(entry.createdAt).toISOString()}</updated
-                    >
-                    <link
-                      rel="alternate"
-                      type="text/html"
-                      href="${webApplication.get(
-                        "url"
-                      )}/alternates/${entry.reference}.html"
-                    />
-                    <content type="html">${entry.content}</content>
-                  </entry>
-                `
-              )}
-            </feed>
-          `.trim()
-        );
+              <content type="html">${entry.content}</content>
+            </entry>
+          `
+        )}
+      </feed>
+    `.trim();
+  }
+
+  webApplication.get<{ feedReference: string }, HTML, {}, {}, {}>(
+    "/feeds/:feedReference.xml",
+    (req, res, next) => {
+      const feed = renderFeed(req.params.feedReference);
+      if (feed === undefined) return next();
+      res
+        .contentType("application/atom+xml")
+        .header("X-Robots-Tag", "noindex")
+        .send(feed);
     }
   );
 
@@ -431,62 +432,41 @@ export default function killTheNewsletter(
   const emailApplication = new SMTPServer({
     disabledCommands: ["AUTH", "STARTTLS"],
     async onData(stream, session, callback) {
-      /*
       try {
+        const atHost = "@" + webApplication.get("email host");
         const email = await mailparser.simpleParser(stream);
-        const content =
+        const from = email.from?.text ?? "";
+        const subject = email.subject ?? "";
+        const body =
           typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
         for (const address of new Set(
-          session.envelope.rcptTo.map(({ address }) => address)
+          session.envelope.rcptTo.map(
+            (smtpServerAddress) => smtpServerAddress.address
+          )
         )) {
-          const match = address.match(
-            new RegExp(
-              `^(?<identifier>\\w+)@${escapeStringRegexp(EMAIL_DOMAIN)}$`
-            )
+          if (!address.endsWith(atHost)) continue;
+          const feedReference = address.slice(0, -atHost.length);
+          const feed = database.get<{ id: number }>(
+            sql`SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}`
           );
-          if (match?.groups === undefined) continue;
-          const identifier = match.groups.identifier.toLowerCase();
-          const path = feedFilePath(identifier);
-          let text;
-          try {
-            text = await fs.readFile(path, "utf8");
-          } catch {
-            continue;
-          }
-          const feed = new JSDOM(text, { contentType: "text/xml" });
-          const document = feed.window.document;
-          const updated = document.querySelector("feed > updated");
-          if (updated === null) {
-            console.error(`Field ‘updated’ not found: ‘${path}’`);
-            continue;
-          }
-          updated.textContent = now();
-          const renderedEntry = entry(
-            identifier,
-            createIdentifier(),
-            X(email.subject ?? ""),
-            X(email.from?.text ?? ""),
-            X(content)
+          if (feed === undefined) continue;
+          database.run(
+            sql`
+              INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
+              VALUES (
+                ${newReference()}, ${feed.id}, ${subject}, ${from}, ${body}
+              )
+            `
           );
-          const firstEntry = document.querySelector(
-            "feed > entry:first-of-type"
+          // TODO: Do this with a trigger.
+          database.run(
+            sql`UPDATE "feeds" SET "updatedAt" = datetime('now') WHERE "id" = ${feed.id}`
           );
-          if (firstEntry === null)
-            document
-              .querySelector("feed")!
-              .insertAdjacentHTML("beforeend", renderedEntry);
-          else firstEntry.insertAdjacentHTML("beforebegin", renderedEntry);
-          while (feed.serialize().length > 500_000) {
-            const lastEntry = document.querySelector(
-              "feed > entry:last-of-type"
+
+          while (renderFeed(feedReference)!.length > 500_00)
+            database.run(
+              sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
             );
-            if (lastEntry === null) break;
-            lastEntry.remove();
-          }
-          await writeFileAtomic(
-            path,
-            html`<?xml version="1.0" encoding="utf-8"?>${feed.serialize()}`.trim()
-          );
         }
         callback();
       } catch (error) {
@@ -497,7 +477,6 @@ export default function killTheNewsletter(
         stream.resume();
         callback(new Error("Failed to receive message. Please try again."));
       }
-      */
     },
   });
 
