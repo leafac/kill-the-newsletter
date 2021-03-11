@@ -65,6 +65,28 @@ export default function killTheNewsletter(
             name="viewport"
             content="width=device-width, initial-scale=1.0"
           />
+          <meta name="generator" content="Kill the Newsletter!/${VERSION}" />
+          <meta
+            name="description"
+            content="Convert email newsletters into Atom feeds."
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="32x32"
+            href="${webApplication.get("url")}/favicon-32x32.png"
+          />
+          <link
+            rel="icon"
+            type="image/png"
+            sizes="16x16"
+            href="${webApplication.get("url")}/favicon-16x16.png"
+          />
+          <link
+            rel="icon"
+            type="image/x-icon"
+            href="${webApplication.get("url")}/favicon.ico"
+          />
           <title>Kill the Newsletter!</title>
         </head>
         <body
@@ -304,36 +326,6 @@ export const webServer = express()
     res.header("X-Robots-Tag", "noindex");
     next();
   })
-  .post("/", async (req, res, next) => {
-    try {
-      const { name } = req.body;
-      const identifier = createIdentifier();
-      const renderedCreated = created(identifier);
-      await writeFileAtomic(
-        feedFilePath(identifier),
-        feed(
-          identifier,
-          X(name),
-          entry(
-            identifier,
-            createIdentifier(),
-            `“${X(name)}” Inbox Created`,
-            "Kill the Newsletter!",
-            X(renderedCreated)
-          )
-        )
-      );
-      res.send(
-        layout(html`
-          <p><strong>“${H(name)}” Inbox Created</strong></p>
-          ${renderedCreated}
-        `)
-      );
-    } catch (error) {
-      console.error(error);
-      next(error);
-    }
-  })
   .get(
     alternatePath(":feedIdentifier", ":entryIdentifier"),
     async (req, res, next) => {
@@ -363,7 +355,6 @@ export const webServer = express()
       }
     }
   )
-  .listen(WEB_PORT, () => console.log(`Server started: ${webApplication.get("url")}`));
 
 export const emailServer = new SMTPServer({
   disabledCommands: ["AUTH", "STARTTLS"],
@@ -432,67 +423,6 @@ export const emailServer = new SMTPServer({
   },
 }).listen(EMAIL_PORT);
 
-function layout(content: string): string {
-  return html`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Kill the Newsletter!</title>
-        <meta name="author" content="Leandro Facchinetti" />
-        <meta
-          name="description"
-          content="Convert email newsletters into Atom feeds."
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="${webApplication.get("url")}/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="${webApplication.get("url")}/favicon-16x16.png"
-        />
-        <link rel="icon" type="image/x-icon" href="${webApplication.get("url")}/favicon.ico" />
-        <link rel="stylesheet" type="text/css" href="${webApplication.get("url")}/styles.css" />
-      </head>
-      <body>
-        <main>${content}</main>
-        <script src="${webApplication.get("url")}/clipboard.min.js"></script>
-        <script src="${webApplication.get("url")}/scripts.js"></script>
-      </body>
-    </html>
-  `.trim();
-}
-
-function created(identifier: string): string {
-  return html`
-    <p>
-      Sign up for the newsletter with<br /><code class="copyable"
-        >${feedEmail(identifier)}</code
-      >
-    </p>
-    <p>
-      Subscribe to the Atom feed at<br /><code class="copyable"
-        >${feedURL(identifier)}</code
-      >
-    </p>
-    <p>
-      Don’t share these addresses.<br />They contain an identifier that other
-      people could use<br />to send you spam and to control your newsletter
-      subscriptions.
-    </p>
-    <p>Enjoy your readings!</p>
-    <p>
-      <a href="${webApplication.get("url")}"><strong>Create Another Inbox</strong></a>
-    </p>
-  `.trim();
-}
-
 function feed(identifier: string, name: string, initialEntry: string): string {
   return html`
     <?xml version="1.0" encoding="utf-8"?>
@@ -539,29 +469,6 @@ function entry(
   `.trim();
 }
 
-function createIdentifier(): string {
-  return cryptoRandomString({
-    length: 16,
-    characters: "1234567890qwertyuiopasdfghjklzxcvbnm",
-  });
-}
-
-function now(): string {
-  return new Date().toISOString();
-}
-
-function feedFilePath(identifier: string): string {
-  return `static/feeds/${identifier}.xml`;
-}
-
-function feedURL(identifier: string): string {
-  return `${webApplication.get("url")}/feeds/${identifier}.xml`;
-}
-
-function feedEmail(identifier: string): string {
-  return `${identifier}@${EMAIL_DOMAIN}`;
-}
-
 function alternatePath(
   feedIdentifier: string,
   entryIdentifier: string
@@ -575,13 +482,5 @@ function alternateURL(feedIdentifier: string, entryIdentifier: string): string {
 
 function urn(identifier: string): string {
   return `urn:kill-the-newsletter:${identifier}`;
-}
-
-function X(string: string): string {
-  return entities.encodeXML(sanitizeXMLString.sanitize(string));
-}
-
-function H(string: string): string {
-  return entities.encodeHTML(sanitizeXMLString.sanitize(string));
 }
 */
