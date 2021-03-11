@@ -87,7 +87,8 @@ export default function killTheNewsletter(
                   monospace;
               }
 
-              a {
+              a,
+              button {
                 color: inherit;
                 text-decoration: none;
                 transition: color 0.2s;
@@ -102,7 +103,7 @@ export default function killTheNewsletter(
               }
 
               footer {
-                font-size: 0.875em;
+                font-size: 0.857em;
               }
 
               input,
@@ -114,17 +115,17 @@ export default function killTheNewsletter(
                 line-height: 1.5;
                 color: inherit;
                 background-color: transparent;
-                padding: 0.2em 1em;
-                border: 1px solid darkgray;
-                border-radius: 10px;
                 margin: 0;
                 outline: none;
-                box-shadow: inset 0px 1px #ffffff22, 0px 1px #00000022;
               }
 
               input {
                 box-sizing: border-box;
                 width: 100%;
+                padding: 0.2em 1em;
+                border: 1px solid darkgray;
+                border-radius: 10px;
+                box-shadow: inset 0px 1px #ffffff22, 0px 1px #00000022;
                 -webkit-appearance: none;
                 transition: border-color 0.2s;
 
@@ -134,27 +135,10 @@ export default function killTheNewsletter(
               }
 
               button {
-                color: #ffffffd4;
-                background-color: #83769c;
-                border-color: #83769c;
-                transition-property: color, background-color, border-color;
-                transition-duration: 0.2s;
+                font-weight: bold;
+                padding: 0;
+                border: none;
                 cursor: pointer;
-
-                @media (prefers-color-scheme: dark) {
-                  background-color: #584f69;
-                  border-color: #584f69;
-                }
-
-                &:hover {
-                  color: #ffffffd4;
-                  background-color: #6e6382;
-                }
-
-                &:active {
-                  color: #ffffffd4;
-                  background-color: #584f69;
-                }
               }
 
               @media (prefers-color-scheme: light) {
