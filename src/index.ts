@@ -262,7 +262,7 @@ export default function killTheNewsletter(
 
   webApplication.post<{}, HTML, { name?: string }, {}, {}>("/", (req, res) => {
     if (
-      req.body.name === undefined ||
+      typeof req.body.name !== "string" ||
       req.body.name.trim() === "" ||
       req.body.name.length > 500
     )
