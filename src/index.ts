@@ -194,7 +194,7 @@ export default function killTheNewsletter(
   webApplication.get<{}, HTML, {}, {}, {}>("/", (req, res) => {
     res.send(
       layout(html`
-        <form method="POST" action="${webApplication.get("url")}/">
+        <form method="post" action="${webApplication.get("url")}/">
           <p>
             <input
               type="text"
@@ -212,7 +212,79 @@ export default function killTheNewsletter(
     );
   });
 
+  webApplication.post<{}, HTML, { name?: string }, {}, {}>("/", (req, res) => {
+    if (
+      req.body.name === undefined ||
+      req.body.name.trim() === "" ||
+      req.body.name.length > 500
+    )
+      return res.status(400).send(
+        layout(
+          html`<p>
+            Error: Missing newsletter name.
+            <a href="${webApplication.get("url")}/"
+              ><strong>Try again</strong></a
+            >.
+          </p>`
+        )
+      );
+
+    const reference = newReference();
+
+    const created = html`
+      <p>
+        Sign up for the newsletter with<br />
+        <code class="copyable"
+          >${reference}@${webApplication.get("email host")}</code
+        >
+      </p>
+      <p>
+        Subscribe to the Atom feed at<br />
+        <code class="copyable"
+          >${webApplication.get("url")}/feeds/${reference}.xml</code
+        >
+      </p>
+      <p>
+        <strong>Don’t share these addresses.</strong><br />
+        They contain an identifier that other people could use to send you spam
+        and to control your newsletter subscriptions.
+      </p>
+      <p>Enjoy your readings!</p>
+      <p>
+        <a href="${webApplication.get("url")}/"
+          ><strong>Create Another Inbox</strong></a
+        >
+      </p>
+    `;
+
+    const feedId = database.run(
+      sql`INSERT INTO "feeds" ("reference", "title") VALUES (${reference}, ${req.body.name})`
+    ).lastInsertRowid;
+    database.run(
+      sql`
+        INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
+        VALUES (${newReference()}, ${feedId}, ${`“${req.body.name}” inbox created`}, ${"Kill the Newsletter!"}, ${created})
+      `
+    );
+
+    res.send(
+      layout(html`
+        <p>
+          <strong>“${req.body.name}” inbox created</strong>
+          $${created}
+        </p>
+      `)
+    );
+  });
+
   const emailApplication = new SMTPServer();
+
+  function newReference(): string {
+    return cryptoRandomString({
+      length: 16,
+      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+    });
+  }
 
   return { webApplication, emailApplication };
 }
