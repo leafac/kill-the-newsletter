@@ -4,7 +4,6 @@ import path from "path";
 import express from "express";
 import { SMTPServer } from "smtp-server";
 import mailparser from "mailparser";
-import escapeStringRegexp from "escape-string-regexp";
 import fs from "fs-extra";
 import cryptoRandomString from "crypto-random-string";
 import { html, HTML } from "@leafac/html";
@@ -48,6 +47,12 @@ export default function killTheNewsletter(
         "author" TEXT NOT NULL,
         "content" TEXT NOT NULL
       );
+
+      CREATE TRIGGER "feedsUpdatedAt"
+      AFTER INSERT ON "entries"
+      BEGIN
+        UPDATE "feeds" SET "updatedAt" = datetime('now') WHERE "id" = "NEW"."feed";
+      END;
     `,
   ]);
 
@@ -458,12 +463,7 @@ export default function killTheNewsletter(
               )
             `
           );
-          // TODO: Do this with a trigger.
-          database.run(
-            sql`UPDATE "feeds" SET "updatedAt" = datetime('now') WHERE "id" = ${feed.id}`
-          );
-
-          while (renderFeed(feedReference)!.length > 500_00)
+          while (renderFeed(feedReference)!.length > 500_000)
             database.run(
               sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
             );
