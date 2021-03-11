@@ -98,7 +98,7 @@ export default function killTheNewsletter(
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
                 line-height: 1.5;
-                max-width: 400px;
+                max-width: 450px;
                 padding: 0 1em;
                 margin: 1em auto;
                 text-align: center;
@@ -204,7 +204,7 @@ export default function killTheNewsletter(
               >
               ·
               <a href="${webApplication.get("administrator")}"
-                >Report an Issue</a
+                >Report an issue</a
               >
             </p>
           </footer>
@@ -271,10 +271,10 @@ export default function killTheNewsletter(
         They contain an identifier that other people could use to send you spam
         and to control your newsletter subscriptions.
       </p>
-      <p>Enjoy your readings!</p>
+      <p><strong>Enjoy your readings!</strong></p>
       <p>
         <a href="${webApplication.get("url")}/"
-          ><strong>Create Another Inbox</strong></a
+          ><strong>Create another inbox</strong></a
         >
       </p>
     `;
@@ -389,7 +389,18 @@ export default function killTheNewsletter(
     }
   );
 
-  // TODO: 404
+  webApplication.use((req, res) => {
+    res.send(
+      layout(html`
+        <p><strong>404 Not found</strong></p>
+        <p>
+          <a href="${webApplication.get("url")}/"
+            ><strong>Create a new inbox</strong></a
+          >
+        </p>
+      `)
+    );
+  });
 
   const emailApplication = new SMTPServer();
 
