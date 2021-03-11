@@ -299,6 +299,85 @@ export default function killTheNewsletter(
     );
   });
 
+  webApplication.get<{ feedReference: string }, HTML, {}, {}, {}>(
+    "/feeds/:feedReference.xml",
+    (req, res, next) => {
+      const feed = database.get<{
+        id: number;
+        updatedAt: string;
+        title: string;
+      }>(
+        sql`SELECT "id", "updatedAt", "title" FROM "feeds" WHERE "reference" = ${req.params.feedReference}`
+      );
+      if (feed === undefined) return next();
+      const entries = database.all<{
+        createdAt: string;
+        reference: string;
+        title: string;
+        author: string;
+        content: string;
+      }>(
+        sql`
+          SELECT "createdAt", "reference", "title", "author", "content"
+          FROM "entries"
+          WHERE "feed" = ${feed.id}
+        `
+      );
+      res
+        .contentType("application/atom+xml")
+        .header("X-Robots-Tag", "noindex")
+        .send(
+          html`
+            <?xml version="1.0" encoding="utf-8"?>
+            <feed xmlns="http://www.w3.org/2005/Atom">
+              <link
+                rel="self"
+                type="application/atom+xml"
+                href="${webApplication.get("url")}/feeds/${req.params
+                  .feedReference}.xml"
+              />
+              <link
+                rel="alternate"
+                type="text/html"
+                href="${webApplication.get("url")}/"
+              />
+              <id>urn:kill-the-newsletter:${req.params.feedReference}</id>
+              <title>${feed.title}</title>
+              <subtitle
+                >Kill the Newsletter! Inbox:
+                ${req.params.feedReference}@${webApplication.get("email host")}
+                →
+                ${webApplication.get("url")}/feeds/${req.params
+                  .feedReference}.xml</subtitle
+              >
+              <updated>${new Date(feed.updatedAt).toISOString()}</updated>
+              <author><name>Kill the Newsletter!</name></author>
+              $${entries.map(
+                (entry) => html`
+                  <entry>
+                    <id>urn:kill-the-newsletter:${entry.reference}</id>
+                    <title>${entry.title}</title>
+                    <author><name>${entry.author}</name></author>
+                    <updated
+                      >${new Date(entry.createdAt).toISOString()}</updated
+                    >
+                    <link
+                      rel="alternate"
+                      type="text/html"
+                      href="${webApplication.get(
+                        "url"
+                      )}/alternates/${entry.reference}.html"
+                    />
+                    <content type="html">${entry.content}</content>
+                  </entry>
+                `
+              )}
+            </feed>
+          `.trim()
+        );
+    }
+  );
+
   const emailApplication = new SMTPServer();
 
   function newReference(): string {
@@ -422,52 +501,6 @@ export const emailServer = new SMTPServer({
     }
   },
 }).listen(EMAIL_PORT);
-
-function feed(identifier: string, name: string, initialEntry: string): string {
-  return html`
-    <?xml version="1.0" encoding="utf-8"?>
-    <feed xmlns="http://www.w3.org/2005/Atom">
-      <link
-        rel="self"
-        type="application/atom+xml"
-        href="${feedURL(identifier)}"
-      />
-      <link rel="alternate" type="text/html" href="${webApplication.get("url")}" />
-      <id>${urn(identifier)}</id>
-      <title>${name}</title>
-      <subtitle
-        >Kill the Newsletter! Inbox: ${feedEmail(identifier)} →
-        ${feedURL(identifier)}</subtitle
-      >
-      <updated>${now()}</updated>
-      <author><name>Kill the Newsletter!</name></author>
-      ${initialEntry}
-    </feed>
-  `.trim();
-}
-
-function entry(
-  feedIdentifier: string,
-  entryIdentifier: string,
-  title: string,
-  author: string,
-  content: string
-): string {
-  return html`
-    <entry>
-      <id>${urn(entryIdentifier)}</id>
-      <title>${title}</title>
-      <author><name>${author}</name></author>
-      <updated>${now()}</updated>
-      <link
-        rel="alternate"
-        type="text/html"
-        href="${alternateURL(feedIdentifier, entryIdentifier)}"
-      />
-      <content type="html">${content}</content>
-    </entry>
-  `.trim();
-}
 
 function alternatePath(
   feedIdentifier: string,
