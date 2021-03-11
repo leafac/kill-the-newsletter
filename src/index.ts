@@ -11,6 +11,7 @@ import { html, HTML } from "@leafac/html";
 import { css, process as processCSS } from "@leafac/css";
 import { sql, Database } from "@leafac/sqlite";
 import databaseMigrate from "@leafac/sqlite-migration";
+import javascript from "tagged-template-noop";
 
 const VERSION = require("../package.json").version;
 
@@ -208,6 +209,31 @@ export default function killTheNewsletter(
               >
             </p>
           </footer>
+          <script>
+            for (const copyable of document.querySelectorAll(".copyable"))
+              copyable.insertAdjacentHTML(
+                "afterend",
+                $${"`"}
+                $${html`
+              <br />
+              <button
+                type="button"
+                onclick="${javascript`
+                  (async () => {
+                    await navigator.clipboard.writeText("\${copyable.innerText}");
+                    const originalInnerText = this.innerText;
+                    this.innerText = "Copied";
+                    await new Promise(resolve => window.setTimeout(resolve, 500));
+                    this.innerText = originalInnerText;
+                  })();
+                `}"
+              >
+                Copy
+              </button>
+            `}
+                $${"`"}
+              );
+          </script>
         </body>
       </html>
     `);
