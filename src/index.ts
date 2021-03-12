@@ -98,7 +98,7 @@ export default function killTheNewsletter(
         );
       END;
 
-      CREATE TRIGGER "feedsUpdatedAt"
+      CREATE TRIGGER "entriesInsertImpliesFeedsUpdatedAt"
       AFTER INSERT ON "entries"
       BEGIN
         UPDATE "feeds" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = "NEW"."feed";
