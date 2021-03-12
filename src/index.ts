@@ -51,7 +51,7 @@ export default function killTheNewsletter(
       CREATE TRIGGER "feedsUpdatedAt"
       AFTER INSERT ON "entries"
       BEGIN
-        UPDATE "feeds" SET "updatedAt" = datetime('now') WHERE "id" = "NEW"."feed";
+        UPDATE "feeds" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = "NEW"."feed";
       END;
     `,
   ]);
@@ -310,9 +310,11 @@ export default function killTheNewsletter(
       </p>
     `;
 
+    // TODO: Add references with a default value with is a call to a JavaScript function.
     const feedId = database.run(
       sql`INSERT INTO "feeds" ("reference", "title") VALUES (${reference}, ${req.body.name})`
     ).lastInsertRowid;
+    // TODO: Do this entry with a trigger.
     database.run(
       sql`
         INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
@@ -464,6 +466,7 @@ export default function killTheNewsletter(
             `
           );
           while (renderFeed(feedReference)!.length > 500_000)
+            // TODO: Does LIMIT 1 work in DELETE?
             database.run(
               sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
             );
