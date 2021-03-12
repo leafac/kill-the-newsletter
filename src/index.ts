@@ -465,18 +465,18 @@ export default function killTheNewsletter(
         const subject = email.subject ?? "";
         const body =
           typeof email.html === "string" ? email.html : email.textAsHtml ?? "";
-        for (const address of new Set(
-          session.envelope.rcptTo.map(
-            (smtpServerAddress) => smtpServerAddress.address
-          )
-        )) {
-          if (!address.endsWith(atHost)) continue;
-          const feedReference = address.slice(0, -atHost.length);
-          const feed = database.get<{ id: number }>(
-            sql`SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}`
-          );
-          if (feed === undefined) continue;
-          database.executeTransaction(() => {
+        database.executeTransaction(() => {
+          for (const address of new Set(
+            session.envelope.rcptTo.map(
+              (smtpServerAddress) => smtpServerAddress.address
+            )
+          )) {
+            if (!address.endsWith(atHost)) continue;
+            const feedReference = address.slice(0, -atHost.length);
+            const feed = database.get<{ id: number }>(
+              sql`SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}`
+            );
+            if (feed === undefined) continue;
             database.run(
               sql`
                 INSERT INTO "entries" ("feed", "title", "author", "content")
@@ -487,8 +487,8 @@ export default function killTheNewsletter(
               database.run(
                 sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
               );
-          });
-        }
+          }
+        });
         callback();
       } catch (error) {
         console.error(
