@@ -466,7 +466,6 @@ export default function killTheNewsletter(
             `
           );
           while (renderFeed(feedReference)!.length > 500_000)
-            // TODO: Does LIMIT 1 work in DELETE?
             database.run(
               sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
             );
