@@ -476,16 +476,18 @@ export default function killTheNewsletter(
             sql`SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}`
           );
           if (feed === undefined) continue;
-          database.run(
-            sql`
-              INSERT INTO "entries" ("feed", "title", "author", "content")
-              VALUES (${feed.id}, ${subject}, ${from}, ${body})
-            `
-          );
-          while (renderFeed(feedReference)!.length > 500_000)
+          database.executeTransaction(() => {
             database.run(
-              sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
+              sql`
+                INSERT INTO "entries" ("feed", "title", "author", "content")
+                VALUES (${feed.id}, ${subject}, ${from}, ${body})
+              `
             );
+            while (renderFeed(feedReference)!.length > 500_000)
+              database.run(
+                sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
+              );
+          });
         }
         callback();
       } catch (error) {
