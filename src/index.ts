@@ -28,20 +28,26 @@ export default function killTheNewsletter(
   const database = new Database(
     path.join(rootDirectory, "kill-the-newsletter.db")
   );
+  database.function("newReference", () =>
+    cryptoRandomString({
+      length: 16,
+      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+    })
+  );
   databaseMigrate(database, [
     sql`
       CREATE TABLE "feeds" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE,
+        "reference" TEXT NOT NULL UNIQUE DEFAULT (newReference()),
         "title" TEXT NOT NULL
       );
 
       CREATE TABLE "entries" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE,
+        "reference" TEXT NOT NULL UNIQUE DEFAULT (newReference()),
         "feed" INTEGER NOT NULL REFERENCES "feeds",
         "title" TEXT NOT NULL,
         "author" TEXT NOT NULL,
@@ -282,19 +288,24 @@ export default function killTheNewsletter(
         )
       );
 
-    const reference = newReference();
+    const feedId = database.run(
+      sql`INSERT INTO "feeds" ("title") VALUES (${req.body.name})`
+    ).lastInsertRowid;
+    const feed = database.get<{ reference: string }>(
+      sql`SELECT "reference" FROM "feeds" WHERE "id" = ${feedId}`
+    )!;
 
     const created = html`
       <p>
         Sign up for the newsletter with<br />
         <code class="copyable"
-          >${reference}@${webApplication.get("email host")}</code
+          >${feed.reference}@${webApplication.get("email host")}</code
         >
       </p>
       <p>
         Subscribe to the Atom feed at<br />
         <code class="copyable"
-          >${webApplication.get("url")}/feeds/${reference}.xml</code
+          >${webApplication.get("url")}/feeds/${feed.reference}.xml</code
         >
       </p>
       <p>
@@ -310,15 +321,11 @@ export default function killTheNewsletter(
       </p>
     `;
 
-    // TODO: Add references with a default value with is a call to a JavaScript function.
-    const feedId = database.run(
-      sql`INSERT INTO "feeds" ("reference", "title") VALUES (${reference}, ${req.body.name})`
-    ).lastInsertRowid;
     // TODO: Do this entry with a trigger.
     database.run(
       sql`
-        INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
-        VALUES (${newReference()}, ${feedId}, ${`“${req.body.name}” inbox created`}, ${"Kill the Newsletter!"}, ${created})
+        INSERT INTO "entries" ("feed", "title", "author", "content")
+        VALUES (${feedId}, ${`“${req.body.name}” inbox created`}, ${"Kill the Newsletter!"}, ${created})
       `
     );
 
@@ -459,10 +466,8 @@ export default function killTheNewsletter(
           if (feed === undefined) continue;
           database.run(
             sql`
-              INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
-              VALUES (
-                ${newReference()}, ${feed.id}, ${subject}, ${from}, ${body}
-              )
+              INSERT INTO "entries" ("feed", "title", "author", "content")
+              VALUES (${feed.id}, ${subject}, ${from}, ${body})
             `
           );
           while (renderFeed(feedReference)!.length > 500_000)
