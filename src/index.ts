@@ -28,11 +28,47 @@ export default function killTheNewsletter(
   const database = new Database(
     path.join(rootDirectory, "kill-the-newsletter.db")
   );
-  database.function("newReference", () =>
+  database.function("newReference", (): string =>
     cryptoRandomString({
       length: 16,
       characters: "abcdefghijklmnopqrstuvwxyz0123456789",
     })
+  );
+  database.function(
+    "entryFeedCreatedTitle",
+    (title: string): string => `“${title}” inbox created`
+  );
+  database.function(
+    "entryFeedCreatedAuthor",
+    (): string => "Kill the Newsletter!"
+  );
+  database.function(
+    "entryFeedCreatedContent",
+    (feedReference: string): HTML => html`
+      <p>
+        Sign up for the newsletter with<br />
+        <code class="copyable"
+          >${feedReference}@${webApplication.get("email host")}</code
+        >
+      </p>
+      <p>
+        Subscribe to the Atom feed at<br />
+        <code class="copyable"
+          >${webApplication.get("url")}/feeds/${feedReference}.xml</code
+        >
+      </p>
+      <p>
+        <strong>Don’t share these addresses.</strong><br />
+        They contain an identifier that other people could use to send you spam
+        and to control your newsletter subscriptions.
+      </p>
+      <p><strong>Enjoy your readings!</strong></p>
+      <p>
+        <a href="${webApplication.get("url")}/"
+          ><strong>Create another inbox</strong></a
+        >
+      </p>
+    `
   );
   databaseMigrate(database, [
     sql`
@@ -53,6 +89,18 @@ export default function killTheNewsletter(
         "author" TEXT NOT NULL,
         "content" TEXT NOT NULL
       );
+
+      CREATE TRIGGER "entryFeedCreated"
+      AFTER INSERT ON "feeds"
+      BEGIN
+        INSERT INTO "entries" ("feed", "title", "author", "content")
+        VALUES (
+          "NEW"."id",
+          entryFeedCreatedTitle("NEW"."title"),
+          entryFeedCreatedAuthor(),
+          entryFeedCreatedContent("NEW"."reference")
+        );
+      END;
 
       CREATE TRIGGER "feedsUpdatedAt"
       AFTER INSERT ON "entries"
@@ -287,54 +335,16 @@ export default function killTheNewsletter(
           </p>`
         )
       );
-
     const feedId = database.run(
       sql`INSERT INTO "feeds" ("title") VALUES (${req.body.name})`
     ).lastInsertRowid;
-    const feed = database.get<{ reference: string }>(
-      sql`SELECT "reference" FROM "feeds" WHERE "id" = ${feedId}`
+    const entry = database.get<{ title: string; content: HTML }>(
+      sql`SELECT "title", "content" FROM "entries" WHERE "feed" = ${feedId}`
     )!;
-
-    const created = html`
-      <p>
-        Sign up for the newsletter with<br />
-        <code class="copyable"
-          >${feed.reference}@${webApplication.get("email host")}</code
-        >
-      </p>
-      <p>
-        Subscribe to the Atom feed at<br />
-        <code class="copyable"
-          >${webApplication.get("url")}/feeds/${feed.reference}.xml</code
-        >
-      </p>
-      <p>
-        <strong>Don’t share these addresses.</strong><br />
-        They contain an identifier that other people could use to send you spam
-        and to control your newsletter subscriptions.
-      </p>
-      <p><strong>Enjoy your readings!</strong></p>
-      <p>
-        <a href="${webApplication.get("url")}/"
-          ><strong>Create another inbox</strong></a
-        >
-      </p>
-    `;
-
-    // TODO: Do this entry with a trigger.
-    database.run(
-      sql`
-        INSERT INTO "entries" ("feed", "title", "author", "content")
-        VALUES (${feedId}, ${`“${req.body.name}” inbox created`}, ${"Kill the Newsletter!"}, ${created})
-      `
-    );
-
     res.send(
       layout(html`
-        <p>
-          <strong>“${req.body.name}” inbox created</strong>
-          $${created}
-        </p>
+        <p><strong>${entry.title}</strong></p>
+        $${entry.content}
       `)
     );
   });
