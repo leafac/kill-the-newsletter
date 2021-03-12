@@ -335,12 +335,14 @@ export default function killTheNewsletter(
           </p>`
         )
       );
+
     const feedId = database.run(
       sql`INSERT INTO "feeds" ("title") VALUES (${req.body.name})`
     ).lastInsertRowid;
     const entry = database.get<{ title: string; content: HTML }>(
       sql`SELECT "title", "content" FROM "entries" WHERE "feed" = ${feedId}`
     )!;
+
     res.send(
       layout(html`
         <p><strong>${entry.title}</strong></p>
