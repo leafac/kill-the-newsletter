@@ -39,10 +39,6 @@ export default function killTheNewsletter(
     (title: string): string => `“${title}” inbox created`
   );
   database.function(
-    "entryFeedCreatedAuthor",
-    (): string => "Kill the Newsletter!"
-  );
-  database.function(
     "entryFeedCreatedContent",
     (feedReference: string): HTML => html`
       <p>
@@ -97,7 +93,7 @@ export default function killTheNewsletter(
         VALUES (
           "NEW"."id",
           entryFeedCreatedTitle("NEW"."title"),
-          entryFeedCreatedAuthor(),
+          'Kill the Newsletter!',
           entryFeedCreatedContent("NEW"."reference")
         );
       END;
