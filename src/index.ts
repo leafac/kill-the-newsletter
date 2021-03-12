@@ -28,18 +28,18 @@ export default function killTheNewsletter(
   const database = new Database(
     path.join(rootDirectory, "kill-the-newsletter.db")
   );
-  database.function("newReference", (): string =>
+  database.function("newRandomReference", (): string =>
     cryptoRandomString({
       length: 16,
       characters: "abcdefghijklmnopqrstuvwxyz0123456789",
     })
   );
   database.function(
-    "entryFeedCreatedTitle",
+    "welcomeEntryTitle",
     (title: string): string => `“${title}” inbox created`
   );
   database.function(
-    "entryFeedCreatedContent",
+    "welcomeEntryContent",
     (feedReference: string): HTML => html`
       <p>
         Sign up for the newsletter with<br />
@@ -72,29 +72,29 @@ export default function killTheNewsletter(
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE DEFAULT (newReference()),
+        "reference" TEXT NOT NULL UNIQUE DEFAULT (newRandomReference()),
         "title" TEXT NOT NULL
       );
 
       CREATE TABLE "entries" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE DEFAULT (newReference()),
+        "reference" TEXT NOT NULL UNIQUE DEFAULT (newRandomReference()),
         "feed" INTEGER NOT NULL REFERENCES "feeds",
         "title" TEXT NOT NULL,
         "author" TEXT NOT NULL,
         "content" TEXT NOT NULL
       );
 
-      CREATE TRIGGER "entryFeedCreated"
+      CREATE TRIGGER "welcomeEntry"
       AFTER INSERT ON "feeds"
       BEGIN
         INSERT INTO "entries" ("feed", "title", "author", "content")
         VALUES (
           "NEW"."id",
-          entryFeedCreatedTitle("NEW"."title"),
+          welcomeEntryTitle("NEW"."title"),
           'Kill the Newsletter!',
-          entryFeedCreatedContent("NEW"."reference")
+          welcomeEntryContent("NEW"."reference")
         );
       END;
 
