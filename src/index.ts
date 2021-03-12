@@ -497,13 +497,6 @@ export default function killTheNewsletter(
     },
   });
 
-  function newReference(): string {
-    return cryptoRandomString({
-      length: 16,
-      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-    });
-  }
-
   return { webApplication, emailApplication };
 }
 
