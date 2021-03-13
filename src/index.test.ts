@@ -1,3 +1,18 @@
+/*
+You may send emails manually from the command line with the following:
+
+cat << "EOF" > /tmp/example-email.txt
+From: Publisher <publisher@example.com>
+To: ru9rmeebswmcy7wx@localhost
+Subject: A subject
+Date: Sat, 13 Mar 2021 11:30:40
+
+<p>Some HTML content</p>
+EOF
+
+curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
+*/
+
 import { beforeAll, afterAll, describe, test, expect } from "@jest/globals";
 import os from "os";
 import path from "path";
