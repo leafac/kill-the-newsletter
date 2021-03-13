@@ -47,7 +47,7 @@ test("Kill the Newsletter!", async () => {
   const feedReference = create.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
 
   // Test feed properties
-  let feedOriginal = await webClient.get(`feeds/${feedReference}.xml`);
+  const feedOriginal = await webClient.get(`feeds/${feedReference}.xml`);
   expect(feedOriginal.headers["content-type"]).toMatch("application/atom+xml");
   expect(feedOriginal.headers["x-robots-tag"]).toBe("noindex");
   expect(feedOriginal.body).toMatch(html`<title>A newsletter</title>`);
@@ -71,7 +71,7 @@ test("Kill the Newsletter!", async () => {
     subject: "Test email with HTML",
     html: html`<p>Some HTML</p>`,
   });
-  let feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+  const feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
   expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
     feedOriginal.body.match(/<updated>(.+?)<\/updated>/)![1]
   );
@@ -84,30 +84,29 @@ test("Kill the Newsletter!", async () => {
     html`<content type="html">${`<p>Some HTML</p>`}\n</content>`
   );
 
-  // Test email with plain text
+  // Test email with text
   await emailClient.sendMail({
     from: "publisher@example.com",
     to: `${feedReference}@${emailHost}`,
-    subject: "Test email with plain text",
-    text: "Some plain text",
-  });
-  feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-  expect(feed).toMatch(
-    html`<content type="html">${`<p>Some plain text</p>`}</content>`
-  );
-
-  // Test email with rich text
-  await emailClient.sendMail({
-    from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
-    subject: "Test email with rich text",
+    subject: "Test email with text",
     text: "A link: https://kill-the-newsletter.com",
   });
-  feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-  expect(feed).toMatch(
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
     // prettier-ignore
     html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
   );
+
+  // Test emails with missing fields
+  // await emailClient.sendMail({
+  //   from: "publisher@example.com",
+  //   to: `${feedReference}@${emailHost}`,
+  //   subject: "Test email with text",
+  //   text: "A link: https://kill-the-newsletter.com",
+  // });
+  // expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
+  //   // prettier-ignore
+  //   html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
+  // );
 
   // Stop servers
   webServer.close();
@@ -116,37 +115,6 @@ test("Kill the Newsletter!", async () => {
 
 /*
 describe("receive email", () => {
-  test("invalid XML character in HTML", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      html: "<p>Invalid XML character (backspace): |\b|💩</p>",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    expect(entry.querySelector("content")!.textContent).toMatchInlineSnapshot(`
-      "<p>Invalid XML character (backspace): ||💩</p>
-      "
-    `);
-  });
-
-  test("invalid XML character in text", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: "Invalid XML character (backspace): |\b|💩",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    expect(entry.querySelector("content")!.textContent).toMatchInlineSnapshot(
-      `"<p>Invalid XML character (backspace): |&#x8;|&#x1F4A9;</p>"`
-    );
-  });
-
   test("missing ‘from’", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
