@@ -16,7 +16,7 @@
   "bugs": "https://github.com/leafac/kill-the-newsletter/issues",
   "homepage": "https://github.com/leafac/kill-the-newsletter#readme",
   "scripts": {
-    "start": "ts-node-dev --poll src/index.ts configuration.local.js",
+    "start": "ts-node-dev --poll src/index.ts configuration.development.js",
     "test": "prettier --check \"src/**/*\" --end-of-line auto && jest",
     "prepare": "tsc"
   },
