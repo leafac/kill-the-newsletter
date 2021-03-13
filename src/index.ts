@@ -356,7 +356,7 @@ export default function killTheNewsletter(
         SELECT "createdAt", "reference", "title", "author", "content"
         FROM "entries"
         WHERE "feed" = ${feed.id}
-        ORDER BY "createdAt" DESC
+        ORDER BY "id" DESC
       `
     );
 
@@ -479,7 +479,7 @@ export default function killTheNewsletter(
             );
             while (renderFeed(feedReference)!.length > 500_000)
               database.run(
-                sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "createdAt" ASC LIMIT 1`
+                sql`DELETE FROM "entries" WHERE "feed" = ${feed.id} ORDER BY "id" ASC LIMIT 1`
               );
           }
         });

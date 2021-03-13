@@ -4,10 +4,10 @@ You may send emails manually from the command line with the following:
 cat << "EOF" > /tmp/example-email.txt
 From: Publisher <publisher@example.com>
 To: ru9rmeebswmcy7wx@localhost
-Subject: A subject
+Subject: Test email with HTML
 Date: Sat, 13 Mar 2021 11:30:40
 
-<p>Some HTML content</p>
+<p>Some HTML</p>
 EOF
 
 curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
@@ -68,8 +68,8 @@ test("Kill the Newsletter!", async () => {
   await emailClient.sendMail({
     from: "publisher@example.com",
     to: `${feedReference}@${emailHost}`,
-    subject: "A subject",
-    html: html`<p>Some HTML content</p>`,
+    subject: "Test email with HTML",
+    html: html`<p>Some HTML</p>`,
   });
   let feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
   expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
@@ -78,10 +78,35 @@ test("Kill the Newsletter!", async () => {
   expect(feed).toMatch(
     html`<author><name>publisher@example.com</name></author>`
   );
-  expect(feed).toMatch(html`<title>A subject</title>`);
+  expect(feed).toMatch(html`<title>Test email with HTML</title>`);
   expect(feed).toMatch(
     // prettier-ignore
-    html`<content type="html">${`<p>Some HTML content</p>`}\n</content>`
+    html`<content type="html">${`<p>Some HTML</p>`}\n</content>`
+  );
+
+  // Test email with plain text
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email with plain text",
+    text: "Some plain text",
+  });
+  feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+  expect(feed).toMatch(
+    html`<content type="html">${`<p>Some plain text</p>`}</content>`
+  );
+
+  // Test email with rich text
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email with rich text",
+    text: "A link: https://kill-the-newsletter.com",
+  });
+  feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+  expect(feed).toMatch(
+    // prettier-ignore
+    html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
   );
 
   // Stop servers
@@ -91,41 +116,6 @@ test("Kill the Newsletter!", async () => {
 
 /*
 describe("receive email", () => {
-  test("text content", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: "TEXT content",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    const alternate = await getAlternate(
-      entry.querySelector("link")!.getAttribute("href")!
-    );
-    expect(entry.querySelector("content")!.textContent).toMatch("TEXT content");
-    expect(alternate.querySelector("p")!.textContent).toMatch("TEXT content");
-  });
-
-  test("rich text content", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: "TEXT content\n\nhttps://leafac.com\n\nMore text",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    const alternate = await getAlternate(
-      entry.querySelector("link")!.getAttribute("href")!
-    );
-    expect(alternate.querySelector("a")!.getAttribute("href")).toBe(
-      "https://leafac.com"
-    );
-  });
-
   test("invalid XML character in HTML", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
