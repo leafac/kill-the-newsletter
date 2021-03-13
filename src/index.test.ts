@@ -76,6 +76,7 @@ describe("Receive email", () => {
       await webClient.post("", { form: { name: "A newsletter" } })
     ).body.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
     const feedBefore = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+    // await new Promise((resolve) => setTimeout(resolve, 50));
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `${feedReference}@${emailHost}`,
