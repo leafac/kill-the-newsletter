@@ -20,8 +20,7 @@ export default function killTheNewsletter(
   const webApplication = express();
 
   webApplication.set("url", "http://localhost:4000");
-  webApplication.set("email port", 2525);
-  webApplication.set("email host", "localhost");
+  webApplication.set("email", "smtp://localhost:2525");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
   fs.ensureDirSync(rootDirectory);
@@ -287,7 +286,8 @@ export default function killTheNewsletter(
       <p>
         Sign up for the newsletter with<br />
         <code class="copyable"
-          >${feedReference}@${webApplication.get("email host")}</code
+          >${feedReference}@${new URL(webApplication.get("email"))
+            .hostname}</code
         >
       </p>
       <p>
@@ -376,7 +376,7 @@ export default function killTheNewsletter(
         <title>${feed.title}</title>
         <subtitle
           >Kill the Newsletter! Inbox:
-          ${feedReference}@${webApplication.get("email host")} →
+          ${feedReference}@${new URL(webApplication.get("email")).hostname} →
           ${webApplication.get("url")}/feeds/${feedReference}.xml</subtitle
         >
         <updated>${new Date(feed.updatedAt).toISOString()}</updated>
@@ -443,7 +443,7 @@ export default function killTheNewsletter(
     disabledCommands: ["AUTH", "STARTTLS"],
     async onData(stream, session, callback) {
       try {
-        const atHost = "@" + webApplication.get("email host");
+        const atHost = "@" + new URL(webApplication.get("email")).hostname;
         const email = await mailparser.simpleParser(stream);
         const from = email.from?.text ?? "";
         const subject = email.subject ?? "";

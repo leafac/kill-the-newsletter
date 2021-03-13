@@ -1,8 +1,33 @@
-import { webServer, emailServer, BASE_URL, EMAIL_DOMAIN, EMAIL_PORT } from ".";
+import { beforeAll, afterAll, describe, test, expect } from "@jest/globals";
+import os from "os";
+import path from "path";
+import http from "http";
+import net from "net";
+import fs from "fs";
+import * as got from "got";
 import nodemailer from "nodemailer";
-import axios from "axios";
-import qs from "qs";
-import { JSDOM } from "jsdom";
+import killTheNewsletter from ".";
+
+let webServer: http.Server;
+let emailServer: net.Server;
+let webClient: got.Got;
+let emailClient: nodemailer.Transporter;
+beforeAll(() => {
+  const rootDirectory = fs.mkdtempSync(
+    path.join(os.tmpdir(), "kill-the-newsletter--test--")
+  );
+  const { webApplication, emailApplication } = killTheNewsletter(rootDirectory);
+  webServer = webApplication.listen(new URL(webApplication.get("url")).port);
+  emailServer = emailApplication.listen(
+    new URL(webApplication.get("email")).port
+  );
+  webClient = got.default.extend({ prefixUrl: webApplication.get("url") });
+  emailClient = nodemailer.createTransport(webApplication.get("email"));
+});
+afterAll(() => {
+  webServer.close();
+  emailServer.close();
+});
 
 test("create feed", async () => {
   const identifier = await createFeed();
@@ -235,12 +260,6 @@ test("‘noindex’ header", async () => {
   );
 });
 
-const webClient = axios.create({
-  baseURL: BASE_URL,
-});
-const emailClient = nodemailer.createTransport(
-  `smtp://${EMAIL_DOMAIN}:${EMAIL_PORT}`
-);
 afterAll(() => {
   webServer.close();
   emailServer.close();
