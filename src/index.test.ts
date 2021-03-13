@@ -6,6 +6,7 @@ import net from "net";
 import fs from "fs";
 import * as got from "got";
 import nodemailer from "nodemailer";
+import html from "@leafac/html";
 import killTheNewsletter from ".";
 
 let webServer: http.Server;
@@ -30,21 +31,29 @@ afterAll(() => {
 });
 
 test("create feed", async () => {
-  const identifier = await createFeed();
-  const feed = await getFeed(identifier);
-  const entry = feed.querySelector("feed > entry:first-of-type")!;
-  const alternate = await getAlternate(
-    entry.querySelector("link")!.getAttribute("href")!
+  const createResponseBody = (
+    await webClient.post("", { form: { name: "A newsletter" } })
+  ).body;
+  expect(createResponseBody).toMatch(`“A newsletter” inbox created`);
+  const feedReference = createResponseBody.match(
+    /\/feeds\/([a-z0-9]{16})\.xml/
+  )![1];
+  const feedResponse = await webClient.get(`feeds/${feedReference}.xml`);
+  expect(feedResponse.headers["content-type"]).toMatch("application/atom+xml");
+  expect(feedResponse.headers["x-robots-tag"]).toBe("noindex");
+  expect(feedResponse.body).toMatch(html`<title>A newsletter</title>`);
+  const alternateReference = feedResponse.body.match(
+    /\/alternates\/([a-z0-9]{16})\.html/
+  )![1];
+  const alternateResponse = await webClient.get(
+    `alternates/${alternateReference}.html`
   );
-  expect(feed.querySelector("feed > title")!.textContent).toBe("My Feed");
-  expect(entry.querySelector("title")!.textContent).toBe(
-    "“My Feed” Inbox Created"
-  );
-  expect(alternate.querySelector("p")!.textContent).toMatch(
-    "Sign up for the newsletter with"
-  );
+  expect(alternateResponse.headers["content-type"]).toMatch("text/html");
+  expect(alternateResponse.headers["x-robots-tag"]).toBe("noindex");
+  expect(alternateResponse.body).toMatch(`Enjoy your readings!`);
 });
 
+/*
 describe("receive email", () => {
   test("‘updated’ field is updated", async () => {
     const identifier = await createFeed();
@@ -245,47 +254,4 @@ describe("receive email", () => {
     ).toMatchInlineSnapshot(`"<p>NORMAL SIZE</p>"`);
   });
 });
-
-test("‘noindex’ header", async () => {
-  const identifier = await createFeed();
-  const feed = await getFeed(identifier);
-  const entry = feed.querySelector("feed > entry:first-of-type")!;
-  const alternatePath = entry.querySelector("link")!.getAttribute("href")!;
-  expect((await webClient.get(`/`)).headers["x-robots-tag"]).toBeUndefined();
-  expect(
-    (await webClient.get(`/feeds/${identifier}.xml`)).headers["x-robots-tag"]
-  ).toBe("noindex");
-  expect((await webClient.get(alternatePath)).headers["x-robots-tag"]).toBe(
-    "noindex"
-  );
-});
-
-afterAll(() => {
-  webServer.close();
-  emailServer.close();
-});
-
-async function createFeed(): Promise<string> {
-  return JSDOM.fragment(
-    (
-      await webClient.post(
-        "/",
-        qs.stringify({
-          name: "My Feed",
-        })
-      )
-    ).data
-  )
-    .querySelector("code")!
-    .textContent!.split("@")[0];
-}
-
-async function getFeed(identifier: string): Promise<Document> {
-  return new JSDOM((await webClient.get(`/feeds/${identifier}.xml`)).data, {
-    contentType: "text/xml",
-  }).window.document;
-}
-
-async function getAlternate(url: string): Promise<DocumentFragment> {
-  return JSDOM.fragment((await webClient.get(url)).data);
-}
+*/
