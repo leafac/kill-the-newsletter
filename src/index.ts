@@ -8,9 +8,9 @@ import fs from "fs-extra";
 import cryptoRandomString from "crypto-random-string";
 import { html, HTML } from "@leafac/html";
 import { css, process as processCSS } from "@leafac/css";
+import javascript from "tagged-template-noop";
 import { sql, Database } from "@leafac/sqlite";
 import databaseMigrate from "@leafac/sqlite-migration";
-import javascript from "tagged-template-noop";
 
 const VERSION = require("../package.json").version;
 
@@ -109,17 +109,6 @@ export default function killTheNewsletter(
                   monospace;
               }
 
-              a,
-              button {
-                color: inherit;
-                text-decoration: none;
-                transition: color 0.2s;
-
-                &:hover {
-                  color: #58a6ff;
-                }
-              }
-
               h1 {
                 font-size: 1.5em;
               }
@@ -154,6 +143,20 @@ export default function killTheNewsletter(
                 &:focus {
                   border-color: #58a6ff;
                 }
+              }
+
+              a,
+              button {
+                transition: color 0.2s;
+
+                &:hover {
+                  color: #58a6ff;
+                }
+              }
+
+              a {
+                color: inherit;
+                text-decoration: none;
               }
 
               button {
@@ -507,5 +510,5 @@ if (require.main === module) {
     process.argv[2] ?? path.join(process.cwd(), "configuration.js")
   );
   require(configurationFile)(require);
-  console.log(`Configuration file loaded from ‘${configurationFile}’.`);
+  console.log(`Configuration loaded from ‘${configurationFile}’.`);
 }
