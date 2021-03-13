@@ -96,17 +96,46 @@ test("Kill the Newsletter!", async () => {
     html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
   );
 
-  // Test emails with missing fields
-  // await emailClient.sendMail({
-  //   from: "publisher@example.com",
-  //   to: `${feedReference}@${emailHost}`,
-  //   subject: "Test email with text",
-  //   text: "A link: https://kill-the-newsletter.com",
-  // });
-  // expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
-  //   // prettier-ignore
-  //   html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
-  // );
+  // Test email missing ‘from’
+  await emailClient.sendMail({
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email missing ‘from’",
+    text: "A link: https://kill-the-newsletter.com",
+  });
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
+    html`<author><name></name></author>`
+  );
+
+  // Test email to nonexistent ‘to’ (gets ignored)
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `nonexistent@${emailHost}`,
+    subject: "Test email to nonexistent ‘to’ (gets ignored)",
+    text: "A link: https://kill-the-newsletter.com",
+  });
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).not.toMatch(
+    "Test email to nonexistent ‘to’ (gets ignored)"
+  );
+
+  // Test email missing ‘subject’
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    text: "A link: https://kill-the-newsletter.com",
+  });
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
+    html`<title></title>`
+  );
+
+  // Test email missing content
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email missing content",
+  });
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
+    html`<content type="html"></content>`
+  );
 
   // Stop servers
   webServer.close();
@@ -115,56 +144,6 @@ test("Kill the Newsletter!", async () => {
 
 /*
 describe("receive email", () => {
-  test("missing ‘from’", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      html: "<p>HTML content</p>",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    expect(entry.querySelector("author > name")!.textContent).toBe("");
-    expect(entry.querySelector("title")!.textContent).toBe("New Message");
-  });
-
-  test("nonexistent ‘to’", async () => {
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `nonexistent@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      html: "<p>HTML content</p>",
-    });
-  });
-
-  test("missing ‘subject’", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      html: "<p>HTML content</p>",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    expect(entry.querySelector("title")!.textContent).toBe("");
-    expect(entry.querySelector("author > name")!.textContent).toBe(
-      "publisher@example.com"
-    );
-  });
-
-  test("missing ‘content’", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    expect(entry.querySelector("content")!.textContent!.trim()).toBe("");
-    expect(entry.querySelector("title")!.textContent).toBe("New Message");
-  });
-
   test("truncation", async () => {
     const identifier = await createFeed();
     const alternatesURLs = new Array<string>();
