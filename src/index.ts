@@ -28,81 +28,25 @@ export default function killTheNewsletter(
   const database = new Database(
     path.join(rootDirectory, "kill-the-newsletter.db")
   );
-  database.function("newRandomReference", (): string =>
-    cryptoRandomString({
-      length: 16,
-      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-    })
-  );
-  database.function(
-    "welcomeEntryTitle",
-    (title: string): string => `“${title}” inbox created`
-  );
-  database.function(
-    "welcomeEntryContent",
-    (feedReference: string): HTML => html`
-      <p>
-        Sign up for the newsletter with<br />
-        <code class="copyable"
-          >${feedReference}@${webApplication.get("email host")}</code
-        >
-      </p>
-      <p>
-        Subscribe to the Atom feed at<br />
-        <code class="copyable"
-          >${webApplication.get("url")}/feeds/${feedReference}.xml</code
-        >
-      </p>
-      <p>
-        <strong>Don’t share these addresses.</strong><br />
-        They contain an identifier that other people could use to send you spam
-        and to control your newsletter subscriptions.
-      </p>
-      <p><strong>Enjoy your readings!</strong></p>
-      <p>
-        <a href="${webApplication.get("url")}/"
-          ><strong>Create another inbox</strong></a
-        >
-      </p>
-    `
-  );
   databaseMigrate(database, [
     sql`
       CREATE TABLE "feeds" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE DEFAULT (newRandomReference()),
+        "reference" TEXT NOT NULL UNIQUE,
         "title" TEXT NOT NULL
       );
 
       CREATE TABLE "entries" (
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "reference" TEXT NOT NULL UNIQUE DEFAULT (newRandomReference()),
+        "reference" TEXT NOT NULL UNIQUE,
         "feed" INTEGER NOT NULL REFERENCES "feeds",
         "title" TEXT NOT NULL,
         "author" TEXT NOT NULL,
         "content" TEXT NOT NULL
       );
-
-      CREATE TRIGGER "welcomeEntry"
-      AFTER INSERT ON "feeds"
-      BEGIN
-        INSERT INTO "entries" ("feed", "title", "author", "content")
-        VALUES (
-          "NEW"."id",
-          welcomeEntryTitle("NEW"."title"),
-          'Kill the Newsletter!',
-          welcomeEntryContent("NEW"."reference")
-        );
-      END;
-
-      CREATE TRIGGER "entriesInsertImpliesFeedsUpdatedAt"
-      AFTER INSERT ON "entries"
-      BEGIN
-        UPDATE "feeds" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = "NEW"."feed";
-      END;
     `,
   ]);
 
@@ -323,26 +267,67 @@ export default function killTheNewsletter(
     )
       return res.status(400).send(
         layout(
-          html`<p>
-            Error: Missing newsletter name.
-            <a href="${webApplication.get("url")}/"
-              ><strong>Try again</strong></a
-            >.
-          </p>`
+          html`
+            <p>
+              Error: Missing newsletter name.
+              <a href="${webApplication.get("url")}/"
+                ><strong>Try again</strong></a
+              >.
+            </p>
+          `
         )
       );
 
-    const feedId = database.run(
-      sql`INSERT INTO "feeds" ("title") VALUES (${req.body.name})`
-    ).lastInsertRowid;
-    const entry = database.get<{ title: string; content: HTML }>(
-      sql`SELECT "title", "content" FROM "entries" WHERE "feed" = ${feedId}`
-    )!;
+    const feedReference = newReference();
+    const welcomeTitle = `“${req.body.name}” inbox created`;
+    const welcomeContent = html`
+      <p>
+        Sign up for the newsletter with<br />
+        <code class="copyable"
+          >${feedReference}@${webApplication.get("email host")}</code
+        >
+      </p>
+      <p>
+        Subscribe to the Atom feed at<br />
+        <code class="copyable"
+          >${webApplication.get("url")}/feeds/${feedReference}.xml</code
+        >
+      </p>
+      <p>
+        <strong>Don’t share these addresses.</strong><br />
+        They contain an identifier that other people could use to send you spam
+        and to control your newsletter subscriptions.
+      </p>
+      <p><strong>Enjoy your readings!</strong></p>
+      <p>
+        <a href="${webApplication.get("url")}/"
+          ><strong>Create another inbox</strong></a
+        >
+      </p>
+    `;
+
+    database.executeTransaction(() => {
+      const feedId = database.run(
+        sql`INSERT INTO "feeds" ("reference", "title") VALUES (${feedReference}, ${req.body.name})`
+      ).lastInsertRowid;
+      database.run(
+        sql`
+          INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
+          VALUES (
+            ${newReference()}
+            ${feedId},
+            ${welcomeTitle},
+            'Kill the Newsletter!',
+            ${welcomeContent}
+          )
+      `
+      );
+    });
 
     res.send(
       layout(html`
-        <p><strong>${entry.title}</strong></p>
-        $${entry.content}
+        <p><strong>${welcomeTitle}</strong></p>
+        $${welcomeContent}
       `)
     );
   });
@@ -475,9 +460,18 @@ export default function killTheNewsletter(
             if (feed === undefined) continue;
             database.run(
               sql`
-                INSERT INTO "entries" ("feed", "title", "author", "content")
-                VALUES (${feed.id}, ${subject}, ${from}, ${body})
+                INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
+                VALUES (
+                  ${newReference()},
+                  ${feed.id},
+                  ${subject},
+                  ${from},
+                  ${body}
+                )
               `
+            );
+            database.run(
+              sql`UPDATE "feeds" SET "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ${feed.id}`
             );
             while (renderFeed(feedReference)!.length > 500_000)
               database.run(
@@ -496,6 +490,13 @@ export default function killTheNewsletter(
       }
     },
   });
+
+  function newReference(): string {
+    return cryptoRandomString({
+      length: 16,
+      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+    });
+  }
 
   return { webApplication, emailApplication };
 }
