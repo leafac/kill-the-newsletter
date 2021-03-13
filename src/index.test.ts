@@ -137,58 +137,45 @@ test("Kill the Newsletter!", async () => {
     html`<content type="html"></content>`
   );
 
+  // Test truncation
+  for (let index = 1; index <= 5; index++)
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${feedReference}@${emailHost}`,
+      subject: `Test truncation: ${index}`,
+      text: `TRUNCATION ${index} `.repeat(10_000),
+    });
+  const feedTruncated = (await webClient.get(`feeds/${feedReference}.xml`))
+    .body;
+  expect(feedTruncated).toMatch("TRUNCATION 5");
+  expect(feedTruncated).not.toMatch("TRUNCATION 1");
+
+  // Test email that’s too long
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email that’s too long",
+    text: `TOO LONG `.repeat(100_000),
+  });
+  const feedEvenMoreTruncated = (
+    await webClient.get(`feeds/${feedReference}.xml`)
+  ).body;
+  expect(feedEvenMoreTruncated).not.toMatch("TOO LONG");
+  expect(feedEvenMoreTruncated).not.toMatch("TRUNCATION 5");
+
+  // Test email after truncation
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "Test email after truncation",
+    text: "A link: https://kill-the-newsletter.com",
+  });
+  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
+    // prettier-ignore
+    html`<title>Test email after truncation</title>`
+  );
+
   // Stop servers
   webServer.close();
   emailServer.close();
 });
-
-/*
-describe("receive email", () => {
-  test("truncation", async () => {
-    const identifier = await createFeed();
-    const alternatesURLs = new Array<string>();
-    for (const repetition of [...new Array(4).keys()]) {
-      await emailClient.sendMail({
-        from: "publisher@example.com",
-        to: `${identifier}@${EMAIL_DOMAIN}`,
-        subject: "New Message",
-        text: `REPETITION ${repetition} `.repeat(10_000),
-      });
-      const feed = await getFeed(identifier);
-      const entry = feed.querySelector("feed > entry:first-of-type")!;
-      alternatesURLs.push(entry.querySelector("link")!.getAttribute("href")!);
-    }
-    const feed = await getFeed(identifier);
-    expect(
-      feed.querySelector("entry:first-of-type > content")!.textContent
-    ).toMatch("REPETITION 3");
-    expect(
-      feed.querySelector("entry:last-of-type > content")!.textContent
-    ).toMatch("REPETITION 1");
-    expect((await getAlternate(alternatesURLs[3]!)).textContent).toMatch(
-      "REPETITION 3"
-    );
-    await expect(getAlternate(alternatesURLs[0]!)).rejects.toThrowError();
-  });
-
-  test("too big entry", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: "TOO BIG".repeat(100_000),
-    });
-    expect((await getFeed(identifier)).querySelector("entry")).toBeNull();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      text: `NORMAL SIZE`,
-    });
-    expect(
-      (await getFeed(identifier)).querySelector("entry > content")!.textContent
-    ).toMatchInlineSnapshot(`"<p>NORMAL SIZE</p>"`);
-  });
-});
-*/
