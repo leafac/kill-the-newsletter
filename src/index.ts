@@ -243,7 +243,7 @@ export default function killTheNewsletter(
   webApplication.get<{}, HTML, {}, {}, {}>("/", (req, res) => {
     res.send(
       layout(html`
-        <form method="post" action="${webApplication.get("url")}/">
+        <form method="POST" action="${webApplication.get("url")}/">
           <p>
             <input
               type="text"
