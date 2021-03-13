@@ -13,89 +13,80 @@ EOF
 curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
 */
 
-import { beforeAll, afterAll, describe, test, expect } from "@jest/globals";
+import { test, expect } from "@jest/globals";
 import os from "os";
 import path from "path";
-import http from "http";
-import net from "net";
 import fs from "fs";
 import * as got from "got";
 import nodemailer from "nodemailer";
 import html from "@leafac/html";
 import killTheNewsletter from ".";
 
-let webServer: http.Server;
-let emailServer: net.Server;
-let webClient: got.Got;
-let emailClient: nodemailer.Transporter;
-let emailHost: string;
-beforeAll(() => {
+test("Kill the Newsletter!", async () => {
+  // Start servers
   const rootDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), "kill-the-newsletter--test--")
   );
   const { webApplication, emailApplication } = killTheNewsletter(rootDirectory);
-  webServer = webApplication.listen(new URL(webApplication.get("url")).port);
-  emailServer = emailApplication.listen(
+  const webServer = webApplication.listen(
+    new URL(webApplication.get("url")).port
+  );
+  const emailServer = emailApplication.listen(
     new URL(webApplication.get("email")).port
   );
-  webClient = got.default.extend({ prefixUrl: webApplication.get("url") });
-  emailClient = nodemailer.createTransport(webApplication.get("email"));
-  emailHost = new URL(webApplication.get("url")).hostname;
-});
-afterAll(() => {
-  webServer.close();
-  emailServer.close();
-});
+  const webClient = got.default.extend({
+    prefixUrl: webApplication.get("url"),
+  });
+  const emailClient = nodemailer.createTransport(webApplication.get("email"));
+  const emailHost = new URL(webApplication.get("url")).hostname;
 
-test("Create feed", async () => {
-  const createResponseBody = (
-    await webClient.post("", { form: { name: "A newsletter" } })
-  ).body;
-  expect(createResponseBody).toMatch(`“A newsletter” inbox created`);
-  const feedReference = createResponseBody.match(
-    /\/feeds\/([a-z0-9]{16})\.xml/
-  )![1];
-  const feedResponse = await webClient.get(`feeds/${feedReference}.xml`);
-  expect(feedResponse.headers["content-type"]).toMatch("application/atom+xml");
-  expect(feedResponse.headers["x-robots-tag"]).toBe("noindex");
-  expect(feedResponse.body).toMatch(html`<title>A newsletter</title>`);
-  const alternateReference = feedResponse.body.match(
+  // Create feed
+  const create = (await webClient.post("", { form: { name: "A newsletter" } }))
+    .body;
+  expect(create).toMatch(`“A newsletter” inbox created`);
+  const feedReference = create.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
+
+  // Test feed properties
+  let feedOriginal = await webClient.get(`feeds/${feedReference}.xml`);
+  expect(feedOriginal.headers["content-type"]).toMatch("application/atom+xml");
+  expect(feedOriginal.headers["x-robots-tag"]).toBe("noindex");
+  expect(feedOriginal.body).toMatch(html`<title>A newsletter</title>`);
+
+  // Test alternate
+  const alternateReference = feedOriginal.body.match(
     /\/alternates\/([a-z0-9]{16})\.html/
   )![1];
-  const alternateResponse = await webClient.get(
+  const alternate = await webClient.get(
     `alternates/${alternateReference}.html`
   );
-  expect(alternateResponse.headers["content-type"]).toMatch("text/html");
-  expect(alternateResponse.headers["x-robots-tag"]).toBe("noindex");
-  expect(alternateResponse.body).toMatch(`Enjoy your readings!`);
-});
+  expect(alternate.headers["content-type"]).toMatch("text/html");
+  expect(alternate.headers["x-robots-tag"]).toBe("noindex");
+  expect(alternate.body).toMatch(`Enjoy your readings!`);
 
-describe("Receive email", () => {
-  test("HTML content", async () => {
-    const feedReference = (
-      await webClient.post("", { form: { name: "A newsletter" } })
-    ).body.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
-    const feedBefore = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${feedReference}@${emailHost}`,
-      subject: "A subject",
-      html: html`<p>Some HTML content</p>`,
-    });
-    const feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-    expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
-      feedBefore.match(/<updated>(.+?)<\/updated>/)![1]
-    );
-    expect(feed).toMatch(
-      html`<author><name>publisher@example.com</name></author>`
-    );
-    expect(feed).toMatch(html`<title>A subject</title>`);
-    expect(feed).toMatch(
-      // prettier-ignore
-      html`<content type="html">${`<p>Some HTML content</p>`}\n</content>`
-    );
+  // Test email with HTML
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for a second to test that the ‘<updated>’ field will be updated
+  await emailClient.sendMail({
+    from: "publisher@example.com",
+    to: `${feedReference}@${emailHost}`,
+    subject: "A subject",
+    html: html`<p>Some HTML content</p>`,
   });
+  let feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+  expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
+    feedOriginal.body.match(/<updated>(.+?)<\/updated>/)![1]
+  );
+  expect(feed).toMatch(
+    html`<author><name>publisher@example.com</name></author>`
+  );
+  expect(feed).toMatch(html`<title>A subject</title>`);
+  expect(feed).toMatch(
+    // prettier-ignore
+    html`<content type="html">${`<p>Some HTML content</p>`}\n</content>`
+  );
+
+  // Stop servers
+  webServer.close();
+  emailServer.close();
 });
 
 /*
