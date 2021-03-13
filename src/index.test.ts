@@ -30,7 +30,7 @@ afterAll(() => {
   emailServer.close();
 });
 
-test("create feed", async () => {
+test("Create feed", async () => {
   const createResponseBody = (
     await webClient.post("", { form: { name: "A newsletter" } })
   ).body;
@@ -51,6 +51,32 @@ test("create feed", async () => {
   expect(alternateResponse.headers["content-type"]).toMatch("text/html");
   expect(alternateResponse.headers["x-robots-tag"]).toBe("noindex");
   expect(alternateResponse.body).toMatch(`Enjoy your readings!`);
+});
+
+describe("Receive email", () => {
+  test("HTML content", async () => {
+    const feedReference = (
+      await webClient.post("", { form: { name: "A newsletter" } })
+    ).body.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
+    const feedBefore = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+    await emailClient.sendMail({
+      from: "publisher@example.com",
+      to: `${feedReference}@$localhost`,
+      subject: "A subject",
+      html: html`<p>Some HTML content</p>`,
+    });
+    const feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
+    expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
+      feedBefore.match(/<updated>(.+?)<\/updated>/)![1]
+    );
+    expect(feed).toMatch(
+      html`<author><name>publisher@example.com</name></author>`
+    );
+    expect(feed).toMatch(html`<title>A subject</title>`);
+    expect(feed).toMatch(
+      html`<content type="html">${`<p>Some HTML content</p>`}</content>`
+    );
+  });
 });
 
 /*
