@@ -356,6 +356,7 @@ export default function killTheNewsletter(
         SELECT "createdAt", "reference", "title", "author", "content"
         FROM "entries"
         WHERE "feed" = ${feed.id}
+        ORDER BY "createdAt" DESC
       `
     );
 
