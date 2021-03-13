@@ -1,0 +1,12 @@
+[Unit]
+Description=Courselore
+After=network.target
+
+[Service]
+ExecStart=/root/courselore/courselore /root/courselore/configuration.js
+Environment=NODE_ENV=production
+User=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
