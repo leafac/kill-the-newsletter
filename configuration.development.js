@@ -1,6 +1,9 @@
 module.exports = (require) => {
+  const path = require("path");
   const killTheNewsletter = require(".").default;
-  const { webApplication, emailApplication } = killTheNewsletter(__dirname);
+  const { webApplication, emailApplication } = killTheNewsletter(
+    path.join(__dirname, "data")
+  );
 
   webApplication.listen(new URL(webApplication.get("url")).port, () => {
     console.log(`Web server started at ${webApplication.get("url")}`);

@@ -1,16 +1,16 @@
 module.exports = async (require) => {
   const path = require("path");
   const express = require("express");
-  const cookieSession = require("cookie-session");
-  const { sql } = require("@leafac/sqlite");
   const AutoEncrypt = require("@small-tech/auto-encrypt");
-  const courselore = require(".").default;
-  const customization = require(path.join(__dirname, "customization"))(require);
+  const killTheNewsletter = require(".").default;
 
-  const app = await courselore(__dirname);
+  const { webApplication, emailApplication } = killTheNewsletter(
+    path.join(__dirname, "data")
+  );
 
-  app.set("url", "https://courselore.org");
-  app.set("administrator", "mailto:administrator@courselore.org");
+  webApplication.set("url", "https://kill-the-newsletter.com");
+  webApplication.set("email", "smtp://kill-the-newsletter.com:25");
+  webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
   const reverseProxy = express();
 
@@ -19,19 +19,11 @@ module.exports = async (require) => {
       return res.redirect(`${app.get("url")}${req.originalUrl}`);
     next();
   });
-  reverseProxy.use(cookieSession({ secret: app.get("cookie secret") }));
-  reverseProxy.use(customization(app));
-  reverseProxy.use(app);
 
   AutoEncrypt.https
     .createServer(
       {
-        domains: [
-          "courselore.org",
-          "www.courselore.org",
-          "courselore.com",
-          "www.courselore.com",
-        ],
+        domains: ["kill-the-newsletter.com", "www.kill-the-newsletter.com"],
         settingsPath: path.join(__dirname, "data/keys/tls"),
       },
       reverseProxy

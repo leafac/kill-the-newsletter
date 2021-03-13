@@ -1,9 +1,9 @@
 [Unit]
-Description=Courselore
+Description=Kill the Newsletter!
 After=network.target
 
 [Service]
-ExecStart=/root/courselore/courselore /root/courselore/configuration.js
+ExecStart=/root/kill-the-newsletter/kill-the-newsletter /root/kill-the-newsletter/configuration.js
 Environment=NODE_ENV=production
 User=root
 Restart=always
