@@ -13,6 +13,7 @@ let webServer: http.Server;
 let emailServer: net.Server;
 let webClient: got.Got;
 let emailClient: nodemailer.Transporter;
+let emailHost: string;
 beforeAll(() => {
   const rootDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), "kill-the-newsletter--test--")
@@ -24,6 +25,7 @@ beforeAll(() => {
   );
   webClient = got.default.extend({ prefixUrl: webApplication.get("url") });
   emailClient = nodemailer.createTransport(webApplication.get("email"));
+  emailHost = new URL(webApplication.get("url")).hostname;
 });
 afterAll(() => {
   webServer.close();
@@ -61,7 +63,7 @@ describe("Receive email", () => {
     const feedBefore = (await webClient.get(`feeds/${feedReference}.xml`)).body;
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${feedReference}@$localhost`,
+      to: `${feedReference}@${emailHost}`,
       subject: "A subject",
       html: html`<p>Some HTML content</p>`,
     });
