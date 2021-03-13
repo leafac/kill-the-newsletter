@@ -76,7 +76,7 @@ describe("Receive email", () => {
       await webClient.post("", { form: { name: "A newsletter" } })
     ).body.match(/\/feeds\/([a-z0-9]{16})\.xml/)![1];
     const feedBefore = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-    // await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await emailClient.sendMail({
       from: "publisher@example.com",
       to: `${feedReference}@${emailHost}`,
@@ -92,49 +92,14 @@ describe("Receive email", () => {
     );
     expect(feed).toMatch(html`<title>A subject</title>`);
     expect(feed).toMatch(
-      html`<content type="html">${`<p>Some HTML content</p>`}</content>`
+      // prettier-ignore
+      html`<content type="html">${`<p>Some HTML content</p>`}\n</content>`
     );
   });
 });
 
 /*
 describe("receive email", () => {
-  test("‘updated’ field is updated", async () => {
-    const identifier = await createFeed();
-    const before = await getFeed(identifier);
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      html: "<p>HTML content</p>",
-    });
-    const after = await getFeed(identifier);
-    expect(after.querySelector("feed > updated")!.textContent).not.toBe(
-      before.querySelector("feed > updated")!.textContent
-    );
-  });
-
-  test("HTML content", async () => {
-    const identifier = await createFeed();
-    await emailClient.sendMail({
-      from: "publisher@example.com",
-      to: `${identifier}@${EMAIL_DOMAIN}`,
-      subject: "New Message",
-      html: "<p>HTML content</p>",
-    });
-    const feed = await getFeed(identifier);
-    const entry = feed.querySelector("feed > entry:first-of-type")!;
-    const alternate = await getAlternate(
-      entry.querySelector("link")!.getAttribute("href")!
-    );
-    expect(entry.querySelector("author > name")!.textContent).toBe(
-      "publisher@example.com"
-    );
-    expect(entry.querySelector("title")!.textContent).toBe("New Message");
-    expect(entry.querySelector("content")!.textContent).toMatch("HTML content");
-    expect(alternate.querySelector("p")!.textContent).toMatch("HTML content");
-  });
-
   test("text content", async () => {
     const identifier = await createFeed();
     await emailClient.sendMail({
