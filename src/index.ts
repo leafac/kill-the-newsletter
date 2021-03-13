@@ -317,7 +317,7 @@ export default function killTheNewsletter(
         sql`
           INSERT INTO "entries" ("reference", "feed", "title", "author", "content")
           VALUES (
-            ${newReference()}
+            ${newReference()},
             ${feedId},
             ${welcomeTitle},
             'Kill the Newsletter!',
