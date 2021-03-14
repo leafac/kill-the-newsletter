@@ -9,7 +9,7 @@ module.exports = async (require) => {
   );
 
   webApplication.set("url", "https://kill-the-newsletter.com");
-  webApplication.set("email", "smtp://kill-the-newsletter.com:25");
+  webApplication.set("email", "smtp://kill-the-newsletter.com");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
   const reverseProxy = express();
@@ -29,4 +29,8 @@ module.exports = async (require) => {
       reverseProxy
     )
     .listen(443);
+
+  emailApplication.listen(25, () => {
+    console.log("Email server started");
+  });
 };
