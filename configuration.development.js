@@ -10,6 +10,6 @@ module.exports = (require) => {
   });
 
   emailApplication.listen(new URL(webApplication.get("email")).port, () => {
-    console.log(`Email server started at port ${webApplication.get("email")}`);
+    console.log(`Email server started at ${webApplication.get("email")}`);
   });
 };
