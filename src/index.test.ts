@@ -23,7 +23,7 @@ test("Kill the Newsletter!", async () => {
     prefixUrl: webApplication.get("url"),
   });
   const emailClient = nodemailer.createTransport(webApplication.get("email"));
-  const emailHost = new URL(webApplication.get("url")).hostname;
+  const emailHostname = new URL(webApplication.get("url")).hostname;
 
   // Create feed
   const create = (await webClient.post("", { form: { name: "A newsletter" } }))
@@ -52,19 +52,20 @@ test("Kill the Newsletter!", async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for a second to test that the ‘<updated>’ field will be updated
   await emailClient.sendMail({
     from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
+    to: `${feedReference}@${emailHostname}`,
     subject: "Test email with HTML",
     html: html`<p>Some HTML</p>`,
   });
-  const feed = (await webClient.get(`feeds/${feedReference}.xml`)).body;
-  expect(feed.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
+  const feedWithHTMLEntry = (await webClient.get(`feeds/${feedReference}.xml`))
+    .body;
+  expect(feedWithHTMLEntry.match(/<updated>(.+?)<\/updated>/)![1]).not.toBe(
     feedOriginal.body.match(/<updated>(.+?)<\/updated>/)![1]
   );
-  expect(feed).toMatch(
+  expect(feedWithHTMLEntry).toMatch(
     html`<author><name>publisher@example.com</name></author>`
   );
-  expect(feed).toMatch(html`<title>Test email with HTML</title>`);
-  expect(feed).toMatch(
+  expect(feedWithHTMLEntry).toMatch(html`<title>Test email with HTML</title>`);
+  expect(feedWithHTMLEntry).toMatch(
     // prettier-ignore
     html`<content type="html">${`<p>Some HTML</p>`}\n</content>`
   );
@@ -72,7 +73,7 @@ test("Kill the Newsletter!", async () => {
   // Test email with text
   await emailClient.sendMail({
     from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
+    to: `${feedReference}@${emailHostname}`,
     subject: "Test email with text",
     text: "A link: https://kill-the-newsletter.com",
   });
@@ -81,20 +82,20 @@ test("Kill the Newsletter!", async () => {
     html`<content type="html">${`<p>A link: <a href="https://kill-the-newsletter.com">https://kill-the-newsletter.com</a></p>`}</content>`
   );
 
-  // Test email missing ‘from’
+  // Test email missing fields
   await emailClient.sendMail({
-    to: `${feedReference}@${emailHost}`,
-    subject: "Test email missing ‘from’",
-    text: "A link: https://kill-the-newsletter.com",
+    to: `${feedReference}@${emailHostname}`,
   });
-  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
-    html`<author><name></name></author>`
-  );
+  const feedMissingFields = (await webClient.get(`feeds/${feedReference}.xml`))
+    .body;
+  expect(feedMissingFields).toMatch(html`<author><name></name></author>`);
+  expect(feedMissingFields).toMatch(html`<title></title>`);
+  expect(feedMissingFields).toMatch(html`<content type="html"></content>`);
 
   // Test email to nonexistent ‘to’ (gets ignored)
   await emailClient.sendMail({
     from: "publisher@example.com",
-    to: `nonexistent@${emailHost}`,
+    to: `nonexistent@${emailHostname}`,
     subject: "Test email to nonexistent ‘to’ (gets ignored)",
     text: "A link: https://kill-the-newsletter.com",
   });
@@ -102,31 +103,11 @@ test("Kill the Newsletter!", async () => {
     "Test email to nonexistent ‘to’ (gets ignored)"
   );
 
-  // Test email missing ‘subject’
-  await emailClient.sendMail({
-    from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
-    text: "A link: https://kill-the-newsletter.com",
-  });
-  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
-    html`<title></title>`
-  );
-
-  // Test email missing content
-  await emailClient.sendMail({
-    from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
-    subject: "Test email missing content",
-  });
-  expect((await webClient.get(`feeds/${feedReference}.xml`)).body).toMatch(
-    html`<content type="html"></content>`
-  );
-
   // Test truncation
   for (let index = 1; index <= 5; index++)
     await emailClient.sendMail({
       from: "publisher@example.com",
-      to: `${feedReference}@${emailHost}`,
+      to: `${feedReference}@${emailHostname}`,
       subject: `Test truncation: ${index}`,
       text: `TRUNCATION ${index} `.repeat(10_000),
     });
@@ -138,7 +119,7 @@ test("Kill the Newsletter!", async () => {
   // Test email that’s too long
   await emailClient.sendMail({
     from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
+    to: `${feedReference}@${emailHostname}`,
     subject: "Test email that’s too long",
     text: `TOO LONG `.repeat(100_000),
   });
@@ -151,7 +132,7 @@ test("Kill the Newsletter!", async () => {
   // Test email after truncation
   await emailClient.sendMail({
     from: "publisher@example.com",
-    to: `${feedReference}@${emailHost}`,
+    to: `${feedReference}@${emailHostname}`,
     subject: "Test email after truncation",
     text: "A link: https://kill-the-newsletter.com",
   });
