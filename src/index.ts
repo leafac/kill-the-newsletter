@@ -191,7 +191,7 @@ export default function killTheNewsletter(
               style="${css`
                 @media (prefers-color-scheme: dark) {
                   path {
-                    fill: #ffffffd4;
+                    fill: #ffffff;
                   }
                 }
               `}"
