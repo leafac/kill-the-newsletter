@@ -270,7 +270,7 @@ export default function killTheNewsletter(
       req.body.name.trim() === "" ||
       req.body.name.length > 500
     )
-      return res.status(400).send(
+      return res.status(422).send(
         layout(
           html`
             <p>
