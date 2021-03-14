@@ -97,6 +97,7 @@ export default function killTheNewsletter(
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
                 line-height: 1.5;
+                -webkit-text-size-adjust: 100%;
                 max-width: 450px;
                 padding: 0 1em;
                 margin: 1em auto;
