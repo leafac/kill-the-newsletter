@@ -9,7 +9,9 @@
   "keywords": [
     "newsletter",
     "atom feeds",
-    "news"
+    "news",
+    "self-hosted",
+    "web application"
   ],
   "author": "Leandro Facchinetti <kill-the-newsletter@leafac.com> (https://leafac.com)",
   "license": "MIT",

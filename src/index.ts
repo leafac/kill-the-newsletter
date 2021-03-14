@@ -200,11 +200,12 @@ export default function killTheNewsletter(
           <main>$${body}</main>
           <footer>
             <p>
-              By <a href="https://leafac.com">Leandro Facchinetti</a> ·
+              By <a href="https://leafac.com">Leandro Facchinetti</a> ·
+              <a href="https://patreon.com/leafac">Patreon</a> ·
+              <a href="https://paypal.me/LeandroFacchinetti">PayPal</a> ·
               <a href="https://github.com/leafac/kill-the-newsletter.com"
                 >Source</a
-              >
-              ·
+              > ·
               <a href="${webApplication.get("administrator")}"
                 >Report an issue</a
               >
