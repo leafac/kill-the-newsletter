@@ -6,6 +6,22 @@
 <a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" alt="Continuous Integration"></a>
 </p>
 
+Send test emails manually from the command line with the following:
+
+```
+cat << "EOF" > /tmp/example-email.txt
+From: Publisher <publisher@example.com>
+To: ru9rmeebswmcy7wx@localhost
+Subject: Test email with HTML
+Date: Sat, 13 Mar 2021 11:30:40
+
+<p>Some HTML</p>
+EOF
+
+curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
+```
+
+
 # [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
 
 # Deploy Your Own Instance (Self-Host)
