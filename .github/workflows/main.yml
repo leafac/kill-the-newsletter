@@ -1,23 +1,23 @@
 on: push
 jobs:
-  insiders-build:
+  build:
     strategy:
       matrix:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--windows--${{ github.sha }}.exe"
-            artifact: Kill the Newsletter--windows--${{ github.sha }}.exe
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--migration--windows--${{ github.sha }}.exe"
+            artifact: Kill the Newsletter--migration--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter.app"
-              tar -czf "Kill the Newsletter--macos--${{ github.sha }}.app.tgz" "Kill the Newsletter.app"
-            artifact: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--migration.app"
+              tar -czf "Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz" "Kill the Newsletter--migration.app"
+            artifact: Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz
           - os: ubuntu
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
-              tar -czf "kill-the-newsletter--linux--${{ github.sha }}.tgz" "kill-the-newsletter"
-            artifact: kill-the-newsletter--linux--${{ github.sha }}.tgz
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter--migration"
+              tar -czf "kill-the-newsletter--migration--linux--${{ github.sha }}.tgz" "kill-the-newsletter--migration"
+            artifact: kill-the-newsletter--migration--linux--${{ github.sha }}.tgz
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,109 +31,3 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}
-
-  test:
-    strategy:
-      matrix:
-        os: [windows, macos, ubuntu]
-    runs-on: ${{ matrix.os }}-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 15
-      - run: npm install-ci-test
-
-  deploy:
-    if: github.ref == 'refs/heads/master'
-    needs: [insiders-build, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: webfactory/ssh-agent@v0.5.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: kill-the-newsletter--linux--${{ github.sha }}.tgz
-      - run: |
-          tar -xzf kill-the-newsletter--linux--${{ github.sha }}.tgz
-
-          cat >> ~/.ssh/known_hosts << "EOF"
-          courselore.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDWOjzHPP1v+6gEeRAVzEB7l/RH+mt31heowjiUVNjgTnpT1FDL/T4yqmztwPrzhXUdBAy7M16H+88Padxm+/rJ5qfbw2dH7KtOA4RALYy9ruBl6HFdCf59eh01A97Py/AmxlpXysGAVcdcVjLsr0PvfoEGOqMlohc0sBjCjhoFcqkP9P57Q4Q3gcqgwjNYaZ1BSbI2G6J6kihjN7+b8pFCHCw8fqs7xo+7pDUv/rvqfBTUAFV7sovwQU0bZK6Z8gWXYFGG0NpKVojsKOHCrZpM8pBBDmleisrJhXmnKQ+Lj/JvYuaEM6cHZh6+RH7ua6S9eqlL8EErXf7GZ4SPuTo1ghNJ5H9cR3k8Px4Op5bDIIdPP767jwGHabZJ5Z8l9QnQajq85gcE7E3vZ1yT2BDKQsIDJeNpg1etTgw6hSUlBQsKx8TNaI9nROSnKwKbSI+sGmZlwrx11XimEkvaMaFmSZfpN+ne/2kmjc81Pr0WKb82sIPf3X2KzmWeChkZus8=
-          courselore.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOIhUnh2H/733XnnD4mvaEqKbxbEc9ov3UhlbG7gkQS7vM5TaSSuknZLOGUIx2VWB681y4jn4vG3Wsja9JYPCB0=
-          courselore.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBCGyIA9/oiJt/qrQNeNoIRNKA8CFc/ppPMnrtw2NW+7
-          EOF
-
-          ssh root@kill-the-newsletter.com "mkdir -p kill-the-newsletter"
-          rsync -a kill-the-newsletter root@kill-the-newsletter.com:kill-the-newsletter/kill-the-newsletter
-          rsync -a deployment-example/configuration.js root@kill-the-newsletter.com:kill-the-newsletter/configuration.js
-          rsync -a deployment-example/kill-the-newsletter.service root@kill-the-newsletter.com:/etc/systemd/system/kill-the-newsletter.service
-
-          ssh root@kill-the-newsletter.com << "EOF"
-          systemctl daemon-reload
-          systemctl enable kill-the-newsletter
-          systemctl restart kill-the-newsletter
-          EOF
-
-  npm-publish:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 15
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci && npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [insiders-build, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: Kill the Newsletter--windows--${{ github.sha }}.exe
-      - uses: actions/download-artifact@v2
-        with:
-          name: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
-      - uses: actions/download-artifact@v2
-        with:
-          name: kill-the-newsletter--linux--${{ github.sha }}.tgz
-      - run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
-        id: tag
-      - uses: actions/create-release@v1
-        id: create-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          release_name: Release ${{ steps.tag.outputs.tag }}
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: Kill the Newsletter--windows--${{ github.sha }}.exe
-          asset_name: Kill the Newsletter--windows--${{ steps.tag.outputs.tag }}.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
-          asset_name: Kill the Newsletter--macos--${{ steps.tag.outputs.tag }}.app.tgz
-          asset_content_type: application/gzip
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: kill-the-newsletter--linux--${{ github.sha }}.tgz
-          asset_name: kill-the-newsletter--linux--${{ steps.tag.outputs.tag }}.tgz
-          asset_content_type: application/gzip
