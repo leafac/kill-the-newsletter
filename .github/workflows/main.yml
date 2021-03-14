@@ -6,16 +6,16 @@ jobs:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--migration--windows--${{ github.sha }}.exe"
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "Kill the Newsletter--migration--windows--${{ github.sha }}.exe"
             artifact: Kill the Newsletter--migration--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--migration.app"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "Kill the Newsletter--migration.app"
               tar -czf "Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz" "Kill the Newsletter--migration.app"
             artifact: Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz
           - os: ubuntu
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter--migration"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "kill-the-newsletter--migration"
               tar -czf "kill-the-newsletter--migration--linux--${{ github.sha }}.tgz" "kill-the-newsletter--migration"
             artifact: kill-the-newsletter--migration--linux--${{ github.sha }}.tgz
     runs-on: ${{ matrix.os }}-latest
