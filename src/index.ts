@@ -447,7 +447,6 @@ export default function killTheNewsletter(
     disabledCommands: ["AUTH", "STARTTLS"],
     async onData(stream, session, callback) {
       try {
-        const atHost = "@" + new URL(webApplication.get("email")).hostname;
         const email = await mailparser.simpleParser(stream);
         const from = email.from?.text ?? "";
         const subject = email.subject ?? "";
@@ -459,8 +458,11 @@ export default function killTheNewsletter(
               (smtpServerAddress) => smtpServerAddress.address
             )
           )) {
-            if (!address.endsWith(atHost)) continue;
-            const feedReference = address.slice(0, -atHost.length);
+            const addressParts = address.split("@");
+            if (addressParts.length !== 2) continue;
+            const [feedReference, hostname] = addressParts;
+            if (hostname !== new URL(webApplication.get("email")).hostname)
+              continue;
             const feed = database.get<{ id: number }>(
               sql`SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}`
             );
