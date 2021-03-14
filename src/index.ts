@@ -19,7 +19,7 @@ export default function killTheNewsletter(
 ): { webApplication: express.Express; emailApplication: SMTPServer } {
   const webApplication = express();
 
-  webApplication.set("url", "http://leafac.local:4000");
+  webApplication.set("url", "http://localhost:4000");
   webApplication.set("email", "smtp://localhost:2525");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
