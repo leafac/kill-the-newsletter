@@ -33,6 +33,7 @@ databaseMigrate(database, [
     `,
 ]);
 for (const feedFile of feedFiles) {
+  process.stdout.write(`${feedFile}...`);
   const feedReference = path.basename(feedFile, ".xml");
   const feedText = fs.readFileSync(path.join("feeds", feedFile));
   const feedDOM = new JSDOM(feedText, { contentType: "application/atom+xml" });
@@ -67,4 +68,5 @@ for (const feedFile of feedFiles) {
     path.join("feeds", feedFile),
     path.join("feeds-migrated", feedFile)
   );
+  console.log(" Done");
 }
