@@ -3,7 +3,6 @@
 const path = require("path");
 const fs = require("fs-extra");
 const { JSDOM } = require("jsdom");
-const he = require("he");
 const { sql, Database } = require("@leafac/sqlite");
 const databaseMigrate = require("@leafac/sqlite-migration").default;
 
@@ -45,7 +44,7 @@ for (const feedFile of feedFiles) {
         VALUES (
           ${feed.querySelector("feed > updated").textContent},
           ${feedReference},
-          ${he.decode(feed.querySelector("feed > title").textContent)}
+          ${feed.querySelector("feed > title").textContent}
         )
       `
     ).lastInsertRowid;
@@ -57,9 +56,9 @@ for (const feedFile of feedFiles) {
             ${entry.querySelector("updated").textContent},
             ${entry.querySelector("id").textContent.split(":")[2]},
             ${feedId},
-            ${he.decode(entry.querySelector("title").textContent)},
-            ${he.decode(entry.querySelector("author > name").textContent)},
-            ${he.decode(entry.querySelector("content").textContent)}
+            ${entry.querySelector("title").textContent},
+            ${entry.querySelector("author > name").textContent},
+            ${entry.querySelector("content").textContent}
           )
         `
       );
