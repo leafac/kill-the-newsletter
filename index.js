@@ -34,39 +34,43 @@ databaseMigrate(database, [
 ]);
 for (const feedFile of feedFiles) {
   process.stdout.write(`${feedFile}...`);
-  const feedReference = path.basename(feedFile, ".xml");
-  const feedText = fs.readFileSync(path.join("feeds", feedFile));
-  const feedDOM = new JSDOM(feedText, { contentType: "application/atom+xml" });
-  const feed = feedDOM.window.document;
-  database.executeTransaction(() => {
-    const feedId = database.run(
-      sql`
-        INSERT INTO "feeds" ("updatedAt", "reference", "title")
-        VALUES (
-          ${feed.querySelector("feed > updated").textContent},
-          ${feedReference},
-          ${feed.querySelector("feed > title").textContent}
-        )
-      `
-    ).lastInsertRowid;
-    for (const entry of [...feed.querySelectorAll("feed > entry")].reverse())
-      database.run(
+  try {
+    const feedReference = path.basename(feedFile, ".xml");
+    const feedText = fs.readFileSync(path.join("feeds", feedFile));
+    const feed = new JSDOM(feedText, { contentType: "application/atom+xml" })
+      .window.document;
+    database.executeTransaction(() => {
+      const feedId = database.run(
         sql`
-          INSERT INTO "entries" ("createdAt", "reference", "feed", "title", "author", "content")
+          INSERT INTO "feeds" ("updatedAt", "reference", "title")
           VALUES (
-            ${entry.querySelector("updated").textContent},
-            ${entry.querySelector("id").textContent.split(":")[2]},
-            ${feedId},
-            ${entry.querySelector("title").textContent},
-            ${entry.querySelector("author > name").textContent},
-            ${entry.querySelector("content").textContent}
+            ${feed.querySelector("feed > updated").textContent},
+            ${feedReference},
+            ${feed.querySelector("feed > title").textContent}
           )
         `
-      );
-  });
-  fs.moveSync(
-    path.join("feeds", feedFile),
-    path.join("feeds-migrated", feedFile)
-  );
-  console.log(" Done");
+      ).lastInsertRowid;
+      for (const entry of [...feed.querySelectorAll("feed > entry")].reverse())
+        database.run(
+          sql`
+            INSERT INTO "entries" ("createdAt", "reference", "feed", "title", "author", "content")
+            VALUES (
+              ${entry.querySelector("updated").textContent},
+              ${entry.querySelector("id").textContent.split(":")[2]},
+              ${feedId},
+              ${entry.querySelector("title").textContent},
+              ${entry.querySelector("author > name").textContent},
+              ${entry.querySelector("content").textContent}
+            )
+          `
+        );
+    });
+    fs.moveSync(
+      path.join("feeds", feedFile),
+      path.join("feeds-migrated", feedFile)
+    );
+    console.log(" done");
+  } catch (error) {
+    console.log(`error: ${error}`);
+  }
 }
