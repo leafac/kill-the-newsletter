@@ -224,11 +224,11 @@ export default function killTheNewsletter(
                 type="button"
                 onclick="${javascript`
                   (async () => {
-                    await navigator.clipboard.writeText("\${copyable.innerText}");
-                    const originalInnerText = this.innerText;
-                    this.innerText = "Copied";
+                    await navigator.clipboard.writeText("\${copyable.textContent}");
+                    const originalTextContent = this.textContent;
+                    this.textContent = "Copied";
                     await new Promise(resolve => window.setTimeout(resolve, 500));
-                    this.innerText = originalInnerText;
+                    this.textContent = originalTextContent;
                   })();
                 `}"
               >
