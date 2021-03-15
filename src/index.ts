@@ -323,7 +323,7 @@ export default function killTheNewsletter(
             ${newReference()},
             ${feedId},
             ${welcomeTitle},
-            'Kill the Newsletter!',
+            ${"Kill the Newsletter!"},
             ${welcomeContent}
           )
       `
