@@ -10,9 +10,9 @@ jobs:
             artifact: Kill the Newsletter--migration--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "Kill the Newsletter--migration.app"
-              tar -czf "Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz" "Kill the Newsletter--migration.app"
-            artifact: Kill the Newsletter--migration--macos--${{ github.sha }}.app.tgz
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "kill-the-newsletter--migration"
+              tar -czf "kill-the-newsletter--migration--macos--${{ github.sha }}.tgz" "kill-the-newsletter--migration"
+            artifact: kill-the-newsletter--migration--macos--${{ github.sha }}.tgz
           - os: ubuntu
             build: |
               npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "kill-the-newsletter--migration"
