@@ -47,6 +47,9 @@ export default function killTheNewsletter(
         "content" TEXT NOT NULL
       );
     `,
+    sql`
+      CREATE INDEX "entriesFeed" ON "entries" ("feed");
+    `,
   ]);
 
   webApplication.use(express.static(path.join(__dirname, "../public")));
