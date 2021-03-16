@@ -19,6 +19,7 @@ module.exports = async (require) => {
       return res.redirect(`${webApplication.get("url")}${req.originalUrl}`);
     next();
   });
+  reverseProxy.use(webApplication);
 
   AutoEncrypt.https
     .createServer(
