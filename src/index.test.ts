@@ -1,4 +1,4 @@
-import { test, expect } from "@jest/globals";
+import { jest, test, expect } from "@jest/globals";
 import os from "os";
 import path from "path";
 import fs from "fs";
@@ -6,6 +6,8 @@ import * as got from "got";
 import nodemailer from "nodemailer";
 import html from "@leafac/html";
 import killTheNewsletter from ".";
+
+jest.setTimeout(300_000);
 
 test("Kill the Newsletter!", async () => {
   // Start servers
