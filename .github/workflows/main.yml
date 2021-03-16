@@ -60,9 +60,9 @@ jobs:
           tar -xzf kill-the-newsletter--linux--${{ github.sha }}.tgz
 
           cat >> ~/.ssh/known_hosts << "EOF"
-          courselore.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDWOjzHPP1v+6gEeRAVzEB7l/RH+mt31heowjiUVNjgTnpT1FDL/T4yqmztwPrzhXUdBAy7M16H+88Padxm+/rJ5qfbw2dH7KtOA4RALYy9ruBl6HFdCf59eh01A97Py/AmxlpXysGAVcdcVjLsr0PvfoEGOqMlohc0sBjCjhoFcqkP9P57Q4Q3gcqgwjNYaZ1BSbI2G6J6kihjN7+b8pFCHCw8fqs7xo+7pDUv/rvqfBTUAFV7sovwQU0bZK6Z8gWXYFGG0NpKVojsKOHCrZpM8pBBDmleisrJhXmnKQ+Lj/JvYuaEM6cHZh6+RH7ua6S9eqlL8EErXf7GZ4SPuTo1ghNJ5H9cR3k8Px4Op5bDIIdPP767jwGHabZJ5Z8l9QnQajq85gcE7E3vZ1yT2BDKQsIDJeNpg1etTgw6hSUlBQsKx8TNaI9nROSnKwKbSI+sGmZlwrx11XimEkvaMaFmSZfpN+ne/2kmjc81Pr0WKb82sIPf3X2KzmWeChkZus8=
-          courselore.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOIhUnh2H/733XnnD4mvaEqKbxbEc9ov3UhlbG7gkQS7vM5TaSSuknZLOGUIx2VWB681y4jn4vG3Wsja9JYPCB0=
-          courselore.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBCGyIA9/oiJt/qrQNeNoIRNKA8CFc/ppPMnrtw2NW+7
+          kill-the-newsletter.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBQiZK4dxdZl6d6f2gpQxuVcwqvJo9JcnoEgfJ4fNjbY
+          kill-the-newsletter.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNZ75UdvVaHOk86fF1TslxKWCGsRG7EfF4Rq2TqeZ1ZWbjc89gpl2G0jVQ1hSwo0KhvmZkpXJsCgQaOnR7kDMjHLdvnwGb6Uqnolef4LqZlso3i3L0dMxbHsBtq/laC1/Zk/sWXs2UO1oZaMNrjqaf+1CjUdkSQFFMoF8oVdgfg3SAidRs+8/WdZbfAjEfDqYONKk1iMRPUTVtN5H4LSJUpJsPx+T8QrDpRez820A3WLAxVbIdVU42Fa1VI8J+C/0Z6/iJcF6/7HRp1zcUWILFPu4t5VzBFVtaVSgkm29TiGfZiz8X/YFF+GRCW+Ht5bObDOEDFNLdrY/xyyqp3h0b9zSTUC5xKqugIiewUtULIT6W9cXxJdbW56W9jlRIlzHfzsB/rcXQC/+HIHWQsJYCF3LCE6JR+R9UfsSV2pR1TseA/9ARD5A2I//cXGxkDyTnWVdcxiHUQbWWq/B+pnfi+EwG0HTUgZWOH9pHJ3apGnHmudii6MAnFplMMzv8ULU=
+          kill-the-newsletter.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBO5UFbB8oNfTXEYFpvykTCrlyeEFSMpAWKa5Nfc0hid2fr1t26rG9t/7DZk2J7MAyvbZecDVY9XGA+ku3RdO/qs=
           EOF
 
           ssh root@kill-the-newsletter.com "mkdir -p kill-the-newsletter"
