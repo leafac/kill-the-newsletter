@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@leafac/css": "^0.0.1",
-    "@leafac/html": "^1.3.0",
+    "@leafac/html": "^2.0.0",
     "@leafac/sqlite": "^1.1.2",
     "@leafac/sqlite-migration": "^1.0.3",
     "@small-tech/auto-encrypt": "^2.0.5",
