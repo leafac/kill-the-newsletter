@@ -257,7 +257,7 @@ export default function killTheNewsletter(
               placeholder="Newsletter name…"
               maxlength="500"
               required
-              pattern=".*\S.*"
+              pattern=".*\\S.*"
               autocomplete="off"
               autofocus
             />
