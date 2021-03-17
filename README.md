@@ -1,10 +1,31 @@
 <h1 align="center"><a href="https://kill-the-newsletter.com">Kill the Newsletter!</a></h1>
 <h3 align="center">Convert email newsletters into Atom feeds</h3>
-<p align="center"><img src="static/logo.svg" alt="Convert email newsletters into Atom feeds"></p>
 <p align="center">
 <a href="https://github.com/leafac/kill-the-newsletter.com"><img src="https://img.shields.io/badge/Source---" alt="Source"></a>
 <a href="https://github.com/leafac/kill-the-newsletter.com/actions"><img src="https://github.com/leafac/kill-the-newsletter.com/workflows/.github/workflows/main.yml/badge.svg" alt="Continuous Integration"></a>
 </p>
+
+# Support
+
+[Patreon (recurring)](https://patreon.com/leafac) ·
+[PayPal (one-time)](https://paypal.me/LeandroFacchinetti)
+
+# [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
+
+<!--
+
+### Usage
+
+#### Hosted Version
+
+The simplest way to use Kill the Newsletter! is the hosted version at <https://kill-the-newsletter.com>.
+
+The service is and will always be free; you don’t have to create an account; and I don’t collect your data or share it with anyone.
+
+#### Self-Hosted Version
+
+You may run Kill the Newsletter! on your own servers if you wish. This guarantees the utmost privacy, and it’s also a fun technical project. Kill the Newsletter! strikes a good balance between being a relatively easy system administration project and being non-trivial at the same time, because it includes an email server.
+
 
 Send test emails manually from the command line with the following:
 
@@ -21,8 +42,8 @@ EOF
 curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
 ```
 
+-->
 
-# [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
 
 # Deploy Your Own Instance (Self-Host)
 
