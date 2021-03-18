@@ -96,13 +96,13 @@ export default function killTheNewsletter(
             @at-root {
               body {
                 font-size: 0.875rem;
+                -webkit-text-size-adjust: 100%;
                 line-height: 1.5;
                 font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
                 color: #000000d4;
                 background-color: white;
-                -webkit-text-size-adjust: 100%;
                 max-width: 450px;
                 padding: 0 1rem;
                 margin: 1rem auto;
@@ -243,19 +243,33 @@ export default function killTheNewsletter(
   webApplication.get<{}, HTML, {}, {}, {}>("/", (req, res) => {
     res.send(
       layout(html`
-        <form method="POST" action="${webApplication.get("url")}/">
+        <form
+          method="POST"
+          action="${webApplication.get("url")}"
+          style="${css`
+            max-width: 300px;
+            margin: 0 auto;
+
+            input,
+            button {
+              box-sizing: border-box;
+              width: 100%;
+            }
+          `}"
+        >
           <p>
             <input
               type="text"
               name="name"
               placeholder="Newsletter name…"
-              size="40"
               maxlength="500"
               required
               pattern=".*\\S.*"
               autocomplete="off"
               autofocus
             />
+          </p>
+          <p>
             <button>Create Inbox</button>
           </p>
         </form>
