@@ -266,7 +266,7 @@ export default function killTheNewsletter(
               autofocus
             />
           </p>
-          <p><button>Create inbox</button></p>
+          <p><button>Create Inbox</button></p>
         </form>
       `)
     );
