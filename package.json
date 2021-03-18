@@ -1,10 +1,12 @@
 {
   "name": "kill-the-newsletter",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Convert email newsletters into Atom feeds",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "bin": "lib/index.js",
+  "bin": {
+    "kill-the-newsletter": "lib/index.js"
+  },
   "repository": "leafac/kill-the-newsletter",
   "keywords": [
     "newsletter",
