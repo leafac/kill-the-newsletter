@@ -95,15 +95,15 @@ export default function killTheNewsletter(
           style="${css`
             @at-root {
               body {
-                font-size: 14px;
+                font-size: 0.875rem;
+                line-height: 1.5;
                 font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
-                line-height: 1.5;
                 -webkit-text-size-adjust: 100%;
                 max-width: 450px;
-                padding: 0 1em;
-                margin: 1em auto;
+                padding: 0 1rem;
+                margin: 1rem auto;
                 text-align: center;
                 overflow-wrap: break-word;
               }
@@ -114,11 +114,11 @@ export default function killTheNewsletter(
               }
 
               h1 {
-                font-size: 1.5em;
+                font-size: 1.3rem;
               }
 
               footer {
-                font-size: 0.857em;
+                font-size: 0.75rem;
               }
 
               a {
@@ -138,7 +138,7 @@ export default function killTheNewsletter(
               input,
               button {
                 all: unset;
-                padding: 0.1em 1em;
+                padding: 0.1rem 1rem;
                 border-style: solid;
                 border-color: gainsboro;
                 border-radius: 5px;
@@ -159,7 +159,7 @@ export default function killTheNewsletter(
               }
 
               button {
-                font-size: 0.857em;
+                font-size: 0.75rem;
                 border-width: 0.1px;
 
                 @media (prefers-color-scheme: dark) {
