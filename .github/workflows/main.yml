@@ -6,13 +6,13 @@ jobs:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter--windows--${{ github.sha }}.exe"
-            artifact: Kill the Newsletter--windows--${{ github.sha }}.exe
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter--windows--${{ github.sha }}.exe"
+            artifact: kill-the-newsletter--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "Kill the Newsletter.app"
-              tar -czf "Kill the Newsletter--macos--${{ github.sha }}.app.tgz" "Kill the Newsletter.app"
-            artifact: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
+              tar -czf "kill-the-newsletter--macos--${{ github.sha }}.tgz" "kill-the-newsletter"
+            artifact: kill-the-newsletter--macos--${{ github.sha }}.tgz
           - os: ubuntu
             build: |
               npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
@@ -97,10 +97,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: Kill the Newsletter--windows--${{ github.sha }}.exe
+          name: kill-the-newsletter--windows--${{ github.sha }}.exe
       - uses: actions/download-artifact@v2
         with:
-          name: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
+          name: kill-the-newsletter--macos--${{ github.sha }}.tgz
       - uses: actions/download-artifact@v2
         with:
           name: kill-the-newsletter--linux--${{ github.sha }}.tgz
@@ -118,16 +118,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: Kill the Newsletter--windows--${{ github.sha }}.exe
-          asset_name: Kill the Newsletter--windows--${{ steps.tag.outputs.tag }}.exe
+          asset_path: kill-the-newsletter--windows--${{ github.sha }}.exe
+          asset_name: kill-the-newsletter--windows--${{ steps.tag.outputs.tag }}.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       - uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: Kill the Newsletter--macos--${{ github.sha }}.app.tgz
-          asset_name: Kill the Newsletter--macos--${{ steps.tag.outputs.tag }}.app.tgz
+          asset_path: kill-the-newsletter--macos--${{ github.sha }}.tgz
+          asset_name: kill-the-newsletter--macos--${{ steps.tag.outputs.tag }}.tgz
           asset_content_type: application/gzip
       - uses: actions/upload-release-asset@v1
         env:
