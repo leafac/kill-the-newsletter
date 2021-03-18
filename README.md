@@ -18,7 +18,7 @@
 
 The simplest way to use Kill the Newsletter! is with the hosted version at <https://kill-the-newsletter.com>.
 
-The service is and will always be free; you don’t have to create an account; and I don’t collect your data or share it with anyone.
+Kill the Newsletter! is and will always be free; you don’t have to create an account; and I don’t collect your data or share it with anyone.
 
 ### Self-Host
 
@@ -47,96 +47,124 @@ And then running the following command:
 $ curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file email.txt
 ```
 
-(Remember to change the `ru9rmeebswmcy7wx` in the example above to the appropriate email address for your Kill the Newsletter! test inbox.)
+Remember to change the `ru9rmeebswmcy7wx` in the example above to the appropriate email address for your Kill the Newsletter! test inbox.
 
 #### Pre-Requisites
 
 To install Kill the Newsletter! on your own server you’ll need:
 
-1. A domain (for example, `kill-the-newsletter.com`). I use [Namecheap](https://www.namecheap.com) to buy domains.
+1. A domain (for example, `kill-the-newsletter.com`). I buy domains at [Namecheap](https://www.namecheap.com).
 2. A DNS server. I use the DNS server that comes with the domain I bought at Namecheap (and they even provide free DNS service for domains bought elsewhere).
-3. A server. I rent a $6/month DigitalOcean droplet created with the following configurations:
+3. A server. I rent a $6/month [DigitalOcean](https://www.digitalocean.com) droplet created with the following configuration:
 
    |                        |                                                                      |
    | ---------------------- | -------------------------------------------------------------------- |
    | **Distributions**      | Ubuntu 20.04 (LTS)                                                   |
    | **Plan**               | Share CPU · Regular Intel · $5/mo                                    |
-   | **Datacenter region**  | Whatever is closest to you—I use New York 1.                         |
+   | **Datacenter region**  | I use New York 1, but you should use whatever is closest to you      |
    | **Additional options** | IPv6 & Monitoring                                                    |
    | **Authentication**     | SSH keys                                                             |
-   | **Hostname**           | Your domain, for example, `kill-the-newsletter.com`.                 |
+   | **Hostname**           | Your domain, for example, `kill-the-newsletter.com`                  |
    | **Backups**            | Enabled (that’s what makes the $5/month plan actually cost $6/month) |
 
-   I also like to assign the droplet a **Floating IP** because it allows me to destroy and create a new droplet without having to change the DNS and wait for the DNS propagation to happen.
+   I also like to assign the droplet a **Floating IP** because it allows me to destroy and create droplets without having to change the DNS and wait for the DNS propagation to happen.
 
    This is the cheapest DigitalOcean offering, and yet it has managed Kill the Newsletter!’s traffic for years, even when it occasionally receives extra attention, for example, when it makes the front page of HackerNews.
 
----
+#### DNS Configuration
 
-8. Configure the DNS in Namecheap:
+This is where you associate domains to servers. For example, you associate `kill-the-newsletter.com` to the DigitalOcean droplet on which Kill the Newsletter! runs.
 
-   | Type    | Host  | Value                                                   |
-   | ------- | ----- | ------------------------------------------------------- |
-   | `A`     | `@`   | `<FLOATING IP>`                                         |
-   | `CNAME` | `www` | `<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>` |
-   | `MX`    | `@`   | `<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>` |
+| Type    | Host  | Value                                               |
+| ------- | ----- | --------------------------------------------------- |
+| `A`     | `@`   | The (Floating) IP address of the server             |
+| `Alias` | `www` | Your domain, for example, `kill-the-newsletter.com` |
+| `MX`    | `@`   | Your domain, for example, `kill-the-newsletter.com` |
 
-9. Configure the deployment on [`package.json`](package.json), particularly under the following keys:
+#### Download Kill the Newsletter!
 
-   - `apps.env.BASE_URL`.
-   - `apps.env.EMAIL_DOMAIN`.
-   - `apps.env.ISSUE_REPORT`.
-   - `deploy.production.host`.
-   - `deploy.production.repo`.
-
-10. Configure [Caddy](https://caddyserver.com), the reverse proxy, on [`Caddyfile`](Caddyfile).
-
-11. Setup the server:
-
-    ```console
-    $ ssh-add
-    $ npm run deploy:setup
-    ```
-
-12. Migrate the existing feeds (if any):
-
-    ```console
-    $ ssh-add
-    $ ssh -A root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>
-    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-feeds> /root/kill-the-newsletter.com/current/static/feeds/
-    root@<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”> $ rsync -av <path-to-previous-alternate> /root/kill-the-newsletter.com/current/static/alternate/
-    ```
-
-13. Push to your fork, which will trigger the GitHub Action that deploys the code and starts the server.
-
-# Run Locally
-
-Install [Node.js](https://nodejs.org/) and run:
+SSH into the server and download Kill the Newsletter!:
 
 ```console
-$ npm install
-$ npm run develop
+[your machine] $ ssh root@kill-the-newsletter.com
+[the server] # mkdir kill-the-newsletter && cd kill-the-newsletter
+[the server] # curl -O https://github.com/leafac/kill-the-newsletter/releases/download/<version>/kill-the-newsletter--linux--<version>.tgz
+[the server] # tar -xzf kill-the-newsletter--linux--<version>.tgz
 ```
 
-The web server will be running at `http://localhost:8000` and the email server at `smtp://localhost:2525`.
+#### Create `configuration.js`
 
-# Run Tests
+You may adapt [`deployment-example/configuration.js`](deployment-example/configuration.js), which is the configuration running at `https://kill-the-newsletter.com`. In particular, you must change the following lines:
 
-Install [Node.js](https://nodejs.org/) and run:
+```javascript
+// ...
+
+webApplication.set("url", "https://kill-the-newsletter.com");
+webApplication.set("email", "smtp://kill-the-newsletter.com");
+webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
+
+// ...
+
+domains: ["kill-the-newsletter.com", "www.kill-the-newsletter.com"],
+
+// ...
+```
+
+#### Try Running the Server
+
+At this point you’re ready to run Kill the Newsletter! for real:
 
 ```console
-$ npm install-test
+[the server] # ./kill-the-newsletter configuration.js
 ```
 
-# Docker Support (Experimental)
+Kill the Newsletter! starts a web server and an email server. They include everything you need to run securely in production, including support for HTTPS.
 
-Install [Docker](https://www.docker.com/) and run:
+<details>
+<summary>Isn’t running the service as <code>root</code> a bad idea?</summary>
+
+This practice is frowned upon, but it may be okay in some cases (that’s how I’ve been running `https://kill-the-newsletter.com` for years). If the only thing of value on a machine is Kill the Newsletter!, then what would you be protecting by running the service as a unprivileged user? The most important things is the data, but that should be accessible from the unprivileged user anyway. I prefer to treat the machine as disposable and run the service as `root`—it’s as simple as it gets.
+
+</details>
+
+#### Install Kill the Newsletter! as a [systemd](https://systemd.io) Service
+
+This ensures that Kill the Newsletter! is always running. If it hits an error and halts, systemd restarts it. If the machine reboots, systemd starts Kill the Newsletter! again.
+
+First, stop the server you ran in the previous step.
+
+Then, create a file at `/etc/systemd/system/kill-the-newsletter.service` with the contents from [`deployment-example/kill-the-newsletter.service`](deployment-example/kill-the-newsletter.service).
+
+Finally, run the following commands:
 
 ```console
-$ docker build -t kill-the-newsletter .
-$ docker run kill-the-newsletter
+[the server] # systemctl daemon-reload
+[the server] # systemctl enable kill-the-newsletter
+[the server] # systemctl restart kill-the-newsletter
 ```
 
-The web server will be running at `http://localhost:8000` and the email server at `smtp://localhost:2525`.
+You may log out of the server and start enjoying your own Kill the Newsletter! installation.
 
-For use in production, start with the example [`Dockerfile`](Dockerfile).
+#### Maintenance
+
+All the data is stored under the `data` directory as a [SQLite](https://sqlite.org) database. If you every have to migrate to a different server, just take the `data` directory with you.
+
+To update, just download and extract a newer [release](https://github.com/leafac/kill-the-newsletter/releases), and then restart the service with the following command:
+
+```console
+[the server] # systemctl restart kill-the-newsletter
+```
+
+### Advanced
+
+#### Other Operating Systems
+
+The guide above covers the basics of running Kill the Newsletter! on a Linux server, which is the most common way of deploying web services, but there are executables for Windows and macOS as well. The process is similar up to the point of installing Kill the Newsletter! as a systemd service, because other operating systems use other process managers.
+
+#### Other Configuration
+
+The `configuration.js` file is a JavaScript module that must return a function to be called by the `kill-the-newsletter` executable. Typically this configuration will start the servers (web and email) for Kill the Newsletter!, but it may do anything you wish. The `kill-the-newsletter` executable simply calls the `configuration.js` file and passes a [`require()`](https://nodejs.org/dist/latest/docs/api/modules.html#modules_require_id) function from the perspective of Kill the Newsletter! itself. You may `require(".")` to get a hold of the `killTheNewsletter()` function, which produces the `webApplication` and the `emailApplication`. You may also `require()` any of the Kill the Newsletter! production dependencies listed in [`package.json`](package.json).
+
+#### Using the [`kill-the-newsletter` npm Package](https://npm.im/kill-the-newsletter)
+
+For people familiar with TypeScript/JavaScript, Kill the Newsletter! is also distributed as an npm package. You may run it with `npx kill-the-newsletter`, or `npm install kill-the-newsletter` into your project to `import` or `require` it and mount it as part of a bigger [Express](http://expressjs.com) application.
