@@ -100,12 +100,19 @@ export default function killTheNewsletter(
                 font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
+                color: #000000d4;
+                background-color: white;
                 -webkit-text-size-adjust: 100%;
                 max-width: 450px;
                 padding: 0 1rem;
                 margin: 1rem auto;
                 text-align: center;
                 overflow-wrap: break-word;
+
+                @media (prefers-color-scheme: dark) {
+                  color: #ffffffd4;
+                  background-color: #1e1e1e;
+                }
               }
 
               code {
@@ -138,8 +145,8 @@ export default function killTheNewsletter(
               input,
               button {
                 all: unset;
-                border-style: solid;
-                border-color: gainsboro;
+                padding: 0.1rem 1rem;
+                border: 1px solid gainsboro;
                 border-radius: 5px;
                 box-shadow: inset 0px 1px 1px #ffffff10, 0px 1px 3px #00000010;
 
@@ -149,8 +156,6 @@ export default function killTheNewsletter(
               }
 
               input {
-                padding: 0.1rem 1rem;
-                border-width: 1px;
                 transition: border-color 0.2s;
 
                 &:focus {
@@ -159,9 +164,7 @@ export default function killTheNewsletter(
               }
 
               button {
-                font-size: 0.75rem;
-                padding: 0.2rem 1rem;
-                border-width: 0.1px;
+                background-color: white;
 
                 @media (prefers-color-scheme: dark) {
                   background-color: #5a5a5a;
@@ -171,19 +174,6 @@ export default function killTheNewsletter(
                   color: white;
                   background-color: #29adff;
                   border-color: #29adff;
-                }
-              }
-
-              @media (prefers-color-scheme: light) {
-                body {
-                  color: #000000d4;
-                }
-              }
-
-              @media (prefers-color-scheme: dark) {
-                body {
-                  color: #ffffffd4;
-                  background-color: #1e1e1e;
                 }
               }
             }
@@ -266,8 +256,8 @@ export default function killTheNewsletter(
               autocomplete="off"
               autofocus
             />
+            <button>Create Inbox</button>
           </p>
-          <p><button>Create Inbox</button></p>
         </form>
       `)
     );
