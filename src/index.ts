@@ -520,7 +520,8 @@ export default function killTheNewsletter(
 
 if (require.main === module) {
   console.log(`Kill the Newsletter!/${VERSION}`);
-  const configurationFile = process.argv[2];
+  const configurationFile =
+    process.argv[2] === undefined ? undefined : path.resolve(process.argv[2]);
   if (configurationFile === undefined) {
     const { webApplication, emailApplication } = killTheNewsletter(
       path.join(process.cwd(), "data")
@@ -532,8 +533,7 @@ if (require.main === module) {
       console.log(`Email server started at ${webApplication.get("email")}`);
     });
   } else {
-    const configurationFileAbsolute = path.resolve(configurationFile);
-    require(configurationFileAbsolute)(require);
-    console.log(`Configuration loaded from ‘${configurationFileAbsolute}’.`);
+    require(configurationFile)(require);
+    console.log(`Configuration loaded from ‘${configurationFile}’.`);
   }
 }

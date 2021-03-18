@@ -13,7 +13,6 @@ module.exports = async (require) => {
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
   const reverseProxy = express();
-
   reverseProxy.use((req, res, next) => {
     if (req.hostname !== new URL(webApplication.get("url")).hostname)
       return res.redirect(`${webApplication.get("url")}${req.originalUrl}`);
@@ -30,7 +29,6 @@ module.exports = async (require) => {
       reverseProxy
     )
     .listen(443);
-
   emailApplication.listen(25, () => {
     console.log("Email server started");
   });
