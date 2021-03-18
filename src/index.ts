@@ -138,7 +138,6 @@ export default function killTheNewsletter(
               input,
               button {
                 all: unset;
-                padding: 0.1rem 1rem;
                 border-style: solid;
                 border-color: gainsboro;
                 border-radius: 5px;
@@ -150,6 +149,7 @@ export default function killTheNewsletter(
               }
 
               input {
+                padding: 0.1rem 1rem;
                 border-width: 1px;
                 transition: border-color 0.2s;
 
@@ -160,6 +160,7 @@ export default function killTheNewsletter(
 
               button {
                 font-size: 0.75rem;
+                padding: 0.2rem 1rem;
                 border-width: 0.1px;
 
                 @media (prefers-color-scheme: dark) {
