@@ -121,45 +121,55 @@ export default function killTheNewsletter(
                 font-size: 0.857em;
               }
 
+              a {
+                color: inherit;
+                transition: color 0.2s;
+
+                &:hover {
+                  color: #29adff;
+                }
+
+                h1 &,
+                footer & {
+                  text-decoration: none;
+                }
+              }
+
               input,
               button {
                 all: unset;
+                padding: 0.1em 1em;
+                border-style: solid;
+                border-color: gainsboro;
+                border-radius: 5px;
+                box-shadow: inset 0px 1px 1px #ffffff10, 0px 1px 3px #00000010;
+
+                @media (prefers-color-scheme: dark) {
+                  border-color: dimgray;
+                }
               }
 
               input {
-                border-bottom: 1px solid gray;
+                border-width: 1px;
                 transition: border-color 0.2s;
 
                 &:focus {
-                  border-color: #58a6ff;
+                  border-color: #29adff;
                 }
               }
 
               button {
                 font-size: 0.857em;
-                padding: 0.1em 1em;
-                border: 0.1px solid gainsboro;
-                border-radius: 5px;
-                box-shadow: inset 0px 1px #ffffff10, 0px 1px 3px #00000010;
+                border-width: 0.1px;
 
                 @media (prefers-color-scheme: dark) {
-                  border-color: dimgray;
                   background-color: #5a5a5a;
                 }
 
                 &:active {
                   color: white;
-                  background-color: #58a6ff;
-                  border-color: #58a6ff;
-                }
-              }
-
-              a {
-                all: unset;
-                transition: color 0.2s;
-
-                &:hover {
-                  color: #58a6ff;
+                  background-color: #29adff;
+                  border-color: #29adff;
                 }
               }
 
