@@ -123,25 +123,11 @@ export default function killTheNewsletter(
 
               input,
               button {
-                font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
-                  Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
-                  "Helvetica Neue", sans-serif;
-                font-size: 1em;
-                line-height: 1.5;
-                color: inherit;
-                background-color: transparent;
-                margin: 0;
-                outline: none;
+                all: unset;
               }
 
               input {
-                box-sizing: border-box;
-                width: 100%;
-                padding: 0.2em 1em;
-                border: 1px solid darkgray;
-                border-radius: 10px;
-                box-shadow: inset 0px 1px #ffffff22, 0px 1px #00000022;
-                -webkit-appearance: none;
+                border-bottom: 1px solid gray;
                 transition: border-color 0.2s;
 
                 &:focus {
@@ -149,25 +135,32 @@ export default function killTheNewsletter(
                 }
               }
 
-              a,
               button {
+                font-size: 0.857em;
+                padding: 0.1em 1em;
+                border: 0.1px solid gainsboro;
+                border-radius: 5px;
+                box-shadow: inset 0px 1px #ffffff10, 0px 1px 3px #00000010;
+
+                @media (prefers-color-scheme: dark) {
+                  border-color: dimgray;
+                  background-color: #5a5a5a;
+                }
+
+                &:active {
+                  color: white;
+                  background-color: #58a6ff;
+                  border-color: #58a6ff;
+                }
+              }
+
+              a {
+                all: unset;
                 transition: color 0.2s;
 
                 &:hover {
                   color: #58a6ff;
                 }
-              }
-
-              a {
-                color: inherit;
-                text-decoration: none;
-              }
-
-              button {
-                font-weight: bold;
-                padding: 0;
-                border: none;
-                cursor: pointer;
               }
 
               @media (prefers-color-scheme: light) {
@@ -255,6 +248,7 @@ export default function killTheNewsletter(
               type="text"
               name="name"
               placeholder="Newsletter name…"
+              size="40"
               maxlength="500"
               required
               pattern=".*\\S.*"
