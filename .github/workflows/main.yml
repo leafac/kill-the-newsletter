@@ -6,8 +6,8 @@ jobs:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "Kill the Newsletter--migration--windows--${{ github.sha }}.exe"
-            artifact: Kill the Newsletter--migration--windows--${{ github.sha }}.exe
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "kill-the-newsletter--migration--windows--${{ github.sha }}.exe"
+            artifact: kill-the-newsletter--migration--windows--${{ github.sha }}.exe
           - os: macos
             build: |
               npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/index.js" --output "kill-the-newsletter--migration"
