@@ -14,76 +14,64 @@
 
 # [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
 
-### Usage
-
-#### Hosted Version
+### Use the Hosted Version
 
 The simplest way to use Kill the Newsletter! is with the hosted version at <https://kill-the-newsletter.com>.
 
 The service is and will always be free; you don’t have to create an account; and I don’t collect your data or share it with anyone.
 
-#### Self-Hosted Version
+### Self-Host
 
 You may run Kill the Newsletter! on your own servers if you wish. This guarantees the utmost privacy, and it’s also a fun system adminstration project. Kill the Newsletter! strikes a good balance between being relatively easy to self-host and being non-trivial at the same time, because it is a web application as well as an email server.
 
+#### Test on Your Machine
 
+The best way to start self-hosting is to test Kill the Newsletter! on your machine. You can’t really use Kill the Newsletter! if it’s running on your machine because Kill the Newsletter!’s email server must be accessible from the internet to receive email and most likely your internet service provider blocks this kind of connection to prevent spam. Still, this is a good first step to get your feet wet by downloading and running Kill the Newsletter! for the first time.
 
-Send test emails manually from the command line with the following:
+Download the [latest release](https://github.com/leafac/kill-the-newsletter/releases/latest) and give it a try. You may send test emails using [curl](https://curl.se) by creating a file like the following:
+
+`email.txt`
 
 ```
-cat << "EOF" > /tmp/example-email.txt
 From: Publisher <publisher@example.com>
 To: ru9rmeebswmcy7wx@localhost
 Subject: Test email with HTML
 Date: Sat, 13 Mar 2021 11:30:40
 
 <p>Some HTML</p>
-EOF
-
-curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file /tmp/example-email.txt
 ```
 
-# Deploy Your Own Instance (Self-Host)
+And then running the following command:
 
-1. Create accounts on [GitHub](https://github.com), [Namecheap](https://www.namecheap.com), and [DigitalOcean](https://www.digitalocean.com).
+```
+$ curl smtp://localhost:2525 --mail-from publisher@example.com --mail-rcpt ru9rmeebswmcy7wx@localhost --upload-file email.txt
+```
 
-2. [Fork](https://github.com/leafac/kill-the-newsletter.com/fork) this repository.
+(Remember to change the `ru9rmeebswmcy7wx` in the example above to the appropriate email address for your Kill the Newsletter! test inbox.)
 
-3. Create a deployment SSH key pair:
+#### Pre-Requisites
 
-   ```console
-   $ ssh-keygen
-   ```
+To install Kill the Newsletter! on your own server you’ll need:
 
-   **Private key (`id_rsa`):** Add to your fork under **Settings > Secrets** as a new secret called `SSH_PRIVATE_KEY`.
+1. A domain (for example, `kill-the-newsletter.com`). I use [Namecheap](https://www.namecheap.com) to buy domains.
+2. A DNS server. I use the DNS server that comes with the domain I bought at Namecheap (and they even provide free DNS service for domains bought elsewhere).
+3. A server. I rent a $6/month DigitalOcean droplet created with the following configurations:
 
-   **Public key (`id_rsa.pub`):** Add to your fork under **Settings > Deploy keys** and to your DigitalOcean account under **Account > Security > SSH keys**.
+   |                        |                                                                      |
+   | ---------------------- | -------------------------------------------------------------------- |
+   | **Distributions**      | Ubuntu 20.04 (LTS)                                                   |
+   | **Plan**               | Share CPU · Regular Intel · $5/mo                                    |
+   | **Datacenter region**  | Whatever is closest to you—I use New York 1.                         |
+   | **Additional options** | IPv6 & Monitoring                                                    |
+   | **Authentication**     | SSH keys                                                             |
+   | **Hostname**           | Your domain, for example, `kill-the-newsletter.com`.                 |
+   | **Backups**            | Enabled (that’s what makes the $5/month plan actually cost $6/month) |
 
-4. Buy a domain on Namecheap.
+   I also like to assign the droplet a **Floating IP** because it allows me to destroy and create a new droplet without having to change the DNS and wait for the DNS propagation to happen.
 
-5. Create a DigitalOcean droplet:
+   This is the cheapest DigitalOcean offering, and yet it has managed Kill the Newsletter!’s traffic for years, even when it occasionally receives extra attention, for example, when it makes the front page of HackerNews.
 
-   |                        |                                                         |
-   | ---------------------- | ------------------------------------------------------- |
-   | **Image**              | Ubuntu 18.04.3 (LTS) x64                                |
-   | **Plan**               | Starter Standard \$5/mo                                 |
-   | **Additional options** | Monitoring                                              |
-   | **Authentication**     | Your Deployment SSH Key                                 |
-   | **Hostname**           | `<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>` |
-   | **Backups**            | Enable                                                  |
-
-6. Assign the new droplet a **Firewall**:
-
-   |                   |                                                         |           |
-   | ----------------- | ------------------------------------------------------- | --------- |
-   | **Name**          | `<YOUR DOMAIN, FOR EXAMPLE, “kill-the-newsletter.com”>` |           |
-   | **Inbound Rules** | ICMP                                                    |           |
-   |                   | SSH                                                     | 22        |
-   |                   | Custom                                                  | 25 (SMTP) |
-   |                   | HTTP                                                    | 80        |
-   |                   | HTTPS                                                   | 443       |
-
-7. Assign the new droplet a **Floating IP**.
+---
 
 8. Configure the DNS in Namecheap:
 
