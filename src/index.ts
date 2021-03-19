@@ -149,14 +149,11 @@ export default function killTheNewsletter(
                 border: 1px solid gainsboro;
                 border-radius: 5px;
                 box-shadow: inset 0px 1px 1px #ffffff10, 0px 1px 3px #00000010;
+                transition: border-color 0.2s;
 
                 @media (prefers-color-scheme: dark) {
                   border-color: dimgray;
                 }
-              }
-
-              input {
-                transition: border-color 0.2s;
 
                 &:focus {
                   border-color: #29adff;
