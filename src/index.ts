@@ -101,8 +101,6 @@ export default function killTheNewsletter(
                 font-family: --apple-system, BlinkMacSystemFont, "Segoe UI",
                   Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                   "Helvetica Neue", sans-serif;
-                color: #000000d4;
-                background-color: white;
                 max-width: 450px;
                 padding: 0 1rem;
                 margin: 1rem auto;
@@ -110,7 +108,7 @@ export default function killTheNewsletter(
                 overflow-wrap: break-word;
 
                 @media (prefers-color-scheme: dark) {
-                  color: #ffffffd4;
+                  color: #d4d4d4;
                   background-color: #1e1e1e;
                 }
               }
@@ -185,7 +183,7 @@ export default function killTheNewsletter(
               style="${css`
                 @media (prefers-color-scheme: dark) {
                   path {
-                    fill: #ffffff;
+                    fill: #d4d4d4;
                   }
                 }
               `}"
