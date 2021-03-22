@@ -168,7 +168,6 @@ export default function killTheNewsletter(
                 &:active {
                   color: white;
                   background-color: #29adff;
-                  border-color: #29adff;
                 }
               }
             }
