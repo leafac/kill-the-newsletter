@@ -153,6 +153,10 @@ export default function killTheNewsletter(
                   border-color: dimgray;
                 }
 
+                @supports (-webkit-touch-callout: none) {
+                  font-size: 16px;
+                }
+
                 &:focus {
                   border-color: #29adff;
                 }
