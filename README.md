@@ -12,7 +12,10 @@
 <a href="https://paypal.me/LeandroFacchinetti">PayPal (one-time)</a>
 </h3>
 
-# [Watch the Code Review!](https://youtu.be/FMTb3Z-QiPY)
+### Videos
+
+- [How to Deploy Kill the Newsletter! (and other Node.js Applications)](https://youtu.be/507WU47x8HI)
+- [A code review from an older version](https://youtu.be/FMTb3Z-QiPY)
 
 ### Use the Hosted Version
 
