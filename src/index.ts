@@ -146,7 +146,7 @@ export default function killTheNewsletter(
                 padding: 0.1rem 1rem;
                 border: 1px solid gainsboro;
                 border-radius: 5px;
-                box-shadow: inset 0px 1px 1px #ffffff10, 0px 1px 3px #00000010;
+                box-shadow: inset 0 1px 1px #ffffff10, 0 1px 3px #00000010;
                 transition: border-color 0.2s;
 
                 @media (prefers-color-scheme: dark) {
