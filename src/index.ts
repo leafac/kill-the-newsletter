@@ -212,25 +212,21 @@ export default function killTheNewsletter(
             for (const copyable of document.querySelectorAll(".copyable"))
               copyable.insertAdjacentHTML(
                 "afterend",
-                $${"`"}
-                $${html`
-              <br />
-              <button
-                type="button"
-                onclick="${javascript`
-                  (async () => {
-                    await navigator.clipboard.writeText("\${copyable.textContent}");
-                    const originalTextContent = this.textContent;
-                    this.textContent = "Copied";
-                    await new Promise(resolve => window.setTimeout(resolve, 500));
-                    this.textContent = originalTextContent;
-                  })();
-                `}"
-              >
-                Copy
-              </button>
-            `}
-                $${"`"}
+                $${"`"}$${html`<br />
+                  <button
+                    type="button"
+                    onclick="${javascript`
+                      (async () => {
+                        await navigator.clipboard.writeText("\${copyable.textContent}");
+                        const originalTextContent = this.textContent;
+                        this.textContent = "Copied";
+                        await new Promise(resolve => window.setTimeout(resolve, 500));
+                        this.textContent = originalTextContent;
+                      })();
+                    `}"
+                  >
+                    Copy
+                  </button>`}$${"`"}
               );
           </script>
         </body>
