@@ -419,10 +419,7 @@ export default function killTheNewsletter(
     (req, res, next) => {
       const feed = renderFeed(req.params.feedReference);
       if (feed === undefined) return next();
-      res
-        .contentType("application/atom+xml")
-        .header("X-Robots-Tag", "noindex")
-        .send(feed);
+      res.type("atom").header("X-Robots-Tag", "noindex").send(feed);
     }
   );
 
