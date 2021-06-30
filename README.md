@@ -95,6 +95,19 @@ SSH into the server and download Kill the Newsletter!:
 [the server] # tar -xzf kill-the-newsletter--linux--<version>.tgz
 ```
 
+#### Create Init.d script
+cp /kill-the-newsletter/deployment-example/kill-the-newsletter-d /etc/init.d/
+update-rc.d kill-the-newsletter-d defaults
+
+Test that it works
+```
+/etc/init.d/node-app start
+/etc/init.d/node-app status
+/etc/init.d/node-app restart
+/etc/init.d/node-app stop
+```
+
+
 #### Create `configuration.js`
 
 You may adapt [`deployment-example/configuration.js`](deployment-example/configuration.js), which is the configuration running at `https://kill-the-newsletter.com`. In particular, you must change the following lines:
