@@ -45,7 +45,7 @@ jobs:
       - run: npm install-ci-test
 
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs: [insiders-build, test]
     runs-on: ubuntu-latest
     steps:
