@@ -6,16 +6,16 @@ jobs:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter--windows--${{ github.sha }}.exe"
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter--windows--${{ github.sha }}.exe"
             artifact: kill-the-newsletter--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter"
               tar -czf "kill-the-newsletter--macos--${{ github.sha }}.tgz" "kill-the-newsletter"
             artifact: kill-the-newsletter--macos--${{ github.sha }}.tgz
           - os: ubuntu
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter"
               tar -czf "kill-the-newsletter--linux--${{ github.sha }}.tgz" "kill-the-newsletter"
             artifact: kill-the-newsletter--linux--${{ github.sha }}.tgz
     runs-on: ${{ matrix.os }}-latest
