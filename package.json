@@ -2,10 +2,10 @@
   "name": "kill-the-newsletter",
   "version": "1.0.1",
   "description": "Convert email newsletters into Atom feeds",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "distribution/index.js",
+  "types": "distribution/index.d.ts",
   "bin": {
-    "kill-the-newsletter": "lib/index.js"
+    "kill-the-newsletter": "distribution/index.js"
   },
   "repository": "leafac/kill-the-newsletter",
   "keywords": [
@@ -20,8 +20,8 @@
   "bugs": "https://github.com/leafac/kill-the-newsletter/issues",
   "homepage": "https://github.com/leafac/kill-the-newsletter#readme",
   "scripts": {
-    "start": "ts-node-dev --poll src/index.ts",
-    "test": "prettier --check \"src/**/*\" --end-of-line auto && jest",
+    "start": "ts-node-dev --poll source/index.ts",
+    "test": "prettier --check \"source/**/*\" --end-of-line auto && jest",
     "prepare": "tsc"
   },
   "dependencies": {
@@ -40,24 +40,23 @@
   "devDependencies": {
     "@types/express": "^4.17.11",
     "@types/fs-extra": "^9.0.8",
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^27.0.1",
     "@types/mailparser": "^3.0.2",
     "@types/node": "^14.14.33",
     "@types/nodemailer": "^6.4.0",
     "@types/smtp-server": "^3.5.6",
     "caxa": "^1.0.0",
     "got": "^11.8.2",
-    "jest": "^26.6.3",
+    "jest": "^27.1.0",
     "nodemailer": "^6.4.18",
     "prettier": "^2.2.1",
-    "ts-jest": "^26.5.3",
+    "ts-jest": "^27.0.5",
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.6",
     "typescript": "^4.2.3"
   },
   "jest": {
-    "rootDir": "src",
     "preset": "ts-jest",
-    "testEnvironment": "node"
+    "rootDir": "source"
   }
 }
