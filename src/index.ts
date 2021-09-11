@@ -19,8 +19,8 @@ export default function killTheNewsletter(
 ): { webApplication: express.Express; emailApplication: SMTPServer } {
   const webApplication = express();
 
-  webApplication.set("url", "http://localhost:4000");
-  webApplication.set("email", "smtp://localhost:2525");
+  webApplication.set("url", "https://ktn.teiks.xyz");
+  webApplication.set("email", "smtp://ktn.teiks.xyz:2525");
   webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
 
   fs.ensureDirSync(rootDirectory);
