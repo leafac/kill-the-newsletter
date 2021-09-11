@@ -6,16 +6,16 @@ jobs:
         os: [windows, macos, ubuntu]
         include:
           - os: windows
-            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter--windows--${{ github.sha }}.exe"
+            build: npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter--windows--${{ github.sha }}.exe"
             artifact: kill-the-newsletter--windows--${{ github.sha }}.exe
           - os: macos
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter"
               tar -czf "kill-the-newsletter--macos--${{ github.sha }}.tgz" "kill-the-newsletter"
             artifact: kill-the-newsletter--macos--${{ github.sha }}.tgz
           - os: ubuntu
             build: |
-              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/lib/index.js" --output "kill-the-newsletter"
+              npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/distribution/index.js" --output "kill-the-newsletter"
               tar -czf "kill-the-newsletter--linux--${{ github.sha }}.tgz" "kill-the-newsletter"
             artifact: kill-the-newsletter--linux--${{ github.sha }}.tgz
     runs-on: ${{ matrix.os }}-latest
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 15
+          node-version: 16
       - run: |
           npm ci
           ${{ matrix.build }}
@@ -36,16 +36,17 @@ jobs:
     strategy:
       matrix:
         os: [windows, macos, ubuntu]
+        node-version: [14, 15, 16]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 15
+          node-version: ${{ matrix.node-version }}
       - run: npm install-ci-test
 
   deploy:
-    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main'
     needs: [insiders-build, test]
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +85,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 15
+          node-version: 16
           registry-url: https://registry.npmjs.org/
       - run: npm ci && npm publish
         env:

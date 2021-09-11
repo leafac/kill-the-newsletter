@@ -72,23 +72,6 @@ export default function killTheNewsletter(
             name="description"
             content="Convert email newsletters into Atom feeds."
           />
-          <link
-            rel="icon"
-            type="image/png"
-            sizes="32x32"
-            href="${webApplication.get("url")}/favicon-32x32.png"
-          />
-          <link
-            rel="icon"
-            type="image/png"
-            sizes="16x16"
-            href="${webApplication.get("url")}/favicon-16x16.png"
-          />
-          <link
-            rel="icon"
-            type="image/x-icon"
-            href="${webApplication.get("url")}/favicon.ico"
-          />
           <title>Kill the Newsletter!</title>
         </head>
         <body
