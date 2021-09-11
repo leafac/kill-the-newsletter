@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "rootDir": "source",
-    "outDir": "distribution",
+    "rootDir": "src",
+    "outDir": "lib",
 
     "target": "ES2019",
     "module": "commonjs",
