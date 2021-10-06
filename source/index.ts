@@ -512,7 +512,7 @@ if (require.main === module) {
     const webPort =
       process.env.WEB_PORT ?? new URL(webApplication.get("url")).port;
     webApplication.listen(webPort, () => {
-      console.log(`Web server started at port ${webPort}}`);
+      console.log(`Web server started at port ${webPort}`);
     });
     const emailPort =
       process.env.EMAIL_PORT ?? new URL(webApplication.get("email")).port;
