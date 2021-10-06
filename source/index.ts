@@ -19,9 +19,15 @@ export default function killTheNewsletter(
 ): { webApplication: express.Express; emailApplication: SMTPServer } {
   const webApplication = express();
 
-  webApplication.set("url", "http://localhost:4000");
-  webApplication.set("email", "smtp://localhost:2525");
-  webApplication.set("administrator", "mailto:kill-the-newsletter@leafac.com");
+  const baseUrl = process.env.BASE_URL ?? "http://localhost:4000";
+  webApplication.set("url", baseUrl);
+
+  const smtpUrl = process.env.SMTP_URL ?? "smtp://localhost:2525";
+  webApplication.set("email", smtpUrl);
+
+  const issueReportEmail =
+    process.env.ISSUE_REPORT_EMAIL ?? "kill-the-newsletter@leafac.com";
+  webApplication.set("administrator", `mailto:${issueReportEmail}`);
 
   fs.ensureDirSync(rootDirectory);
   const database = new Database(
@@ -503,11 +509,15 @@ if (require.main === module) {
     const { webApplication, emailApplication } = killTheNewsletter(
       path.join(process.cwd(), "data")
     );
-    webApplication.listen(new URL(webApplication.get("url")).port, () => {
-      console.log(`Web server started at ${webApplication.get("url")}`);
+    const webPort =
+      process.env.WEB_PORT ?? new URL(webApplication.get("url")).port;
+    webApplication.listen(webPort, () => {
+      console.log(`Web server started at port ${webPort}}`);
     });
-    emailApplication.listen(new URL(webApplication.get("email")).port, () => {
-      console.log(`Email server started at ${webApplication.get("email")}`);
+    const emailPort =
+      process.env.EMAIL_PORT ?? new URL(webApplication.get("email")).port;
+    emailApplication.listen(emailPort, () => {
+      console.log(`Email server started at port ${emailPort}`);
     });
   } else {
     const configurationFile = path.resolve(process.argv[2]);
