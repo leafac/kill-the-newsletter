@@ -4,10 +4,9 @@ RUN git config --global url."https://github.com/".insteadOf ssh://git@github.com
 
 WORKDIR /kill-the-newsletter
 
-COPY package*.json ./
+COPY . .
 RUN npm ci
 RUN npm dedupe --production
-COPY . .
 
 VOLUME /kill-the-newsletter/static/feeds/
 VOLUME /kill-the-newsletter/static/alternate/
