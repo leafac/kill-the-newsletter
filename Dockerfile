@@ -13,8 +13,8 @@ VOLUME /kill-the-newsletter/static/alternate/
 
 ENV WEB_PORT=4000
 ENV EMAIL_PORT=2525
-ENV BASE_URL=https://kill-the-newsletter.retronym.us
-ENV SMTP_URL=smtp://kill-the-newsletter.retronym.us
+ENV BASE_URL=http://localhost:4000
+ENV SMTP_URL=smtp://localhost
 ENV ISSUE_REPORT_EMAIL=kill-the-newsletter@leafac.com
 
 EXPOSE 4000
