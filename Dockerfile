@@ -8,8 +8,7 @@ COPY . .
 RUN npm ci
 RUN npm dedupe --production
 
-VOLUME /kill-the-newsletter/static/feeds/
-VOLUME /kill-the-newsletter/static/alternate/
+VOLUME /kill-the-newsletter/data
 
 ENV WEB_PORT=4000
 ENV EMAIL_PORT=2525
