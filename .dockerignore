@@ -1,5 +1,5 @@
 # Prevent Git history from leaking
 **/.git
 
-# Force fresh build
+# `npm ci` makes this redundant, but it's a good practice
 **/node_modules
