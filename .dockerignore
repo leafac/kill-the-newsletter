@@ -1,0 +1,5 @@
+# Prevent Git history from leaking
+**/.git
+
+# Force fresh build
+**/node_modules
