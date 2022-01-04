@@ -285,7 +285,7 @@ export default function killTheNewsletter(
 
     database.executeTransaction(() => {
       const feedId = database.run(
-        sql`DELETE FROM "feeds" WHERE "reference"="${feedReference}" AND "title" = "${feedName}"`
+        "DELETE FROM feeds WHERE reference=? AND title = ?", [feedReference, feedName]
       );
     });
 
