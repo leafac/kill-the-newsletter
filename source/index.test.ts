@@ -144,7 +144,7 @@ test("Kill the Newsletter!", async () => {
   );
 
   // Delete feed
-  const feedReferenceName = feedReference + "A newsletter"
+  const feedReferenceName = feedReference + "," + "A newsletter"
   const responseDeleted = (await webClient.delete("", { form: { name: feedReferenceName } })).body;
   expect(responseDeleted).toMatch(`Inbox ${feedReference} deleted.`);
    
