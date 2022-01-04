@@ -254,7 +254,8 @@ export default function killTheNewsletter(
     );
   });
 
-  webApplication.post<{}, HTML, { name?: string }, {}, {}>("/", (req, res) => {
+  function validateRequest(req, res) {
+
     if (
       typeof req.body.name !== "string" ||
       req.body.name.trim() === "" ||
@@ -272,6 +273,27 @@ export default function killTheNewsletter(
           `
         )
       );
+
+  }
+
+  webApplication.delete('/', function (req, res) {
+    validateRequest(req, res);
+    
+    const feed = req.body.name.split(",", 2);
+    const feedReference = feed[0] 
+    const feedName = feed[1]
+
+    database.executeTransaction(() => {
+      const feedId = database.run(
+        sql`DELETE FROM "feeds" WHERE "reference"="${feedReference}" AND "title" = "${feedName}"`
+      );
+    });
+
+    res.send(`Inbox ${feedReference} deleted.`)
+  });
+
+  webApplication.post<{}, HTML, { name?: string }, {}, {}>("/", (req, res) => {
+    validateRequest(req, res);
 
     const feedReference = newReference();
     const welcomeTitle = `“${req.body.name}” inbox created`;

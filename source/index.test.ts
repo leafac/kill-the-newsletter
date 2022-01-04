@@ -143,6 +143,16 @@ test("Kill the Newsletter!", async () => {
     html`<title>Test email after truncation</title>`
   );
 
+  // Delete feed
+  const feedReferenceName = feedReference + "A newsletter"
+  const responseDeleted = (await webClient.delete("", { form: { name: feedReferenceName } })).body;
+  expect(responseDeleted).toMatch(`Inbox ${feedReference} deleted.`);
+   
+  // Test deleted feed does not exist.
+  const responseGetFeed = await webClient.get(`feeds/${feedReference}.xml`).body;
+  expect(responseGetFeed).toMatch(html`Feed reference ${feedReference} not found.`);
+
+
   // Stop servers
   webServer.close();
   emailServer.close();
