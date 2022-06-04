@@ -32,7 +32,7 @@
     "@small-tech/auto-encrypt": "^2.0.5",
     "crypto-random-string": "^3.3.1",
     "express": "^4.17.1",
-    "fs-extra": "^9.1.0",
+    "fs-extra": "^10.0.0",
     "mailparser": "^3.1.0",
     "smtp-server": "^3.8.0",
     "tagged-template-noop": "^2.1.1"
