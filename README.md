@@ -1,3 +1,34 @@
+<!--
+    - [ ] Copy and paste issue Gwern Branwen
+
+
+
+- [ ] Use app.locals instead of app.set()
+- [ ] Stop using @leafac/sqlite-migration
+- [ ] Store email content as files, because they’re too big for the database and cause things to go more slowly
+- [ ] Fix any issues with timestamps (store timestamps with explicit timezones)
+
+One more encoding issue: Max Kolysh <max@dover.io> , А А <asavian@ya.ru>, Mikalai Daronin <me@mikalaidaronin.info>
+
+Let you reply to emails: Wesley Luan <luannleonn@gmail.com>
+
+Increase feed size to 1MB: Nicola DG <straynic@gmail.com>
+
+Blocklist Blogtrottr
+
+FAQ:
+- Email confirmation
+  - Clicking on links works.
+  - Sending an email doesn’t work
+- When old posts are eliminated
+- How do delete an inbox
+- feed isn’t updating? Check reader. Try sending a test emat. Contact me via email 
+- Publishers: Don’t worry, it’s just another email client
+
+
+
+if (import.meta.url.endsWith(process.argv[1]))
+-->
 <h1 align="center"><a href="https://kill-the-newsletter.com">Kill the Newsletter!</a></h1>
 <h3 align="center">Convert email newsletters into Atom feeds</h3>
 <p align="center">

@@ -18,7 +18,13 @@
   "author": "Leandro Facchinetti <kill-the-newsletter@leafac.com> (https://leafac.com)",
   "license": "MIT",
   "bugs": "https://github.com/leafac/kill-the-newsletter/issues",
-  "homepage": "https://github.com/leafac/kill-the-newsletter#readme",
+  "homepage": "https://github.com/leafac/kill-the-newsletter",
+  "funding": [
+    "https://patreon.com/leafac",
+    "https://paypal.me/LeandroFacchinettiEU",
+    "https://github.com/sponsors/leafac",
+    "https://btc.com/34KJBgtaFYMtDqpSgMayw9qiKWg2GQXA9M"
+  ],
   "scripts": {
     "start": "node-dev source/index.ts",
     "test": "prettier --check \"source/**/*\" --end-of-line auto && jest",

@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "rootDir": "source",
-    "outDir": "distribution",
+    "rootDir": "./source/",
+    "outDir": "./distribution/",
 
-    "target": "ES2019",
-    "module": "commonjs",
-    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ESNext",
 
     "declaration": true,
     "declarationMap": true,

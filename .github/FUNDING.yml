@@ -1,3 +1,7 @@
 patreon: leafac
-custom: "https://paypal.me/LeandroFacchinettiEU"
+custom:
+  [
+    "https://paypal.me/LeandroFacchinettiEU",
+    "https://btc.com/34KJBgtaFYMtDqpSgMayw9qiKWg2GQXA9M",
+  ]
 github: leafac
