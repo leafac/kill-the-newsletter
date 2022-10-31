@@ -2,12 +2,6 @@
   "name": "kill-the-newsletter",
   "version": "1.0.1",
   "description": "Convert email newsletters into Atom feeds",
-  "main": "distribution/index.js",
-  "types": "distribution/index.d.ts",
-  "bin": {
-    "kill-the-newsletter": "distribution/index.js"
-  },
-  "repository": "leafac/kill-the-newsletter",
   "keywords": [
     "newsletter",
     "atom feeds",
@@ -15,16 +9,18 @@
     "self-hosted",
     "web application"
   ],
-  "author": "Leandro Facchinetti <kill-the-newsletter@leafac.com> (https://leafac.com)",
-  "license": "MIT",
+  "homepage": "https://kill-the-newsletter.com",
+  "repository": "https://github.com/leafac/kill-the-newsletter",
   "bugs": "https://github.com/leafac/kill-the-newsletter/issues",
-  "homepage": "https://github.com/leafac/kill-the-newsletter",
   "funding": [
     "https://patreon.com/leafac",
     "https://paypal.me/LeandroFacchinettiEU",
     "https://github.com/sponsors/leafac",
     "https://btc.com/34KJBgtaFYMtDqpSgMayw9qiKWg2GQXA9M"
   ],
+  "author": "Leandro Facchinetti <kill-the-newsletter@leafac.com> (https://leafac.com)",
+  "license": "MIT",
+  "bin": "./build/index.mjs",
   "scripts": {
     "start": "node-dev source/index.ts",
     "test": "prettier --check \"source/**/*\" --end-of-line auto && jest",
@@ -60,9 +56,5 @@
     "ts-jest": "^27.0.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "rootDir": "source"
   }
 }

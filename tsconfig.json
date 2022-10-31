@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "rootDir": "./source/",
-    "outDir": "./distribution/",
+    "outDir": "./build/",
 
     "module": "ESNext",
     "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
     "target": "ESNext",
 
     "declaration": true,
