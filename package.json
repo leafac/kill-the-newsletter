@@ -22,9 +22,16 @@
   "license": "MIT",
   "bin": "./build/index.mjs",
   "scripts": {
-    "start": "node-dev source/index.ts",
-    "test": "prettier --check \"source/**/*\" --end-of-line auto && jest",
-    "prepare": "tsc"
+    "postinstall": "(cd ./server/ && npm install && cd ..) && (cd ./static/ && npm install && cd ..)",
+    "prepare": "(cd ./server/ && npm run prepare && cd ..) && (cd ./static/ && npm run prepare && cd ..)",
+    "start": "nodemon --watch \"./server/**/*.mts\" --watch \"./static/{{prepare,leafac--javascript}.mjs,**/*.{png,jpeg,ico}}\" --watch \"./configuration/**/*.mjs\" --ext \"*\" --exec \"npm run prepare && node ./build/server/index.mjs ./configuration/development.mjs\"",
+    "start:clean:data": "npm run clean:data && npm run start",
+    "test": "prettier --check \"./server/**/*.mts\" --check \"./static/prepare.mjs\" --check \"./configuration/**/*.mjs\" --end-of-line auto",
+    "clean:all": "npm run clean:build && npm run clean:data && npm run clean:node_modules",
+    "clean:build": "shx rm -rf ./build/",
+    "clean:data": "shx rm -rf ./data/",
+    "clean:node_modules": "shx rm -rf ./node_modules/ ./server/node_modules/ ./static/node_modules/",
+    "update": "npm-check-updates --upgrade && (cd ./server/ && npm-check-updates --upgrade && cd ..) && (cd ./static/ && npm-check-updates --upgrade && cd ..) && npm install"
   },
   "dependencies": {
     "@leafac/caddy": "^1.0.5",
@@ -39,17 +46,10 @@
     "smtp-server": "^3.11.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.14",
-    "@types/mailparser": "^3.4.0",
-    "@types/node": "^18.11.9",
-    "@types/nodemailer": "^6.4.6",
-    "@types/smtp-server": "^3.5.7",
     "caxa": "^3.0.1",
-    "esbuild": "^0.15.12",
     "got": "^12.5.2",
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20",
-    "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
+    "prettier": "^2.7.1"
   }
 }
