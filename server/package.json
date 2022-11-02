@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "prepare": "tsc"
+  },
   "devDependencies": {
     "@types/express": "^4.17.14",
     "@types/mailparser": "^3.4.0",
