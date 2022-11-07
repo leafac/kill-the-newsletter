@@ -3,7 +3,9 @@
     "prepare": "tsc"
   },
   "devDependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/express": "^4.17.14",
+    "@types/lodash": "^4.14.188",
     "@types/mailparser": "^3.4.0",
     "@types/node": "^18.11.9",
     "@types/nodemailer": "^6.4.6",
