@@ -212,7 +212,7 @@ await commander.program
         processType,
         processNumber,
       }: {
-        processType: "main" | "server" | "worker";
+        processType: "main" | "web" | "email";
         processNumber: string;
       }
     ) => {
@@ -241,18 +241,26 @@ await commander.program
       });
 
       const application = {
-        name: "courselore",
+        name: "kill-the-newsletter",
         version,
         process: {
           id: Math.random().toString(36).slice(2),
           type: processType,
-          number:
-            typeof processNumber === "string"
-              ? Number(processNumber)
-              : undefined,
+          number: (typeof processNumber === "string"
+            ? Number(processNumber)
+            : undefined) as number,
         },
         configuration: (await import(url.pathToFileURL(configuration).href))
-          .default,
+          .default as {
+          hostname: string;
+          dataDirectory: string;
+          administratorEmail: string;
+          environment: "production" | "development" | "other";
+          tunnel: boolean;
+          alternativeHostnames: string[];
+          hstsPreload: boolean;
+          caddy: string;
+        },
         static: JSON.parse(
           await fs.readFile(
             new URL("../static/paths.json", import.meta.url),
@@ -260,36 +268,24 @@ await commander.program
           )
         ),
         ports: {
-          server: lodash.times(
+          web: lodash.times(
             os.cpus().length,
             (processNumber) => 6000 + processNumber
           ),
-          serverEvents: lodash.times(
-            os.cpus().length,
-            (processNumber) => 7000 + processNumber
-          ),
-          workerEvents: lodash.times(
-            os.cpus().length,
-            (processNumber) => 8000 + processNumber
-          ),
         },
-        addresses: {
-          canonicalHostname: "courselore.org",
-          metaCourseloreInvitation: "https://meta.courselore.org",
-          tryHostname: "try.courselore.org",
-        },
-        server: express() as any,
-        serverEvents: express() as any,
-        workerEvents: express() as any,
-      } as Application;
+        web: express(),
+        email: "TODO",
+      };
 
       application.configuration.environment ??= "production";
-      application.configuration.demonstration ??=
-        application.configuration.environment !== "production";
       application.configuration.tunnel ??= false;
       application.configuration.alternativeHostnames ??= [];
       application.configuration.hstsPreload ??= false;
       application.configuration.caddy ??= caddyfile``;
+
+      application.web.get("/", (request, response) => {
+        response.send("TODO");
+      });
 
       // #!/usr/bin/env node
 
@@ -814,25 +810,26 @@ await commander.program
           const childProcesses = new Set<ExecaChildProcess>();
           let restartChildProcesses = true;
           for (const execaArguments of [
-            ...["server", "worker"].flatMap((processType) =>
-              lodash.times(os.cpus().length, (processNumber) => ({
-                file: process.argv[0],
-                arguments: [
-                  process.argv[1],
-                  "--process-type",
-                  processType,
-                  "--process-number",
-                  processNumber,
-                  configuration,
-                ],
-                options: {
-                  preferLocal: true,
-                  stdio: "inherit",
-                  ...(application.configuration.environment === "production"
-                    ? { env: { NODE_ENV: "production" } }
-                    : {}),
-                },
-              }))
+            ...Object.entries({ web: os.cpus().length, email: 1 }).flatMap(
+              ([processType, processCount]) =>
+                lodash.times(processCount, (processNumber) => ({
+                  file: process.argv[0],
+                  arguments: [
+                    process.argv[1],
+                    "--process-type",
+                    processType,
+                    "--process-number",
+                    processNumber,
+                    configuration,
+                  ],
+                  options: {
+                    preferLocal: true,
+                    stdio: "inherit",
+                    ...(application.configuration.environment === "production"
+                      ? { env: { NODE_ENV: "production" } }
+                      : {}),
+                  },
+                }))
             ),
             {
               file: "caddy",
@@ -842,114 +839,100 @@ await commander.program
                 stdout: "ignore",
                 stderr: "ignore",
                 input: caddyfile`
-                {
-                  admin off
-                  ${
-                    application.configuration.environment === "production"
-                      ? `email ${application.configuration.administratorEmail}`
-                      : `local_certs`
+                  {
+                    admin off
+                    ${
+                      application.configuration.environment === "production"
+                        ? `email ${application.configuration.administratorEmail}`
+                        : `local_certs`
+                    }
                   }
-                }
 
-                (common) {
-                  header Cache-Control no-store
-                  header Content-Security-Policy "default-src https://${
-                    application.configuration.hostname
-                  }/ 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'none'; object-src 'none'"
-                  header Cross-Origin-Embedder-Policy require-corp
-                  header Cross-Origin-Opener-Policy same-origin
-                  header Cross-Origin-Resource-Policy same-origin
-                  header Referrer-Policy no-referrer
-                  header Strict-Transport-Security "max-age=31536000; includeSubDomains${
-                    application.configuration.hstsPreload ? `; preload` : ``
-                  }"
-                  header X-Content-Type-Options nosniff
-                  header Origin-Agent-Cluster "?1"
-                  header X-DNS-Prefetch-Control off
-                  header X-Frame-Options DENY
-                  header X-Permitted-Cross-Domain-Policies none
-                  header -Server
-                  header -X-Powered-By
-                  header X-XSS-Protection 0
-                  header Permissions-Policy "interest-cohort=()"
-                  encode zstd gzip
-                }
+                  (common) {
+                    header Cache-Control no-store
+                    header Content-Security-Policy "default-src https://${
+                      application.configuration.hostname
+                    }/ 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'none'; object-src 'none'"
+                    header Cross-Origin-Embedder-Policy require-corp
+                    header Cross-Origin-Opener-Policy same-origin
+                    header Cross-Origin-Resource-Policy same-origin
+                    header Referrer-Policy no-referrer
+                    header Strict-Transport-Security "max-age=31536000; includeSubDomains${
+                      application.configuration.hstsPreload ? `; preload` : ``
+                    }"
+                    header X-Content-Type-Options nosniff
+                    header Origin-Agent-Cluster "?1"
+                    header X-DNS-Prefetch-Control off
+                    header X-Frame-Options DENY
+                    header X-Permitted-Cross-Domain-Policies none
+                    header -Server
+                    header -X-Powered-By
+                    header X-XSS-Protection 0
+                    header Permissions-Policy "interest-cohort=()"
+                    encode zstd gzip
+                  }
 
-                ${[
-                  application.configuration.tunnel
-                    ? []
-                    : [application.configuration.hostname],
-                  ...application.configuration.alternativeHostnames,
-                ]
-                  .map((hostname) => `http://${hostname}`)
-                  .join(", ")} {
-                  import common
-                  redir https://{host}{uri} 308
-                  handle_errors {
+                  ${[
+                    ...(application.configuration.tunnel
+                      ? []
+                      : [application.configuration.hostname]),
+                    ...application.configuration.alternativeHostnames,
+                  ]
+                    .map((hostname) => `http://${hostname}`)
+                    .join(", ")} {
                     import common
+                    redir https://{host}{uri} 308
+                    handle_errors {
+                      import common
+                    }
                   }
-                }
 
-                ${
-                  application.configuration.alternativeHostnames.length > 0
-                    ? caddyfile`
-                        ${application.configuration.alternativeHostnames
-                          .map((hostname) => `https://${hostname}`)
-                          .join(", ")} {
-                          import common
-                          redir https://${
-                            application.configuration.hostname
-                          }{uri} 307
-                          handle_errors {
+                  ${
+                    application.configuration.alternativeHostnames.length > 0
+                      ? caddyfile`
+                          ${application.configuration.alternativeHostnames
+                            .map((hostname) => `https://${hostname}`)
+                            .join(", ")} {
                             import common
+                            redir https://${
+                              application.configuration.hostname
+                            }{uri} 307
+                            handle_errors {
+                              import common
+                            }
                           }
-                        }
-                      `
-                    : ``
-                }
+                        `
+                      : ``
+                  }
 
-                http${application.configuration.tunnel ? `` : `s`}://${
+                  http${application.configuration.tunnel ? `` : `s`}://${
                   application.configuration.hostname
                 } {
-                  route {
-                    import common
                     route {
-                      root * ${JSON.stringify(
-                        url.fileURLToPath(
-                          new URL("../static/", import.meta.url)
-                        )
-                      )}
-                      @file_exists file
-                      route @file_exists {
-                        header Cache-Control "public, max-age=31536000, immutable"
-                        file_server
+                      import common
+                      route {
+                        root * ${JSON.stringify(
+                          url.fileURLToPath(
+                            new URL("../static/", import.meta.url)
+                          )
+                        )}
+                        @file_exists file
+                        route @file_exists {
+                          header Cache-Control "public, max-age=31536000, immutable"
+                          file_server
+                        }
                       }
+                      reverse_proxy ${application.ports.web
+                        .map((port) => `127.0.0.1:${port}`)
+                        .join(" ")}
                     }
-                    route /files/* {
-                      root * ${JSON.stringify(
-                        path.resolve(application.configuration.dataDirectory)
-                      )}
-                      @file_exists file
-                      route @file_exists {
-                        header Cache-Control "private, max-age=31536000, immutable"
-                        @must_be_downloaded not path *.png *.jpg *.jpeg *.gif *.mp3 *.mp4 *.m4v *.ogg *.mov *.mpeg *.avi *.pdf *.txt
-                        header @must_be_downloaded Content-Disposition attachment
-                        @may_be_embedded_in_other_sites path *.png *.jpg *.jpeg *.gif *.mp3 *.mp4 *.m4v *.ogg *.mov *.mpeg *.avi *.pdf
-                        header @may_be_embedded_in_other_sites Cross-Origin-Resource-Policy cross-origin
-                        file_server
-                      }
+                    handle_errors {
+                      import common
                     }
-                    reverse_proxy ${application.ports.server
-                      .map((port) => `127.0.0.1:${port}`)
-                      .join(" ")}
                   }
-                  handle_errors {
-                    import common
-                  }
-                }
 
-                ${application.configuration.caddy}
-              `,
+                  ${application.configuration.caddy}
+                `,
               },
             },
           ])
@@ -979,37 +962,22 @@ await commander.program
           break;
         }
 
-        case "server": {
-          const serverApplication = application.server;
-          const eventsApplication = application.serverEvents;
-          serverApplication.emit("start");
-          eventsApplication.emit("start");
-          const server = serverApplication.listen(
-            application.ports.server[application.process.number],
-            "127.0.0.1"
-          );
-          const events = eventsApplication.listen(
-            application.ports.serverEvents[application.process.number],
+        case "web": {
+          const webApplication = application.web;
+          webApplication.emit("start");
+          const server = webApplication.listen(
+            application.ports.web[application.process.number],
             "127.0.0.1"
           );
           await stop;
           server.close();
-          events.close();
-          serverApplication.emit("stop");
-          eventsApplication.emit("stop");
+          webApplication.emit("stop");
           break;
         }
 
-        case "worker": {
-          const eventsApplication = application.workerEvents;
-          eventsApplication.emit("start");
-          const events = eventsApplication.listen(
-            application.ports.workerEvents[application.process.number],
-            "127.0.0.1"
-          );
+        case "email": {
+          // TODO
           await stop;
-          events.close();
-          eventsApplication.emit("stop");
           break;
         }
       }
