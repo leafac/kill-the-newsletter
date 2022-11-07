@@ -275,6 +275,9 @@ await commander.program
         },
         web: express(),
         email: "TODO",
+        log: (...messageParts: any[]) => {
+          console.log(messageParts.join(" "));
+        },
       };
 
       application.configuration.environment ??= "production";
