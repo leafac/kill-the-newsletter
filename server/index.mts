@@ -927,7 +927,9 @@ await commander.program
                       }
                       reverse_proxy ${application.ports.web
                         .map((port) => `127.0.0.1:${port}`)
-                        .join(" ")}
+                        .join(" ")} {
+                          lb_retries 1
+                        }
                     }
                     handle_errors {
                       import common
