@@ -294,7 +294,7 @@ await commander.program
             application.process.number,
             application.process.id,
             ...messageParts,
-          ].join("\t")
+          ].join(" \t")
         );
       };
 
