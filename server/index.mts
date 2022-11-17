@@ -286,9 +286,80 @@ await commander.program
       application.configuration.hstsPreload ??= false;
       application.configuration.caddy ??= caddyfile``;
 
-      application.web.get("/", (request, response) => {
-        response.send("TODO");
+      application.log = (...messageParts) => {
+        console.log(
+          [
+            new Date().toISOString(),
+            application.process.type,
+            application.process.number,
+            application.process.id,
+            ...messageParts,
+          ].join("\t")
+        );
+      };
+
+      application.log(
+        "STARTED",
+        ...(application.process.type === "main"
+          ? [
+              application.name,
+              application.version,
+              `https://${application.configuration.hostname}`,
+            ]
+          : [])
+      );
+
+      process.once("exit", () => {
+        application.log("STOPPED");
       });
+
+      type ResponseLocalsLogging = {
+        log(...messageParts: string[]): void;
+      };
+
+      application.web.enable("trust proxy");
+
+      application.web.use<{}, any, {}, {}, ResponseLocalsLogging>(
+        (request, response, next) => {
+          if (response.locals.log !== undefined) return next();
+
+          const id = Math.random().toString(36).slice(2);
+          const time = process.hrtime.bigint();
+          response.locals.log = (...messageParts) => {
+            application.log(
+              id,
+              `${(process.hrtime.bigint() - time) / 1_000_000n}ms`,
+              request.ip,
+              request.method,
+              request.originalUrl,
+              ...messageParts
+            );
+          };
+          const log = response.locals.log;
+
+          log("STARTING...");
+
+          response.once("close", () => {
+            const contentLength = response.getHeader("Content-Length");
+            log(
+              "FINISHED",
+              String(response.statusCode),
+              ...(typeof contentLength === "string"
+                ? [`${Math.ceil(Number(contentLength) / 1000)}kB`]
+                : [])
+            );
+          });
+
+          next();
+        }
+      );
+
+      application.web.get<{}, any, {}, {}, ResponseLocalsLogging>(
+        "/",
+        (request, response) => {
+          response.send("TODO");
+        }
+      );
 
       // #!/usr/bin/env node
 
