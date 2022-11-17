@@ -9,6 +9,7 @@ import os from "node:os";
 import * as commander from "commander";
 import express from "express";
 import nodemailer from "nodemailer";
+import { Database, sql } from "@leafac/sqlite";
 import lodash from "lodash";
 import { execa, ExecaChildProcess } from "execa";
 import caddyfile from "dedent";
@@ -240,7 +241,35 @@ await commander.program
           });
       });
 
-      const application = {
+      const application: {
+        name: string;
+        version: string;
+        process: {
+          id: string;
+          type: "main" | "web" | "email";
+          number: number;
+        };
+        configuration: {
+          hostname: string;
+          dataDirectory: string;
+          administratorEmail: string;
+          environment: "production" | "development" | "other";
+          tunnel: boolean;
+          alternativeHostnames: string[];
+          hstsPreload: boolean;
+          caddy: string;
+        };
+        static: {
+          [path: string]: string;
+        };
+        ports: {
+          web: number[];
+        };
+        web: Omit<express.Express, "locals"> & Function;
+        email: "TODO";
+        log(...messageParts: string[]): void;
+        database: Database;
+      } = {
         name: "kill-the-newsletter",
         version,
         process: {
@@ -251,16 +280,7 @@ await commander.program
             : undefined) as number,
         },
         configuration: (await import(url.pathToFileURL(configuration).href))
-          .default as {
-          hostname: string;
-          dataDirectory: string;
-          administratorEmail: string;
-          environment: "production" | "development" | "other";
-          tunnel: boolean;
-          alternativeHostnames: string[];
-          hstsPreload: boolean;
-          caddy: string;
-        },
+          .default,
         static: JSON.parse(
           await fs.readFile(
             new URL("../static/paths.json", import.meta.url),
@@ -275,10 +295,7 @@ await commander.program
         },
         web: express(),
         email: "TODO",
-        log: (...messageParts: any[]) => {
-          console.log(messageParts.join(" "));
-        },
-      };
+      } as any;
 
       application.configuration.environment ??= "production";
       application.configuration.tunnel ??= false;
@@ -354,6 +371,55 @@ await commander.program
         }
       );
 
+      await fs.mkdir(application.configuration.dataDirectory, {
+        recursive: true,
+      });
+      application.database = new Database(
+        path.join(
+          application.configuration.dataDirectory,
+          `${application.name}.db`
+        )
+      );
+
+      process.once("exit", () => {
+        application.database.close();
+      });
+
+      if (application.process.type === "main") {
+        application.log("DATABASE MIGRATION", "STARTING...");
+
+        application.database.pragma("journal_mode = WAL");
+
+        // TODO: STOP USING DEFAULT VALUES.
+        // TODO: DOUBLE-CHECK THAT THE OLD MIGRATION SYSTEM IS COMPATIBLE WITH THIS, USING SQLITE’S ‘PRAGMA USER_DATA’
+        await application.database.migrate(
+          sql`
+            CREATE TABLE "feeds" (
+              "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+              "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "reference" TEXT NOT NULL UNIQUE,
+              "title" TEXT NOT NULL
+            );
+
+            CREATE TABLE "entries" (
+              "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+              "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              "reference" TEXT NOT NULL UNIQUE,
+              "feed" INTEGER NOT NULL REFERENCES "feeds",
+              "title" TEXT NOT NULL,
+              "author" TEXT NOT NULL,
+              "content" TEXT NOT NULL
+            );
+          `,
+          sql`
+            CREATE INDEX "entriesFeed" ON "entries" ("feed");
+          `
+        );
+
+        application.log("DATABASE MIGRATION", "FINISHED");
+      }
+
       application.web.get<{}, any, {}, {}, ResponseLocalsLogging>(
         "/",
         (request, response) => {
@@ -391,28 +457,6 @@ await commander.program
       //     path.join(rootDirectory, "kill-the-newsletter.db")
       //   );
       //   databaseMigrate(database, [
-      //     sql`
-      //       CREATE TABLE "feeds" (
-      //         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      //         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      //         "updatedAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      //         "reference" TEXT NOT NULL UNIQUE,
-      //         "title" TEXT NOT NULL
-      //       );
-
-      //       CREATE TABLE "entries" (
-      //         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      //         "createdAt" TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      //         "reference" TEXT NOT NULL UNIQUE,
-      //         "feed" INTEGER NOT NULL REFERENCES "feeds",
-      //         "title" TEXT NOT NULL,
-      //         "author" TEXT NOT NULL,
-      //         "content" TEXT NOT NULL
-      //       );
-      //     `,
-      //     sql`
-      //       CREATE INDEX "entriesFeed" ON "entries" ("feed");
-      //     `,
       //   ]);
 
       //   webApplication.use(express.static(path.join(__dirname, "../public")));
