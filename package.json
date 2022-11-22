@@ -33,6 +33,9 @@
     "clean:node_modules": "shx rm -rf ./node_modules/ ./server/node_modules/ ./static/node_modules/",
     "update": "npm-check-updates --upgrade && (cd ./server/ && npm-check-updates --upgrade && cd ..) && (cd ./static/ && npm-check-updates --upgrade && cd ..) && npm install"
   },
+  "engines": {
+    "node": ">=19"
+  },
   "dependencies": {
     "@leafac/caddy": "^1.0.5",
     "@leafac/css": "^0.7.0",
