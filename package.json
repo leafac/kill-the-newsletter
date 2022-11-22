@@ -50,6 +50,7 @@
     "mailparser": "^3.5.0",
     "smtp-server": "^3.11.0"
   },
+  "caddy": "2.6.2",
   "devDependencies": {
     "caxa": "^3.0.1",
     "cross-env": "^7.0.3",
