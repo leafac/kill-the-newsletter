@@ -147,6 +147,7 @@ export default function killTheNewsletter(
 
               button {
                 background-color: white;
+                cursor: pointer;
 
                 @media (prefers-color-scheme: dark) {
                   background-color: #5a5a5a;
