@@ -457,40 +457,57 @@ await commander.program
         response: express.Response<HTML, ResponseLocalsBase>;
         head: HTML;
         body: HTML;
-      }) => html`
-        <!DOCTYPE html>
-        <html lang="en">
-          <head>
-            <meta name="version" content="${application.version}" />
+      }) => {
+        const layoutBody = html`
+          <body
+            css="${response.locals.css(css`
+              background-color: var(--color--cyan--50);
+              color: var(--color--cyan--900);
+              @media (prefers-color-scheme: dark) {
+                background-color: var(--color--cyan--900);
+                color: var(--color--cyan--50);
+              }
+            `)}"
+          >
+            $${body}
+          </body>
+        `;
 
-            <meta
-              name="description"
-              content="Convert email newsletters into Atom feeds"
-            />
+        return html`
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta name="version" content="${application.version}" />
 
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1, maximum-scale=1"
-            />
-            <link
-              rel="stylesheet"
-              href="https://${application.configuration.hostname}/${application
-                .static["index.css"]}"
-            />
-            $${response.locals.css.toString()}
+              <meta
+                name="description"
+                content="Convert email newsletters into Atom feeds"
+              />
 
-            <script
-              src="https://${application.configuration.hostname}/${application
-                .static["index.mjs"]}"
-              defer
-            ></script>
+              <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1, maximum-scale=1"
+              />
+              <link
+                rel="stylesheet"
+                href="https://${application.configuration
+                  .hostname}/${application.static["index.css"]}"
+              />
+              $${response.locals.css.toString()}
 
-            $${head}
-          </head>
+              <script
+                src="https://${application.configuration.hostname}/${application
+                  .static["index.mjs"]}"
+                defer
+              ></script>
 
-          $${body} $${response.locals.javascript.toString()}
-        </html>
-      `;
+              $${head}
+            </head>
+
+            $${layoutBody} $${response.locals.javascript.toString()}
+          </html>
+        `;
+      };
 
       application.web.get<{}, any, {}, {}, ResponseLocalsBase>(
         "/",
