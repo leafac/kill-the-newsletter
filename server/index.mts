@@ -461,6 +461,9 @@ await commander.program
         const layoutBody = html`
           <body
             css="${response.locals.css(css`
+              font-family: "JetBrains MonoVariable",
+                var(--font-family--monospace);
+              font-size: var(--font-size--xs);
               background-color: var(--color--cyan--50);
               color: var(--color--cyan--900);
               @media (prefers-color-scheme: dark) {
@@ -493,6 +496,11 @@ await commander.program
                   align-items: center;
                 `)}"
               >
+                <h1>
+                  <a href="https://${application.configuration.hostname}/"
+                    >Kill the Newsletter!</a
+                  >
+                </h1>
                 $${body}
               </div>
             </div>
