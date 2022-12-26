@@ -38,27 +38,27 @@
   },
   "dependencies": {
     "@leafac/caddy": "^1.0.5",
-    "@leafac/css": "^0.7.0",
-    "@leafac/html": "^3.0.3",
-    "@leafac/javascript": "^0.2.13",
-    "@leafac/sqlite": "^3.2.2",
+    "@leafac/css": "^0.8.1",
+    "@leafac/html": "^4.0.0",
+    "@leafac/javascript": "^0.4.0",
+    "@leafac/sqlite": "^4.0.0",
     "commander": "^9.4.1",
     "crypto-random-string": "^5.0.0",
     "dedent": "^0.7.0",
     "express": "^4.18.2",
     "lodash": "^4.17.21",
-    "mailparser": "^3.5.0",
+    "mailparser": "^3.6.2",
     "smtp-server": "^3.11.0"
   },
   "caddy": "2.6.2",
   "devDependencies": {
     "caxa": "^3.0.1",
     "cross-env": "^7.0.3",
-    "got": "^12.5.2",
+    "got": "^12.5.3",
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20",
-    "npm-check-updates": "^16.3.16",
-    "prettier": "^2.7.1",
+    "npm-check-updates": "^16.6.2",
+    "prettier": "^2.8.1",
     "shx": "^0.3.4"
   }
 }
