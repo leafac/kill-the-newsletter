@@ -482,7 +482,19 @@ await commander.program
                 align-items: center;
               `)}"
             >
-              $${body}
+              <div
+                css="${response.locals.css(css`
+                  text-align: center;
+                  max-width: var(--width--prose);
+                  margin: var(--space--4) var(--space--2);
+                  display: flex;
+                  flex-direction: column;
+                  gap: var(--space--2);
+                  align-items: center;
+                `)}"
+              >
+                $${body}
+              </div>
             </div>
           </body>
         `;
@@ -531,7 +543,63 @@ await commander.program
               request,
               response,
               head: html`<title>Kill the Newsletter!</title>`,
-              body: html`TODO`,
+              body: html`
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                  Aenean dictum dui quis magna mollis, vel interdum felis
+                  consectetur.
+                </p>
+              `,
             })
           );
         }
