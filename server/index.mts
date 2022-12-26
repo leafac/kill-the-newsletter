@@ -9,7 +9,10 @@ import os from "node:os";
 import * as commander from "commander";
 import express from "express";
 import nodemailer from "nodemailer";
-import { Database, sql } from "@leafac/sqlite";
+import sql, { Database } from "@leafac/sqlite";
+import html, { HTML } from "@leafac/html";
+import css, { localCSS } from "@leafac/css";
+import javascript, { localJavaScript } from "@leafac/javascript";
 import lodash from "lodash";
 import { execa, ExecaChildProcess } from "execa";
 import caddyfile from "dedent";
@@ -420,10 +423,86 @@ await commander.program
         application.log("DATABASE MIGRATION", "FINISHED");
       }
 
-      application.web.get<{}, any, {}, {}, ResponseLocalsLogging>(
+      type ResponseLocalsBase = ResponseLocalsLogging & {
+        css: ReturnType<typeof localCSS>;
+        javascript: ReturnType<typeof localJavaScript>;
+      };
+
+      application.web.use<{}, any, {}, {}, ResponseLocalsBase>(
+        (request, response, next) => {
+          response.locals.css = localCSS();
+          response.locals.javascript = localJavaScript();
+
+          if (
+            !["GET", "HEAD", "OPTIONS", "TRACE"].includes(request.method) &&
+            request.header("CSRF-Protection") !== "true"
+          )
+            next("Cross-Site Request Forgery");
+
+          next();
+        }
+      );
+
+      application.web.use<{}, any, {}, {}, ResponseLocalsBase>(
+        express.urlencoded({ extended: true })
+      );
+
+      const layout = ({
+        request,
+        response,
+        head,
+        body,
+      }: {
+        request: express.Request<{}, HTML, {}, {}, ResponseLocalsBase>;
+        response: express.Response<HTML, ResponseLocalsBase>;
+        head: HTML;
+        body: HTML;
+      }) => html`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta name="version" content="${application.version}" />
+
+            <meta
+              name="description"
+              content="Convert email newsletters into Atom feeds"
+            />
+
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1, maximum-scale=1"
+            />
+            <link
+              rel="stylesheet"
+              href="https://${application.configuration.hostname}/${application
+                .static["index.css"]}"
+            />
+            $${response.locals.css.toString()}
+
+            <script
+              src="https://${application.configuration.hostname}/${application
+                .static["index.mjs"]}"
+              defer
+            ></script>
+
+            $${head}
+          </head>
+
+          $${body} $${response.locals.javascript.toString()}
+        </html>
+      `;
+
+      application.web.get<{}, any, {}, {}, ResponseLocalsBase>(
         "/",
         (request, response) => {
-          response.send("TODO");
+          response.send(
+            layout({
+              request,
+              response,
+              head: html`<title>Kill the Newsletter!</title>`,
+              body: html`TODO`,
+            })
+          );
         }
       );
 

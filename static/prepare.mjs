@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import { processCSS, css } from "@leafac/css";
-import { javascript } from "@leafac/javascript";
+import css, { processCSS } from "@leafac/css";
+import javascript from "@leafac/javascript";
 import esbuild from "esbuild";
 
 await fs.writeFile("global.css", processCSS(css``));
