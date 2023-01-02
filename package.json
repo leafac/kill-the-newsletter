@@ -26,7 +26,7 @@
     "prepare": "(cd ./server/ && npm run prepare && cd ..) && (cd ./static/ && npm run prepare && cd ..)",
     "start": "nodemon --watch \"./server/**/*.mts\" --watch \"./static/{{prepare,leafac--javascript}.mjs,**/*.{png,jpeg,ico}}\" --watch \"./configuration/**/*.mjs\" --ext \"*\" --exec \"npm run prepare && node ./build/server/index.mjs ./configuration/development.mjs\"",
     "start:clean:data": "npm run clean:data && npm run start",
-    "test": "prettier --check \"./server/**/*.mts\" --check \"./static/prepare.mjs\" --check \"./configuration/**/*.mjs\" --end-of-line auto && npm run prepare && cross-env TEST=kill-the-newsletter node ./build/server/index.mjs",
+    "test": "prettier --check \"./README.md\" --check \"./package.json\" --check \"./server/**/*.mts\" --check \"./static/prepare.mjs\" --check \"./configuration/**/*.mjs\" --end-of-line auto && npm run prepare && cross-env TEST=kill-the-newsletter node ./build/server/index.mjs",
     "clean:all": "npm run clean:build && npm run clean:data && npm run clean:node_modules",
     "clean:build": "shx rm -rf ./build/",
     "clean:data": "shx rm -rf ./data/",
