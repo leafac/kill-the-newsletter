@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@radically-straightforward/production": "^1.0.7"
+  },
+  "devDependencies": {
+    "@radically-straightforward/development": "^1.0.1",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  }
+}

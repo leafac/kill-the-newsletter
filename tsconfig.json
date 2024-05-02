@@ -1,0 +1,7 @@
+{
+  "extends": "@radically-straightforward/typescript",
+  "compilerOptions": {
+    "rootDir": "./source/",
+    "outDir": "./build/"
+  }
+}
