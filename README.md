@@ -203,6 +203,6 @@ The `configuration.js` file is a JavaScript module that must return a function t
 
 If you installed Kill the Newsletter! before 2021-03-18 then you need to start from scratch because the deployment process changed (it’s **much** simpler now!). You may migrate existing feeds with the migration tools found in the [v1.0.1 release](https://github.com/leafac/kill-the-newsletter/releases/tag/v1.0.1) or the [`migration` tag](https://github.com/leafac/kill-the-newsletter/tree/migration). Just make a backup of your `feeds/` directory, download the migration executable, and run it from the directory containing `feeds/`. It’ll produce a `data/` directory with the data in the new format.
 
-#### Using the [`kill-the-newsletter` npm Package](https://npm.im/kill-the-newsletter)
+#### Using the [`kill-the-newsletter` npm Package](https://www.npmjs.com/package//kill-the-newsletter)
 
 For people familiar with TypeScript/JavaScript, Kill the Newsletter! is also distributed as an npm package. You may run it with `npx kill-the-newsletter`, or `npm install kill-the-newsletter` into your project to `import` or `require` it and mount it as part of a bigger [Express](http://expressjs.com) application.
