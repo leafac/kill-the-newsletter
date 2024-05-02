@@ -1,0 +1,38 @@
+on: push
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows
+          - macos
+          - ubuntu
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      - uses: actions/checkout@main
+      - uses: actions/setup-node@main
+        with:
+          node-version: latest
+      - run: |
+          npm install-ci-test
+          npx package
+          cd ..
+          mv ./kill-the-newsletter.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }} ./kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+      - uses: actions/upload-artifact@main
+        with:
+          path: ./kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+          name: kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/download-artifact@main
+        with:
+          pattern: kill-the-newsletter--*
+      - if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        uses: softprops/action-gh-release@master
+        with:
+          files: ./**/*.*
