@@ -14,7 +14,9 @@
     "@fontsource-variable/public-sans": "^5.0.19",
     "@radically-straightforward/development": "^1.0.2",
     "@types/mailparser": "^3.4.4",
+    "@types/nodemailer": "^6.4.15",
     "@types/smtp-server": "^3.5.10",
+    "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"

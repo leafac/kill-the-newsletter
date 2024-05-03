@@ -15,6 +15,7 @@ import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
 import { SMTPServer } from "smtp-server";
+import * as mailParser from "mailparser";
 
 const commandLineArguments = util.parseArgs({
   options: {
@@ -51,6 +52,7 @@ const database = await new Database(
       "reference" TEXT NOT NULL,
       "name" TEXT NOT NULL
     ) STRICT;
+    CREATE INDEX "inboxesReference" ON "inboxes" ("reference");
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL,
@@ -58,6 +60,8 @@ const database = await new Database(
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
     );
+    CREATE INDEX "entriesReference" ON "entries" ("reference");
+    CREATE INDEX "entriesInbox" ON "entries" ("inbox");
   `,
 );
 
@@ -255,7 +259,7 @@ switch (commandLineArguments.values.type) {
             response,
             body: html`
               <p>${reference}@${request.URL.hostname}</p>
-              <p>${request.URL.origin}/${reference}</p>
+              <p>${request.URL.origin}/feeds/${reference}.xml</p>
             `,
           }),
         );
@@ -290,11 +294,58 @@ switch (commandLineArguments.values.type) {
       disabledCommands: ["AUTH"],
       key: await fs.readFile(configuration.tls.key, "utf-8"),
       cert: await fs.readFile(configuration.tls.certificate, "utf-8"),
-      onData: (stream, session, callback) => {
-        console.log(session);
+      onData: async (stream, session, callback) => {
+        stream.once("end", callback);
+        try {
+          const inboxesIds = session.envelope.rcptTo.flatMap(({ address }) => {
+            if (
+              configuration.environment !== "development" &&
+              address.match(utilities.emailRegExp) === null
+            )
+              return [];
+            const [inboxReference, hostname] = address.split("@");
+            if (hostname !== configuration.hostname) return [];
+            const inbox = database.get<{ id: number }>(
+              sql`
+                SELECT "id" FROM "inboxes" WHERE "reference" = ${inboxReference}
+              `,
+            );
+            if (inbox === undefined) return [];
+            return [inbox.id];
+          });
+          if (
+            inboxesIds.length === 0 ||
+            ["TODO"].some(
+              (hostname) =>
+                session.envelope.mailFrom === false ||
+                session.envelope.mailFrom.address.endsWith(hostname),
+            )
+          )
+            throw new Error("TODO");
+          const email = await mailParser.simpleParser(stream);
+          if (stream.sizeExceeded) throw new Error("TODO");
+          for (const inboxId of inboxesIds)
+            database.run(
+              sql`
+                INSERT INTO "entries" (
+                  "reference",
+                  "inbox",
+                  "title",
+                  "content"
+                )
+                VALUES (
+                  ${cryptoRandomString({
+                    length: 20,
+                    characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+                  })},
+                  ${inboxId},
+                  ${email.subject ?? "UNTITLED"},
+                  ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "NO CONTENT"}
+                )
+              `,
+            );
+        } catch {}
         stream.resume();
-        if (stream.sizeExceeded) "TODO";
-        callback();
       },
     });
     server.listen(25);
