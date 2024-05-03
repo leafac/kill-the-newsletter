@@ -123,6 +123,8 @@ switch (commandLineArguments.values.type) {
       css`
         @import "@radically-straightforward/css/static/index.css";
         @import "@radically-straightforward/javascript/static/index.css";
+        @import "@fontsource-variable/public-sans";
+        @import "@fontsource-variable/public-sans/wght-italic.css";
       `;
       javascript`
         import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
@@ -139,12 +141,65 @@ switch (commandLineArguments.values.type) {
             />
           </head>
           <body
+            css="${css`
+              font-family: "Public Sans Variable",
+                var(--font-family--sans-serif);
+              font-size: var(--font-size--3-5);
+              line-height: var(--font-size--3-5--line-height);
+              background-color: var(--color--stone--50);
+              color: var(--color--stone--800);
+              @media (prefers-color-scheme: dark) {
+                background-color: var(--color--stone--950);
+                color: var(--color--stone--200);
+              }
+              padding: var(--space--4) var(--space--4);
+
+              input[type="text"],
+              button {
+                background-color: var(--color--stone--100);
+                padding: var(--space--1) var(--space--2);
+                border: var(--border-width--1) solid var(--color--stone--400);
+                border-radius: var(--border-radius--1);
+                &:hover {
+                  border-color: var(--color--stone--600);
+                }
+                &:focus-within {
+                  border-color: var(--color--blue--400);
+                }
+                @media (prefers-color-scheme: dark) {
+                  background-color: var(--color--stone--900);
+                  border-color: var(--color--stone--600);
+                  &:hover {
+                    border-color: var(--color--stone--400);
+                  }
+                  &:focus-within {
+                    border-color: var(--color--blue--600);
+                  }
+                }
+                transition-property: var(--transition-property--colors);
+                transition-duration: var(--transition-duration--200);
+                transition-timing-function: var(
+                  --transition-timing-function--ease-in-out
+                );
+              }
+
+              button {
+                cursor: pointer;
+              }
+            `}"
             javascript="${javascript`
               if (${configuration.environment === "development"})
                 javascript.liveConnection(${request.id}, { reload: true });  
             `}"
           >
-            $${body}
+            <div
+              css="${css`
+                max-width: var(--space--prose);
+                margin: var(--space--0) auto;
+              `}"
+            >
+              $${body}
+            </div>
           </body>
         </html>
       `;
@@ -158,9 +213,24 @@ switch (commandLineArguments.values.type) {
             request,
             response,
             body: html`
-              <form method="POST" action="/" novalidate>
-                <input type="text" name="title" required />
-                <button>Create Inbox</button>
+              <form
+                method="POST"
+                action="/"
+                novalidate
+                css="${css`
+                  display: flex;
+                  flex-direction: column;
+                  gap: var(--space--2);
+                `}"
+              >
+                <input
+                  type="text"
+                  name="title"
+                  placeholder="Inbox name…"
+                  required
+                  autofocus
+                />
+                <div><button>Create Inbox</button></div>
               </form>
             `,
           }),
