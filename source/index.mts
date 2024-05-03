@@ -13,6 +13,7 @@ import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
+import { SMTPServer } from "smtp-server";
 
 const commandLineArguments = util.parseArgs({
   options: {
@@ -26,16 +27,11 @@ const configuration: {
   hostname: string;
   administratorEmail: string;
   dataDirectory: string;
+  tls: { key: string; certificate: string };
   environment: "production" | "development";
   hstsPreload: boolean;
   ports: number[];
-} =
-  typeof commandLineArguments.positionals[0] === "string"
-    ? (await import(path.resolve(commandLineArguments.positionals[0]))).default
-    : {
-        hostname: "localhost",
-        administratorEmail: "kill-the-newsletter@example.com",
-      };
+} = (await import(path.resolve(commandLineArguments.positionals[0]))).default;
 configuration.dataDirectory ??= path.resolve("./data/");
 configuration.environment ??= "production";
 configuration.hstsPreload ??= false;
@@ -64,20 +60,17 @@ const database = await new Database(
 );
 
 switch (commandLineArguments.values.type) {
-  case undefined:
+  case undefined: {
     utilities.log("KILL-THE-NEWSLETTER", "2.0.0", "START");
     process.once("beforeExit", () => {
-      utilities.log("STOP");
+      utilities.log("KILL-THE-NEWSLETTER", "STOP");
     });
     for (const port of configuration.ports)
       node.childProcessKeepAlive(() =>
         childProcess.spawn(
-          process.argv[0],
+          process.execPath,
           [
-            process.argv[1],
-            ...(typeof commandLineArguments.positionals[0] === "string"
-              ? [commandLineArguments.positionals[0]]
-              : []),
+            commandLineArguments.positionals[0],
             "--type",
             "web",
             "--port",
@@ -88,15 +81,8 @@ switch (commandLineArguments.values.type) {
       );
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
-        process.argv[0],
-        [
-          process.argv[1],
-          ...(typeof commandLineArguments.positionals[0] === "string"
-            ? [commandLineArguments.positionals[0]]
-            : []),
-          "--type",
-          "email",
-        ],
+        process.execPath,
+        [commandLineArguments.positionals[0], "--type", "email"],
         { stdio: "inherit" },
       ),
     );
@@ -108,8 +94,9 @@ switch (commandLineArguments.values.type) {
       hstsPreload: configuration.hstsPreload,
     });
     break;
+  }
 
-  case "web":
+  case "web": {
     const application = server({
       port: Number(commandLineArguments.values.port),
     });
@@ -282,7 +269,25 @@ switch (commandLineArguments.values.type) {
       },
     });
     break;
+  }
 
-  case "email":
+  case "email": {
+    utilities.log("EMAIL", "START");
+    process.once("beforeExit", () => {
+      utilities.log("EMAIL", "STOP");
+    });
+    const server = new SMTPServer({
+      name: configuration.hostname,
+      size: 2 ** 20,
+      disabledCommands: ["AUTH"],
+      key: await fs.readFile("private.pem"),
+      cert: await fs.readFile("server.pem"),
+      onData: () => {},
+    });
+    server.listen(25);
+    process.once("gracefulTermination", () => {
+      server.close();
+    });
     break;
+  }
 }
