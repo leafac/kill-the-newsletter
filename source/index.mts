@@ -280,8 +280,8 @@ switch (commandLineArguments.values.type) {
       name: configuration.hostname,
       size: 2 ** 20,
       disabledCommands: ["AUTH"],
-      key: await fs.readFile("private.pem"),
-      cert: await fs.readFile("server.pem"),
+      key: configuration.tls.key,
+      cert: configuration.tls.certificate,
       onData: () => {},
     });
     server.listen(25);
