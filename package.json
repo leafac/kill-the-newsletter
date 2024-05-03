@@ -5,7 +5,8 @@
     "test": "npm run prepare && prettier --check \"./README.md\" --check \"./CHANGELOG.md\" --check \"./package.json\" --check \"./tsconfig.json\" --check \"./source/**/*.mts\" --check \"./configuration/**/*.mjs\""
   },
   "dependencies": {
-    "@radically-straightforward/production": "^1.0.8"
+    "@radically-straightforward/production": "^1.0.8",
+    "crypto-random-string": "^5.0.0"
   },
   "devDependencies": {
     "@fontsource-variable/public-sans": "^5.0.19",

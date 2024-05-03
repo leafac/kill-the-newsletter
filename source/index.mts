@@ -12,6 +12,7 @@ import javascript from "@radically-straightforward/javascript";
 import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
+import cryptoRandomString from "crypto-random-string";
 
 const commandLineArguments = util.parseArgs({
   options: {
@@ -50,6 +51,7 @@ const database = await new Database(
   sql`
     CREATE TABLE "inboxes" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "reference" TEXT NOT NULL,
       "name" TEXT NOT NULL
     ) STRICT;
     CREATE TABLE "entries" (
@@ -187,10 +189,6 @@ switch (commandLineArguments.values.type) {
                 cursor: pointer;
               }
             `}"
-            javascript="${javascript`
-              if (${configuration.environment === "development"})
-                javascript.liveConnection(${request.id}, { reload: true });  
-            `}"
           >
             <div
               css="${css`
@@ -225,7 +223,7 @@ switch (commandLineArguments.values.type) {
               >
                 <input
                   type="text"
-                  name="title"
+                  name="name"
                   placeholder="Inbox name…"
                   required
                   autofocus
@@ -234,6 +232,52 @@ switch (commandLineArguments.values.type) {
               </form>
             `,
           }),
+        );
+      },
+    });
+    application.push({
+      method: "POST",
+      pathname: "/",
+      handler: (
+        request: serverTypes.Request<{}, {}, {}, { name: string }, {}>,
+        response,
+      ) => {
+        if (typeof request.body.name !== "string" || request.body.name === "")
+          throw "validation";
+        const reference = cryptoRandomString({
+          length: 20,
+          characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+        });
+        database.run(
+          sql`
+            INSERT INTO "inboxes" ("reference", "name")
+            VALUES (${reference}, ${request.body.name})
+          `,
+        );
+        response.end(
+          layout({
+            request,
+            response,
+            body: html`
+              <p>${reference}@${request.URL.hostname}</p>
+              <p>${request.URL.origin}/${reference}</p>
+            `,
+          }),
+        );
+      },
+    });
+    application.push({
+      handler: (request, response) => {
+        response.end(
+          layout({ request, response, body: html` <p>Not found.</p> ` }),
+        );
+      },
+    });
+    application.push({
+      error: true,
+      handler: (request, response) => {
+        response.end(
+          layout({ request, response, body: html` <p>Error.</p> ` }),
         );
       },
     });
