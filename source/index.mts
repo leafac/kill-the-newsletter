@@ -138,7 +138,12 @@ switch (commandLineArguments.values.type) {
               content="width=device-width, initial-scale=1, maximum-scale=1"
             />
           </head>
-          <body>
+          <body
+            javascript="${javascript`
+              if (${configuration.environment === "development"})
+                javascript.liveConnection(${request.id}, { reload: true });  
+            `}"
+          >
             $${body}
           </body>
         </html>
