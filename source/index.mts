@@ -53,6 +53,7 @@ const database = await new Database(
     ) STRICT;
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "reference" TEXT NOT NULL,
       "inbox" INTEGER NOT NULL REFERENCES "inboxes",
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
@@ -289,7 +290,12 @@ switch (commandLineArguments.values.type) {
       disabledCommands: ["AUTH"],
       key: await fs.readFile(configuration.tls.key, "utf-8"),
       cert: await fs.readFile(configuration.tls.certificate, "utf-8"),
-      onData: () => {},
+      onData: (stream, session, callback) => {
+        console.log(session);
+        stream.resume();
+        if (stream.sizeExceeded) "TODO";
+        callback();
+      },
     });
     server.listen(25);
     process.once("gracefulTermination", () => {

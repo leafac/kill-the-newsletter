@@ -5,6 +5,7 @@ export default {
   hostname: "localhost",
   administratorEmail: "kill-the-newsletter@example.com",
   tls: {
+    // TODO
     key: path.join(
       os.homedir(),
       "Library/Application Support/Caddy/certificates/local/localhost/localhost.key",
