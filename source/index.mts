@@ -1,5 +1,5 @@
 import util from "node:util";
-import url from "node:url";
+import path from "node:path";
 import os from "node:os";
 import childProcess from "node:child_process";
 import * as utilities from "@radically-straightforward/utilities";
@@ -22,18 +22,14 @@ const configuration: {
   ports: string[];
 } =
   typeof commandLineArguments.positionals[0] === "string"
-    ? (
-        await import(
-          url.pathToFileURL(commandLineArguments.positionals[0]).href
-        )
-      ).default
+    ? (await import(path.resolve(commandLineArguments.positionals[0]))).default
     : {
         hostname: "localhost",
         administratorEmail: "kill-the-newsletter@example.com",
       };
 configuration.environment ??= "production";
 configuration.hstsPreload ??= false;
-configuration.ports ??= Array.from(
+configuration.ports = Array.from(
   { length: os.availableParallelism() },
   (value, index) => String(18000 + index),
 );
@@ -43,7 +39,6 @@ if (commandLineArguments.values.type === undefined) {
   process.once("beforeExit", () => {
     utilities.log("STOP");
   });
-
   for (const port of configuration.ports)
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
@@ -61,7 +56,20 @@ if (commandLineArguments.values.type === undefined) {
         { stdio: "inherit" },
       ),
     );
-
+  node.childProcessKeepAlive(() =>
+    childProcess.spawn(
+      process.argv[0],
+      [
+        process.argv[1],
+        ...(typeof commandLineArguments.positionals[0] === "string"
+          ? [commandLineArguments.positionals[0]]
+          : []),
+        "--type",
+        "email",
+      ],
+      { stdio: "inherit" },
+    ),
+  );
   caddy.start({
     address: configuration.hostname,
     untrustedStaticFilesRoots: [],
