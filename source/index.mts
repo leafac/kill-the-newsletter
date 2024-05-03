@@ -71,6 +71,7 @@ switch (commandLineArguments.values.type) {
         childProcess.spawn(
           process.execPath,
           [
+            process.argv[1],
             commandLineArguments.positionals[0],
             "--type",
             "web",
@@ -83,7 +84,12 @@ switch (commandLineArguments.values.type) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.execPath,
-        [commandLineArguments.positionals[0], "--type", "email"],
+        [
+          process.argv[1],
+          commandLineArguments.positionals[0],
+          "--type",
+          "email",
+        ],
         { stdio: "inherit" },
       ),
     );
