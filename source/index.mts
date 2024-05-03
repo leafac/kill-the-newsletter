@@ -6,6 +6,9 @@ import childProcess from "node:child_process";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
 import sql, { Database } from "@radically-straightforward/sqlite";
+import html, { HTML } from "@radically-straightforward/html";
+import css from "@radically-straightforward/css";
+import javascript from "@radically-straightforward/javascript";
 import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
@@ -108,11 +111,55 @@ switch (commandLineArguments.values.type) {
     const application = server({
       port: Number(commandLineArguments.values.port),
     });
+    function layout({
+      request,
+      response,
+      body,
+    }: {
+      request: serverTypes.Request<{}, {}, {}, {}, {}>;
+      response: serverTypes.Response;
+      body: HTML;
+    }): HTML {
+      css`
+        @import "@radically-straightforward/css/static/index.css";
+        @import "@radically-straightforward/javascript/static/index.css";
+      `;
+      javascript`
+        import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
+      `;
+      return html`
+        <!doctype html>
+        <html>
+          <head>
+            <link rel="stylesheet" href="/${caddy.staticFiles["index.css"]}" />
+            <script src="/${caddy.staticFiles["index.mjs"]}"></script>
+            <meta
+              name="viewport"
+              content="width=device-width, initial-scale=1, maximum-scale=1"
+            />
+          </head>
+          <body>
+            $${body}
+          </body>
+        </html>
+      `;
+    }
     application.push({
       method: "GET",
       pathname: "/",
       handler: (request, response) => {
-        response.end("HELLO WORLD");
+        response.end(
+          layout({
+            request,
+            response,
+            body: html`
+              <form method="POST" action="/" novalidate>
+                <input type="text" name="title" required />
+                <button>Create Inbox</button>
+              </form>
+            `,
+          }),
+        );
       },
     });
     break;

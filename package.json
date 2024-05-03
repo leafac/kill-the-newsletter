@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "prepare": "tsc",
+    "prepare": "tsc && build",
     "start": "nodemon --watch \"./package.json\" --watch \"./tsconfig.json\" --watch \"./source/**/*.mts\" --watch \"./configuration/**/*.mjs\" --ext \"*\" --exec \"npm run prepare && node ./build/index.mjs ./configuration/development.mjs\"",
     "test": "npm run prepare && prettier --check \"./README.md\" --check \"./CHANGELOG.md\" --check \"./package.json\" --check \"./tsconfig.json\" --check \"./source/**/*.mts\" --check \"./configuration/**/*.mjs\""
   },
