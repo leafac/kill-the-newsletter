@@ -2,6 +2,7 @@ import util from "node:util";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
+import fsSync from "node:fs";
 import childProcess from "node:child_process";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
@@ -26,8 +27,8 @@ const commandLineArguments = util.parseArgs({
 const configuration: {
   hostname: string;
   administratorEmail: string;
-  dataDirectory: string;
   tls: { key: string; certificate: string };
+  dataDirectory: string;
   environment: "production" | "development";
   hstsPreload: boolean;
   ports: number[];
@@ -280,14 +281,18 @@ switch (commandLineArguments.values.type) {
       name: configuration.hostname,
       size: 2 ** 20,
       disabledCommands: ["AUTH"],
-      key: configuration.tls.key,
-      cert: configuration.tls.certificate,
+      key: await fs.readFile(configuration.tls.key, "utf-8"),
+      cert: await fs.readFile(configuration.tls.certificate, "utf-8"),
       onData: () => {},
     });
     server.listen(25);
     process.once("gracefulTermination", () => {
       server.close();
     });
+    for (const file of [configuration.tls.key, configuration.tls.certificate])
+      fsSync.watchFile(file, () => {
+        // TODO
+      });
     break;
   }
 }
