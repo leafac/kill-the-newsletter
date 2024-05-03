@@ -5,7 +5,7 @@
     "test": "npm run prepare && prettier --check \"./README.md\" --check \"./CHANGELOG.md\" --check \"./package.json\" --check \"./tsconfig.json\" --check \"./source/**/*.mts\" --check \"./configuration/**/*.mjs\""
   },
   "dependencies": {
-    "@radically-straightforward/production": "^1.0.7"
+    "@radically-straightforward/production": "^1.0.8"
   },
   "devDependencies": {
     "@radically-straightforward/development": "^1.0.1",
