@@ -4,6 +4,7 @@ import os from "node:os";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import childProcess from "node:child_process";
+import stream from "node:stream/promises";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
 import sql, { Database } from "@radically-straightforward/sqlite";
@@ -294,9 +295,19 @@ switch (commandLineArguments.values.type) {
       disabledCommands: ["AUTH"],
       key: await fs.readFile(configuration.tls.key, "utf-8"),
       cert: await fs.readFile(configuration.tls.certificate, "utf-8"),
-      onData: async (stream, session, callback) => {
-        stream.once("end", callback);
+      onData: async (emailStream, session, callback) => {
         try {
+          if (
+            ["TODO"].some(
+              (hostname) =>
+                session.envelope.mailFrom === false ||
+                session.envelope.mailFrom.address.match(
+                  utilities.emailRegExp,
+                ) === null ||
+                session.envelope.mailFrom.address.endsWith(hostname),
+            )
+          )
+            throw new Error("Invalid ‘mailFrom’.");
           const inboxesIds = session.envelope.rcptTo.flatMap(({ address }) => {
             if (
               configuration.environment !== "development" &&
@@ -313,18 +324,10 @@ switch (commandLineArguments.values.type) {
             if (inbox === undefined) return [];
             return [inbox.id];
           });
-          if (
-            inboxesIds.length === 0 ||
-            ["TODO"].some(
-              (hostname) =>
-                session.envelope.mailFrom === false ||
-                session.envelope.mailFrom.address.endsWith(hostname),
-            )
-          )
-            throw new Error("TODO");
-          const email = await mailParser.simpleParser(stream);
-          if (stream.sizeExceeded) throw new Error("TODO");
-          for (const inboxId of inboxesIds)
+          if (inboxesIds.length === 0) throw new Error("No valid recipients.");
+          const email = await mailParser.simpleParser(emailStream);
+          if (emailStream.sizeExceeded) throw new Error("Email is too big.");
+          for (const inboxId of inboxesIds) {
             database.run(
               sql`
                 INSERT INTO "entries" (
@@ -339,13 +342,20 @@ switch (commandLineArguments.values.type) {
                     characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                   })},
                   ${inboxId},
-                  ${email.subject ?? "UNTITLED"},
-                  ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "NO CONTENT"}
+                  ${email.subject ?? "Untitled"},
+                  ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
                 )
               `,
             );
-        } catch {}
-        stream.resume();
+            utilities.log("EMAIL", "SUCCESS", String(inboxId));
+          }
+        } catch (error) {
+          utilities.log("EMAIL", "ERROR", String(error));
+        } finally {
+          emailStream.resume();
+          await stream.finished(emailStream);
+          callback();
+        }
       },
     });
     server.listen(25);
