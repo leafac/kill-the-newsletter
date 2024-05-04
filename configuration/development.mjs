@@ -1,18 +1,17 @@
-import os from "node:os";
 import path from "node:path";
+import * as caddy from "@radically-straightforward/caddy";
 
 export default {
   hostname: "localhost",
   administratorEmail: "kill-the-newsletter@example.com",
   tls: {
-    // TODO
     key: path.join(
-      os.homedir(),
-      "Library/Application Support/Caddy/certificates/local/localhost/localhost.key",
+      caddy.dataDirectory(),
+      "certificates/local/localhost/localhost.key",
     ),
     certificate: path.join(
-      os.homedir(),
-      "Library/Application Support/Caddy/certificates/local/localhost/localhost.crt",
+      caddy.dataDirectory(),
+      "certificates/local/localhost/localhost.crt",
     ),
   },
   environment: "development",
