@@ -57,7 +57,7 @@ const database = await new Database(
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL,
-      "inbox" INTEGER NOT NULL REFERENCES "inboxes",
+      "inbox" INTEGER NOT NULL REFERENCES "inboxes" ON DELETE CASCADE,
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
     );
