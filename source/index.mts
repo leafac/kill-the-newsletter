@@ -304,7 +304,7 @@ switch (commandLineArguments.values.type) {
                 session.envelope.mailFrom.address.match(
                   utilities.emailRegExp,
                 ) === null ||
-                session.envelope.mailFrom.address.endsWith(hostname),
+                session.envelope.mailFrom.address.endsWith("@" + hostname),
             )
           )
             throw new Error("Invalid ‘mailFrom’.");
