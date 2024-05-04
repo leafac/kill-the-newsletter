@@ -353,9 +353,11 @@ switch (commandLineArguments.values.type) {
       server.close();
     });
     for (const file of [configuration.tls.key, configuration.tls.certificate])
-      fsSync.watchFile(file, () => {
-        node.exit();
-      });
+      fsSync
+        .watchFile(file, () => {
+          node.exit();
+        })
+        .unref();
     break;
   }
 }
