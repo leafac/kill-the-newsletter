@@ -186,6 +186,7 @@ switch (process.env.TYPE) {
       pathname: "/",
       handler: (request, response) => {
         response.end(
+          // TODO: maxlength on ‘name="title"’
           layout(html`
             <form
               method="POST"
@@ -381,7 +382,7 @@ switch (process.env.TYPE) {
             )
           )
             throw new Error("Invalid ‘mailFrom’.");
-          const feedsIds = session.envelope.rcptTo.flatMap(({ address }) => {
+          const feeds = session.envelope.rcptTo.flatMap(({ address }) => {
             if (
               configuration.environment !== "development" &&
               address.match(utilities.emailRegExp) === null
@@ -389,44 +390,91 @@ switch (process.env.TYPE) {
               return [];
             const [feedReference, hostname] = address.split("@");
             if (hostname !== configuration.hostname) return [];
-            const feed = database.get<{ id: number }>(
+            const feed = database.get<{ id: number; reference: string }>(
               sql`
-                SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}
+                SELECT "id", "reference" FROM "feeds" WHERE "reference" = ${feedReference}
               `,
             );
             if (feed === undefined) return [];
-            return [feed.id];
+            return [feed];
           });
-          if (feedsIds.length === 0) throw new Error("No valid recipients.");
+          if (feeds.length === 0) throw new Error("No valid recipients.");
           const email = await mailParser.simpleParser(emailStream);
           if (emailStream.sizeExceeded) throw new Error("Email is too big.");
-          for (const feedId of feedsIds) {
-            database.run(
-              sql`
-                INSERT INTO "entries" (
-                  "reference",
-                  "createdAt",
-                  "feed",
-                  "title",
-                  "content"
-                )
-                VALUES (
-                  ${cryptoRandomString({
-                    length: 20,
-                    characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-                  })},
-                  ${new Date().toISOString()},
-                  ${feedId},
-                  ${email.subject ?? "Untitled"},
-                  ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
-                )
-              `,
+          for (const feed of feeds) {
+            const reference = cryptoRandomString({
+              length: 20,
+              characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+            });
+            const deletedEntriesReferences = new Array<string>();
+            database.executeTransaction(() => {
+              database.run(
+                sql`
+                  INSERT INTO "entries" (
+                    "reference",
+                    "createdAt",
+                    "feed",
+                    "title",
+                    "content"
+                  )
+                  VALUES (
+                    ${reference},
+                    ${new Date().toISOString()},
+                    ${feed.id},
+                    ${email.subject ?? "Untitled"},
+                    ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
+                  )
+                `,
+              );
+              const entries = database.all<{
+                id: number;
+                reference: string;
+                title: string;
+                content: string;
+              }>(
+                sql`
+                  SELECT "id", "reference", "title", "content"
+                  FROM "feeds"
+                  WHERE "id" = ${feed.id}
+                  ORDER BY "id" ASC
+                `,
+              );
+              let contentLength = 0;
+              while (entries.length > 0) {
+                const entry = entries.pop()!;
+                contentLength += entry.title.length + entry.content.length;
+                if (contentLength > 3 * 2 ** 20) break;
+              }
+              for (const entry of entries) {
+                database.run(
+                  sql`
+                    DELETE FROM "entries" WHERE "id" = ${entry.id}
+                  `,
+                );
+                deletedEntriesReferences.push(entry.reference);
+              }
+            });
+            utilities.log(
+              "EMAIL",
+              "SUCCESS",
+              String(feed.reference),
+              reference,
+              session.envelope.mailFrom === false
+                ? ""
+                : session.envelope.mailFrom.address,
+              "DELETED ENTRIES",
+              JSON.stringify(deletedEntriesReferences),
             );
-            // TODO: Clean up old entries.
-            utilities.log("EMAIL", "SUCCESS", String(feedId));
           }
         } catch (error) {
-          utilities.log("EMAIL", "ERROR", String(error));
+          utilities.log(
+            "EMAIL",
+            "ERROR",
+            session.envelope.mailFrom === false
+              ? ""
+              : session.envelope.mailFrom.address,
+            String(error),
+          );
         } finally {
           emailStream.resume();
           await stream.finished(emailStream);
