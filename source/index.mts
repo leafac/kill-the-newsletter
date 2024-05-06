@@ -323,15 +323,6 @@ switch (process.env.TYPE) {
             </div>
 
             <div>
-              <h2>Why are old entries disappearing?</h2>
-              <p>
-                When Kill the Newsletter! receives an email it may delete old
-                entries to keep the feed under a size limit, because some feed
-                readers don’t support feeds that are too big.
-              </p>
-            </div>
-
-            <div>
               <h2>How do I confirm my newsletter subscription?</h2>
               <p>
                 Typically when you subscribe to a newsletter the newsletter
@@ -372,6 +363,28 @@ switch (process.env.TYPE) {
                 with newsletter publishers, who may, for example, get statistics
                 on the number of subscribers who use Kill the Newsletter!. Note
                 that Kill the Newsletter! itself doesn’t track users in any way.
+              </p>
+            </div>
+
+            <div>
+              <h2>Why are old entries disappearing?</h2>
+              <p>
+                When Kill the Newsletter! receives an email it may delete old
+                entries to keep the feed under a size limit, because some feed
+                readers don’t support feeds that are too big.
+              </p>
+            </div>
+
+            <div>
+              <h2>Why isn’t my feed updating?</h2>
+              <p>
+                Send an email to the address that corresponds to your Kill the
+                Newsletter! feed. Wait a few minutes. If the email shows up on
+                your feed reader, then the issue must be with the newsletter
+                publisher and you should contact them. Otherwise, please
+                <a href="mailto:kill-the-newsletter@leafac.com"
+                  >report the issue us</a
+                >.
               </p>
             </div>
 
