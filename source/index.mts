@@ -188,10 +188,7 @@ switch (process.env.TYPE) {
                 );
               }
 
-              h1,
               h2 {
-                font-size: var(--font-size--4);
-                line-height: var(--font-size--4--line-height);
                 font-weight: 700;
               }
 
@@ -218,6 +215,9 @@ switch (process.env.TYPE) {
               <div>
                 <h1
                   css="${css`
+                    font-size: var(--font-size--4-5);
+                    line-height: var(--font-size--4-5--line-height);
+                    font-weight: 700;
                     display: flex;
                     gap: var(--space--2);
                   `}"
