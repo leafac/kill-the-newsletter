@@ -60,13 +60,13 @@ const database = await new Database(
 
 switch (process.env.TYPE) {
   case undefined: {
-    utilities.log("KILL-THE-NEWSLETTER", "2.0.0", "START");
+    utilities.log("KILL THE NEWSLETTER!", "2.0.0", "START");
     process.once("beforeExit", () => {
-      utilities.log("KILL-THE-NEWSLETTER", "STOP");
+      utilities.log("KILL THE NEWSLETTER!", "STOP");
     });
     for (const port of configuration.ports)
       node.childProcessKeepAlive(() =>
-        childProcess.spawn(process.execPath, process.argv.slice(1), {
+        childProcess.spawn(process.argv[0], process.argv.slice(1), {
           env: {
             ...process.env,
             NODE_ENV: configuration.environment,
@@ -77,7 +77,7 @@ switch (process.env.TYPE) {
         }),
       );
     node.childProcessKeepAlive(() =>
-      childProcess.spawn(process.execPath, process.argv.slice(1), {
+      childProcess.spawn(process.argv[0], process.argv.slice(1), {
         env: {
           ...process.env,
           NODE_ENV: configuration.environment,
@@ -100,15 +100,7 @@ switch (process.env.TYPE) {
     const application = server({
       port: Number(process.env.PORT),
     });
-    function layout({
-      request,
-      response,
-      body,
-    }: {
-      request: serverTypes.Request<{}, {}, {}, {}, {}>;
-      response: serverTypes.Response;
-      body: HTML;
-    }): HTML {
+    function layout(body: HTML): HTML {
       css`
         @import "@radically-straightforward/css/static/index.css";
         @import "@radically-straightforward/javascript/static/index.css";
@@ -194,31 +186,27 @@ switch (process.env.TYPE) {
       pathname: "/",
       handler: (request, response) => {
         response.end(
-          layout({
-            request,
-            response,
-            body: html`
-              <form
-                method="POST"
-                action="/"
-                novalidate
-                css="${css`
-                  display: flex;
-                  flex-direction: column;
-                  gap: var(--space--2);
-                `}"
-              >
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Feed name…"
-                  required
-                  autofocus
-                />
-                <div><button>Create Feed</button></div>
-              </form>
-            `,
-          }),
+          layout(html`
+            <form
+              method="POST"
+              action="/"
+              novalidate
+              css="${css`
+                display: flex;
+                flex-direction: column;
+                gap: var(--space--2);
+              `}"
+            >
+              <input
+                type="text"
+                name="name"
+                placeholder="Feed name…"
+                required
+                autofocus
+              />
+              <div><button>Create Feed</button></div>
+            </form>
+          `),
         );
       },
     });
@@ -242,14 +230,10 @@ switch (process.env.TYPE) {
           `,
         );
         response.end(
-          layout({
-            request,
-            response,
-            body: html`
-              <p>${reference}@${request.URL.hostname}</p>
-              <p>${request.URL.origin}/feeds/${reference}.xml</p>
-            `,
-          }),
+          layout(html`
+            <p>${reference}@${request.URL.hostname}</p>
+            <p>${request.URL.origin}/feeds/${reference}.xml</p>
+          `),
         );
       },
     });
@@ -297,7 +281,7 @@ switch (process.env.TYPE) {
                 rel="self"
               />
               <updated>
-                ${entries[0]?.createdAt ?? "2003-12-13T18:30:02Z"}
+                ${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}
               </updated>
               <title>${feed.title}</title>
               $${entries.map(
@@ -361,17 +345,13 @@ switch (process.env.TYPE) {
     });
     application.push({
       handler: (request, response) => {
-        response.end(
-          layout({ request, response, body: html` <p>TODO: Not found.</p> ` }),
-        );
+        response.end(layout(html` <p>TODO: Not found.</p> `));
       },
     });
     application.push({
       error: true,
       handler: (request, response) => {
-        response.end(
-          layout({ request, response, body: html` <p>TODO: Error.</p> ` }),
-        );
+        response.end(layout(html` <p>TODO: Error.</p> `));
       },
     });
     break;
@@ -442,6 +422,7 @@ switch (process.env.TYPE) {
                 )
               `,
             );
+            // TODO: Clean up old entries.
             utilities.log("EMAIL", "SUCCESS", String(feedId));
           }
         } catch (error) {
