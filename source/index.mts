@@ -12,6 +12,7 @@ import css from "@radically-straightforward/css";
 import javascript from "@radically-straightforward/javascript";
 import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
+import caddyfile from "@radically-straightforward/caddy";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
 import { SMTPServer } from "smtp-server";
@@ -24,11 +25,13 @@ const configuration: {
   dataDirectory: string;
   environment: "production" | "development";
   hstsPreload: boolean;
+  extraCaddyfile: string;
   ports: number[];
 } = (await import(path.resolve(process.argv[2]))).default;
 configuration.dataDirectory ??= path.resolve("./data/");
 configuration.environment ??= "production";
 configuration.hstsPreload ??= false;
+configuration.extraCaddyfile ??= caddyfile``;
 configuration.ports = Array.from(
   { length: os.availableParallelism() },
   (value, index) => 18000 + index,
@@ -92,6 +95,7 @@ switch (process.env.TYPE) {
       dynamicServerPorts: configuration.ports,
       email: configuration.administratorEmail,
       hstsPreload: configuration.hstsPreload,
+      extraCaddyfile: configuration.extraCaddyfile,
     });
     break;
   }

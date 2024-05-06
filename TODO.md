@@ -1,10 +1,7 @@
 # TODO
 
-- Data migration.
 - Deploy.
-  - Production configuration.
-    - `www` redirect.
-- Deploy with GitHub Actions.
+- Setup future deploys with GitHub Actions.
 - Answer
   - blogtrottr
   - straynic
