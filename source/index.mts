@@ -50,13 +50,13 @@ const database = await new Database(
   sql`
     CREATE TABLE "inboxes" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "reference" TEXT NOT NULL,
+      "reference" TEXT NOT NULL UNIQUE,
       "name" TEXT NOT NULL
     ) STRICT;
     CREATE INDEX "inboxesReference" ON "inboxes" ("reference");
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "reference" TEXT NOT NULL,
+      "reference" TEXT NOT NULL UNIQUE,
       "inbox" INTEGER NOT NULL REFERENCES "inboxes" ON DELETE CASCADE,
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
@@ -267,9 +267,36 @@ switch (commandLineArguments.values.type) {
       },
     });
     application.push({
+      method: "GET",
+      pathname: new RegExp("^/feeds/(?<inboxReference>[A-Za-z0-9]+)\\.xml$"),
+      handler: (
+        request: serverTypes.Request<
+          { inboxReference: string },
+          {},
+          {},
+          {},
+          {}
+        >,
+        response,
+      ) => {
+        if (typeof request.pathname.inboxReference !== "string") return;
+        const inbox = database.get<{ id: number; title: string }>(
+          sql`
+            SELECT "id", "title"
+            FROM "inboxes"
+            WHERE "reference" = ${request.pathname.inboxReference}
+          `,
+        );
+        if (inbox === undefined) return;
+        response
+          .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
+          .end(html``);
+      },
+    });
+    application.push({
       handler: (request, response) => {
         response.end(
-          layout({ request, response, body: html` <p>Not found.</p> ` }),
+          layout({ request, response, body: html` <p>TODO: Not found.</p> ` }),
         );
       },
     });
@@ -277,7 +304,7 @@ switch (commandLineArguments.values.type) {
       error: true,
       handler: (request, response) => {
         response.end(
-          layout({ request, response, body: html` <p>Error.</p> ` }),
+          layout({ request, response, body: html` <p>TODO: Error.</p> ` }),
         );
       },
     });
