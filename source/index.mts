@@ -668,7 +668,7 @@ switch (process.env.TYPE) {
       onData: async (emailStream, session, callback) => {
         try {
           if (
-            ["TODO"].some(
+            ["blogtrottr.com", "feedrabbit.com"].some(
               (hostname) =>
                 session.envelope.mailFrom === false ||
                 session.envelope.mailFrom.address.match(
