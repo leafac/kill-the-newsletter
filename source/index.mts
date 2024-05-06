@@ -243,7 +243,6 @@ switch (process.env.TYPE) {
       pathname: "/",
       handler: (request, response) => {
         response.end(
-          // TODO: maxlength on ‘name="title"’
           layout(html`
             <form
               method="POST"
@@ -262,6 +261,7 @@ switch (process.env.TYPE) {
                 name="title"
                 placeholder="Feed title…"
                 required
+                maxlength="200"
                 autofocus
                 css="${css`
                   flex: 1;
@@ -389,7 +389,11 @@ switch (process.env.TYPE) {
         request: serverTypes.Request<{}, {}, {}, { title: string }, {}>,
         response,
       ) => {
-        if (typeof request.body.title !== "string" || request.body.title === "")
+        if (
+          typeof request.body.title !== "string" ||
+          request.body.title === "" ||
+          request.body.title.length > 200
+        )
           throw "validation";
         const reference = cryptoRandomString({
           length: 20,
