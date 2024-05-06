@@ -443,7 +443,7 @@ switch (process.env.TYPE) {
               while (entries.length > 0) {
                 const entry = entries.pop()!;
                 contentLength += entry.title.length + entry.content.length;
-                if (contentLength > 3 * 2 ** 20) break;
+                if (contentLength > 2 ** 20) break;
               }
               for (const entry of entries) {
                 database.run(
@@ -457,7 +457,9 @@ switch (process.env.TYPE) {
             utilities.log(
               "EMAIL",
               "SUCCESS",
+              "FEED",
               String(feed.reference),
+              "ENTRY",
               reference,
               session.envelope.mailFrom === false
                 ? ""
