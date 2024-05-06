@@ -282,6 +282,16 @@ switch (process.env.TYPE) {
               </small>
             </p>
 
+            <hr
+              css="${css`
+                border-top: var(--border-width--1) solid
+                  var(--color--stone--400);
+                @media (prefers-color-scheme: dark) {
+                  border-color: var(--color--stone--600);
+                }
+              `}"
+            />
+
             <div>
               <h2>How does Kill the Newsletter! work?</h2>
               <p>
@@ -309,11 +319,11 @@ switch (process.env.TYPE) {
                 publisher sends you an email with a confirmation link. Kill the
                 Newsletter! converts that email into a feed entry as usual, so
                 it appears in your feed reader and you may follow the
-                confirmation link. Some newsletter publishers want you to reply
-                to an email using the address that subscribed to the newsletter.
-                Unfortunately Kill the Newsletter! doesn’t support this
-                scenario, but you may contact the newsletter publisher and ask
-                them to verify you manually.
+                confirmation link from there. Some newsletter publishers want
+                you to reply to an email using the address that subscribed to
+                the newsletter. Unfortunately Kill the Newsletter! doesn’t
+                support this scenario, but you may contact the newsletter
+                publisher and ask them to verify you manually.
               </p>
             </div>
 
@@ -340,10 +350,9 @@ switch (process.env.TYPE) {
                 sharing a feed, you may share Kill the Newsletter! itself and
                 let people create their own Kill the Newsletter! feeds. Kill the
                 Newsletter! has been designed this way because it plays better
-                with newsletter publishers, who may still, for example, get
-                statistics on the number of subscribers who use Kill the
-                Newsletter!. Note that Kill the Newsletter! itself doesn’t track
-                users in any way.
+                with newsletter publishers, who may, for example, get statistics
+                on the number of subscribers who use Kill the Newsletter!. Note
+                that Kill the Newsletter! itself doesn’t track users in any way.
               </p>
             </div>
 
@@ -395,7 +404,18 @@ switch (process.env.TYPE) {
           layout(html`
             <div>
               <p>Subscribe to a newsletter with the following email address:</p>
-              <p>${reference}@${request.URL.hostname}</p>
+              <p>
+                ${reference}@${request.URL.hostname}
+                <button
+                  javascript="${javascript`
+                    this.onclick = async () => {
+                      await navigator.clipboard.writeText(${`${reference}@${request.URL.hostname}`});
+                    };
+                  `}"
+                >
+                  <i class="bi bi-copy"></i>  Copy
+                </button>
+              </p>
             </div>
             <div>
               <p>Subscribe on your feed reader to the following Atom feed:</p>
