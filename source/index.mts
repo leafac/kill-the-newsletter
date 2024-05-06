@@ -187,7 +187,14 @@ switch (process.env.TYPE) {
                 );
               }
 
-              .secondary {
+              h1,
+              h2 {
+                font-size: var(--font-size--4);
+                line-height: var(--font-size--4--line-height);
+                font-weight: 700;
+              }
+
+              small {
                 font-size: var(--font-size--3);
                 line-height: var(--font-size--3--line-height);
                 font-weight: 700;
@@ -208,11 +215,8 @@ switch (process.env.TYPE) {
               `}"
             >
               <div>
-                <div
+                <h1
                   css="${css`
-                    font-size: var(--font-size--4);
-                    line-height: var(--font-size--4--line-height);
-                    font-weight: 700;
                     display: flex;
                     gap: var(--space--2);
                   `}"
@@ -224,10 +228,8 @@ switch (process.env.TYPE) {
                     ><i class="bi bi-rss-fill"></i>
                   </div>
                   <div>Kill the Newsletter!</div>
-                </div>
-                <div class="secondary">
-                  Convert email newsletters into Atom feeds
-                </div>
+                </h1>
+                <p><small>Convert email newsletters into Atom feeds</small></p>
               </div>
               $${body}
             </div>
@@ -267,13 +269,104 @@ switch (process.env.TYPE) {
               <div><button>Create Feed</button></div>
             </form>
 
-            <div class="secondary">
-              Created by <a href="https://leafac.com">Leandro Facchinetti</a> ·
-              <a href="https://github.com/leafac/kill-the-newsletter">Source</a
-              > · Contribute via
-              <a href="https://patreon.com/leafac">Patreon</a>,
-              <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a>, or
-              <a href="https://github.com/sponsors/leafac">GitHub</a>
+            <p>
+              <small>
+                Created by
+                <a href="https://leafac.com">Leandro Facchinetti</a> ·
+                <a href="https://github.com/leafac/kill-the-newsletter"
+                  >Source</a
+                > · Contribute via
+                <a href="https://patreon.com/leafac">Patreon</a>,
+                <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a>, or
+                <a href="https://github.com/sponsors/leafac">GitHub</a>
+              </small>
+            </p>
+
+            <div>
+              <h2>How does Kill the Newsletter! work?</h2>
+              <p>
+                Create a feed in the form above and Kill the Newsletter!
+                provides you with an email address and an Atom feed. Emails that
+                are received at the address are turned into entries in the feed.
+                Sign up to a newsletter with that address and use your feed
+                reader to subscribe to that feed.
+              </p>
+            </div>
+
+            <div>
+              <h2>Why are old entries disappearing?</h2>
+              <p>
+                When Kill the Newsletter! receives an email it may delete old
+                entries to keep the feed under a size limit, because some feed
+                readers don’t support feeds that are too big.
+              </p>
+            </div>
+
+            <div>
+              <h2>How do I confirm my newsletter subscription?</h2>
+              <p>
+                Typically when you subscribe to a newsletter the newsletter
+                publisher sends you an email with a confirmation link. Kill the
+                Newsletter! converts that email into a feed entry as usual, so
+                it appears in your feed reader and you may follow the
+                confirmation link. Some newsletter publishers want you to reply
+                to an email using the address that subscribed to the newsletter.
+                Unfortunately Kill the Newsletter! doesn’t support this
+                scenario, but you may contact the newsletter publisher and ask
+                them to verify you manually.
+              </p>
+            </div>
+
+            <div>
+              <h2>
+                Why can’t I subscribe to a newsletter with my Kill the
+                Newsletter! email?
+              </h2>
+              <p>
+                Some newsletter publishers block Kill the Newsletter!. You may
+                contact them to explain why using Kill the Newsletter! is
+                important to you and ask them to reconsider their policy, but
+                ultimately it’s their content and their choice of who has access
+                to it and by what means.
+              </p>
+            </div>
+
+            <div>
+              <h2>How do I share a Kill the Newsletter! feed?</h2>
+              <p>
+                You don’t. The feed includes the identifier for the email
+                address and anyone who has access to it may unsubscribe you from
+                your newsletters, send you spam, and so forth. Instead of
+                sharing a feed, you may share Kill the Newsletter! itself and
+                let people create their own Kill the Newsletter! feeds. Kill the
+                Newsletter! has been designed this way because it plays better
+                with newsletter publishers, who may still, for example, get
+                statistics on the number of subscribers who use Kill the
+                Newsletter!. Note that Kill the Newsletter! itself doesn’t track
+                users in any way.
+              </p>
+            </div>
+
+            <div>
+              <h2>How do I delete my Kill the Newsletter! feed?</h2>
+              <p>
+                You don’t. If you’re no longer interested in a newsletter,
+                unsubscribe from the publisher (typically you may do that by
+                following a link in a feed entry), unsubscribe on the feed
+                reader, and abandon the feed.
+              </p>
+            </div>
+
+            <div>
+              <h2>
+                I’m a newsletter publisher and I saw some people subscribing
+                with Kill the Newsletter!. What is this?
+              </h2>
+              <p>
+                Think of Kill the Newsletter! as an email provider like Gmail,
+                but the emails get delivered through Atom feeds for people who
+                prefer to use feed readers.
+              </p>
             </div>
           `),
         );
