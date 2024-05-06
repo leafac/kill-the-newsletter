@@ -393,8 +393,15 @@ switch (process.env.TYPE) {
         );
         response.end(
           layout(html`
-            <p>${reference}@${request.URL.hostname}</p>
-            <p>${request.URL.origin}/feeds/${reference}.xml</p>
+            <div>
+              <p>Subscribe to a newsletter with the following email address:</p>
+              <p>${reference}@${request.URL.hostname}</p>
+            </div>
+            <div>
+              <p>Subscribe on your feed reader to the following Atom feed:</p>
+              <p>${request.URL.origin}/feeds/${reference}.xml</p>
+            </div>
+            <p><a href="/">Create Another Feed</a></p>
           `),
         );
       },
