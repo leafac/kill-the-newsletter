@@ -52,7 +52,7 @@ const database = await new Database(
       "feed" INTEGER NOT NULL REFERENCES "feeds" ON DELETE CASCADE,
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
-    );
+    ) STRICT;
     CREATE INDEX "entriesReference" ON "entries" ("reference");
     CREATE INDEX "entriesFeed" ON "entries" ("feed");
   `,
