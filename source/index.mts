@@ -110,6 +110,7 @@ switch (process.env.TYPE) {
       `;
       javascript`
         import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
+        import * as utilities from "@radically-straightforward/utilities";
       `;
       return html`
         <!doctype html>
@@ -404,22 +405,93 @@ switch (process.env.TYPE) {
           layout(html`
             <div>
               <p>Subscribe to a newsletter with the following email address:</p>
-              <p>
-                ${reference}@${request.URL.hostname}
-                <button
+              <div
+                css="${css`
+                  display: flex;
+                  gap: var(--space--2);
+                  @media (max-width: 400px) {
+                    flex-direction: column;
+                  }
+                `}"
+              >
+                <input
+                  type="text"
+                  value="${reference}@${request.URL.hostname}"
+                  readonly
+                  css="${css`
+                    flex: 1;
+                  `}"
                   javascript="${javascript`
-                    this.onclick = async () => {
-                      await navigator.clipboard.writeText(${`${reference}@${request.URL.hostname}`});
+                    this.onclick = () => {
+                      this.select();
                     };
                   `}"
-                >
-                  <i class="bi bi-copy"></i>  Copy
-                </button>
-              </p>
+                />
+                <div>
+                  <button
+                    javascript="${javascript`
+                      this.onclick = async () => {
+                        await navigator.clipboard.writeText(${`${reference}@${request.URL.hostname}`});
+                        javascript.tippy({
+                          element: this,
+                          trigger: "manual",
+                          hideOnClick: false,
+                          content: "Copied",
+                        }).show();
+                        await utilities.sleep(1000);
+                        this.tooltip.hide();
+                      };
+                    `}"
+                  >
+                    <i class="bi bi-copy"></i>  Copy
+                  </button>
+                </div>
+              </div>
             </div>
             <div>
               <p>Subscribe on your feed reader to the following Atom feed:</p>
-              <p>${request.URL.origin}/feeds/${reference}.xml</p>
+              <div
+                css="${css`
+                  display: flex;
+                  gap: var(--space--2);
+                  @media (max-width: 400px) {
+                    flex-direction: column;
+                  }
+                `}"
+              >
+                <input
+                  type="text"
+                  value="${request.URL.origin}/feeds/${reference}.xml"
+                  readonly
+                  css="${css`
+                    flex: 1;
+                  `}"
+                  javascript="${javascript`
+                    this.onclick = () => {
+                      this.select();
+                    };
+                  `}"
+                />
+                <div>
+                  <button
+                    javascript="${javascript`
+                      this.onclick = async () => {
+                        await navigator.clipboard.writeText(${`${request.URL.origin}/feeds/${reference}.xml`});
+                        javascript.tippy({
+                          element: this,
+                          trigger: "manual",
+                          hideOnClick: false,
+                          content: "Copied",
+                        }).show();
+                        await utilities.sleep(1000);
+                        this.tooltip.hide();
+                      };
+                    `}"
+                  >
+                    <i class="bi bi-copy"></i>  Copy
+                  </button>
+                </div>
+              </div>
             </div>
             <p><a href="/">Create Another Feed</a></p>
           `),
