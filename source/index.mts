@@ -106,6 +106,7 @@ switch (process.env.TYPE) {
         @import "@radically-straightforward/javascript/static/index.css";
         @import "@fontsource-variable/public-sans";
         @import "@fontsource-variable/public-sans/wght-italic.css";
+        @import "bootstrap-icons/font/bootstrap-icons.css";
       `;
       javascript`
         import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
@@ -173,9 +174,45 @@ switch (process.env.TYPE) {
               css="${css`
                 max-width: var(--space--prose);
                 margin: var(--space--0) auto;
+                display: flex;
+                flex-direction: column;
+                gap: var(--space--4);
               `}"
             >
-              $${body}
+              <div>
+                <div
+                  css="${css`
+                    font-size: var(--font-size--4);
+                    line-height: var(--font-size--4--line-height);
+                    font-weight: 700;
+                    display: flex;
+                    gap: var(--space--2);
+                  `}"
+                >
+                  <div>
+                    <i class="bi bi-envelope-fill"></i> <i
+                      class="bi bi-arrow-right"
+                      > </i
+                    ><i class="bi bi-rss-fill"></i>
+                  </div>
+                  <div>Kill the Newsletter!</div>
+                </div>
+                <div
+                  css="${css`
+                    font-size: var(--font-size--3);
+                    line-height: var(--font-size--3--line-height);
+                    font-weight: 700;
+                    color: var(--color--stone--500);
+                    @media (prefers-color-scheme: dark) {
+                      color: var(--color--stone--500);
+                    }
+                  `}"
+                >
+                  Convert email newsletters into Atom feeds
+                </div>
+              </div>
+              <div>$${body}</div>
+              <div></div>
             </div>
           </body>
         </html>
@@ -194,8 +231,10 @@ switch (process.env.TYPE) {
               novalidate
               css="${css`
                 display: flex;
-                flex-direction: column;
                 gap: var(--space--2);
+                @media (max-width: 400px) {
+                  flex-direction: column;
+                }
               `}"
             >
               <input
@@ -204,6 +243,9 @@ switch (process.env.TYPE) {
                 placeholder="Feed title…"
                 required
                 autofocus
+                css="${css`
+                  flex: 1;
+                `}"
               />
               <div><button>Create Feed</button></div>
             </form>

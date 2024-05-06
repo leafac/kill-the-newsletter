@@ -16,6 +16,7 @@
     "@types/mailparser": "^3.4.4",
     "@types/nodemailer": "^6.4.15",
     "@types/smtp-server": "^3.5.10",
+    "bootstrap-icons": "^1.11.3",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "prettier": "^3.2.5",
