@@ -434,8 +434,8 @@ switch (process.env.TYPE) {
               }>(
                 sql`
                   SELECT "id", "reference", "title", "content"
-                  FROM "feeds"
-                  WHERE "id" = ${feed.id}
+                  FROM "entries"
+                  WHERE "feed" = ${feed.id}
                   ORDER BY "id" ASC
                 `,
               );
