@@ -159,7 +159,7 @@ switch (process.env.TYPE) {
                   }
                 }
                 transition-property: var(--transition-property--colors);
-                transition-duration: var(--transition-duration--200);
+                transition-duration: var(--transition-duration--150);
                 transition-timing-function: var(
                   --transition-timing-function--ease-in-out
                 );
@@ -167,6 +167,34 @@ switch (process.env.TYPE) {
 
               button {
                 cursor: pointer;
+              }
+
+              a {
+                cursor: pointer;
+                text-decoration: underline;
+                color: var(--color--blue--500);
+                &:hover,
+                &:focus-within {
+                  color: var(--color--blue--400);
+                }
+                &:active {
+                  color: var(--color--blue--600);
+                }
+                transition-property: var(--transition-property--colors);
+                transition-duration: var(--transition-duration--150);
+                transition-timing-function: var(
+                  --transition-timing-function--ease-in-out
+                );
+              }
+
+              .secondary {
+                font-size: var(--font-size--3);
+                line-height: var(--font-size--3--line-height);
+                font-weight: 700;
+                color: var(--color--stone--500);
+                @media (prefers-color-scheme: dark) {
+                  color: var(--color--stone--500);
+                }
               }
             `}"
           >
@@ -197,22 +225,11 @@ switch (process.env.TYPE) {
                   </div>
                   <div>Kill the Newsletter!</div>
                 </div>
-                <div
-                  css="${css`
-                    font-size: var(--font-size--3);
-                    line-height: var(--font-size--3--line-height);
-                    font-weight: 700;
-                    color: var(--color--stone--500);
-                    @media (prefers-color-scheme: dark) {
-                      color: var(--color--stone--500);
-                    }
-                  `}"
-                >
+                <div class="secondary">
                   Convert email newsletters into Atom feeds
                 </div>
               </div>
-              <div>$${body}</div>
-              <div></div>
+              $${body}
             </div>
           </body>
         </html>
@@ -249,6 +266,15 @@ switch (process.env.TYPE) {
               />
               <div><button>Create Feed</button></div>
             </form>
+
+            <div class="secondary">
+              Created by <a href="https://leafac.com">Leandro Facchinetti</a> ·
+              <a href="https://github.com/leafac/kill-the-newsletter">Source</a
+              > · Contribute via
+              <a href="https://patreon.com/leafac">Patreon</a>,
+              <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a>, or
+              <a href="https://github.com/sponsors/leafac">GitHub</a>
+            </div>
           `),
         );
       },
