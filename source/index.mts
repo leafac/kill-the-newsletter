@@ -116,6 +116,11 @@ switch (process.env.TYPE) {
         <!doctype html>
         <html>
           <head>
+            <title>Kill the Newsletter!</title>
+            <meta
+              name="description"
+              content="Convert email newsletters into Atom feeds"
+            />
             <link rel="stylesheet" href="/${caddy.staticFiles["index.css"]}" />
             <script src="/${caddy.staticFiles["index.mjs"]}"></script>
             <meta
@@ -550,36 +555,43 @@ switch (process.env.TYPE) {
         );
         response
           .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
-          .end(html`
-            <?xml version="1.0" encoding="utf-8"?>
-            <feed xmlns="http://www.w3.org/2005/Atom">
-              <id>urn:${feed.reference}</id>
-              <link
-                href="${request.URL.origin}/feeds/${feed.reference}.xml"
-                rel="self"
-              />
-              <updated>
-                ${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}
-              </updated>
-              <title>${feed.title}</title>
-              $${entries.map(
-                (entry) => html`
-                  <entry>
-                    <id>urn:${entry.reference}</id>
-                    <link
-                      rel="alternate"
-                      type="text/html"
-                      href="${request.URL
-                        .origin}/feeds/${feed.reference}/entries/${entry.reference}.html"
-                    />
-                    <published>${entry.createdAt}</published>
-                    <title>${entry.title}</title>
-                    <content type="html">${entry.content}</content>
-                  </entry>
-                `,
-              )}
-            </feed>
-          `);
+          .setHeader("X-Robots-Tag", "none")
+          .end(
+            html`<?xml version="1.0" encoding="utf-8"?>
+              <feed xmlns="http://www.w3.org/2005/Atom">
+                <id>urn:kill-the-newsletter:${feed.reference}</id>
+                <link
+                  rel="self"
+                  href="${request.URL.origin}/feeds/${feed.reference}.xml"
+                />
+                <updated
+                  >${entries[0]?.createdAt ??
+                  "2000-01-01T00:00:00.000Z"}</updated
+                >
+                <title>${feed.title}</title>
+                $${entries.map(
+                  (entry) => html`
+                    <entry>
+                      <id>urn:kill-the-newsletter:${entry.reference}</id>
+                      <link
+                        rel="alternate"
+                        type="text/html"
+                        href="${request.URL
+                          .origin}/feeds/${feed.reference}/entries/${entry.reference}.html"
+                      />
+                      <published>${entry.createdAt}</published>
+                      <updated>${entry.createdAt}</updated>
+                      <author>
+                        <name>Kill the Newsletter!</name>
+                        <email>kill-the-newsletter@leafac.com</email>
+                      </author>
+                      <title>${entry.title}</title>
+                      <content type="html">${entry.content}</content>
+                    </entry>
+                  `,
+                )}
+              </feed> `,
+          );
       },
     });
     application.push({
@@ -618,7 +630,7 @@ switch (process.env.TYPE) {
           `,
         );
         if (entry === undefined) return;
-        response.end(entry.content);
+        response.setHeader("X-Robots-Tag", "none").end(entry.content);
       },
     });
     application.push({

@@ -7,7 +7,7 @@ await nodemailer
   })
   .sendMail({
     from: `"Example of Sender" <sender@example.com>`,
-    to: `"Example of Recipient" <zk7p2f3m8407rxpb1pq0@localhost>`,
+    to: `"Example of Recipient" <dw18qrowuzynvp62kik7@localhost>`,
     subject: "Example of a Newsletter Entry",
     html: "<p>Hello World</p>".repeat(1),
   });
