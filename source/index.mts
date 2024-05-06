@@ -42,7 +42,7 @@ const database = await new Database(
     CREATE TABLE "feeds" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL UNIQUE,
-      "name" TEXT NOT NULL
+      "title" TEXT NOT NULL
     ) STRICT;
     CREATE INDEX "feedsReference" ON "feeds" ("reference");
     CREATE TABLE "entries" (
@@ -199,8 +199,8 @@ switch (process.env.TYPE) {
             >
               <input
                 type="text"
-                name="name"
-                placeholder="Feed name…"
+                name="title"
+                placeholder="Feed title…"
                 required
                 autofocus
               />
@@ -214,10 +214,10 @@ switch (process.env.TYPE) {
       method: "POST",
       pathname: "/",
       handler: (
-        request: serverTypes.Request<{}, {}, {}, { name: string }, {}>,
+        request: serverTypes.Request<{}, {}, {}, { title: string }, {}>,
         response,
       ) => {
-        if (typeof request.body.name !== "string" || request.body.name === "")
+        if (typeof request.body.title !== "string" || request.body.title === "")
           throw "validation";
         const reference = cryptoRandomString({
           length: 20,
@@ -225,8 +225,8 @@ switch (process.env.TYPE) {
         });
         database.run(
           sql`
-            INSERT INTO "feeds" ("reference", "name")
-            VALUES (${reference}, ${request.body.name})
+            INSERT INTO "feeds" ("reference", "title")
+            VALUES (${reference}, ${request.body.title})
           `,
         );
         response.end(
