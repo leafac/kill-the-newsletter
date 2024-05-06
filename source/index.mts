@@ -39,22 +39,22 @@ const database = await new Database(
   path.join(configuration.dataDirectory, "kill-the-newsletter.db"),
 ).migrate(
   sql`
-    CREATE TABLE "inboxes" (
+    CREATE TABLE "feeds" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL UNIQUE,
       "name" TEXT NOT NULL
     ) STRICT;
-    CREATE INDEX "inboxesReference" ON "inboxes" ("reference");
+    CREATE INDEX "feedsReference" ON "feeds" ("reference");
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL UNIQUE,
       "createdAt" TEXT NOT NULL,
-      "inbox" INTEGER NOT NULL REFERENCES "inboxes" ON DELETE CASCADE,
+      "feed" INTEGER NOT NULL REFERENCES "feeds" ON DELETE CASCADE,
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
     );
     CREATE INDEX "entriesReference" ON "entries" ("reference");
-    CREATE INDEX "entriesInbox" ON "entries" ("inbox");
+    CREATE INDEX "entriesFeed" ON "entries" ("feed");
   `,
 );
 
@@ -211,11 +211,11 @@ switch (process.env.TYPE) {
                 <input
                   type="text"
                   name="name"
-                  placeholder="Inbox name…"
+                  placeholder="Feed name…"
                   required
                   autofocus
                 />
-                <div><button>Create Inbox</button></div>
+                <div><button>Create Feed</button></div>
               </form>
             `,
           }),
@@ -237,7 +237,7 @@ switch (process.env.TYPE) {
         });
         database.run(
           sql`
-            INSERT INTO "inboxes" ("reference", "name")
+            INSERT INTO "feeds" ("reference", "name")
             VALUES (${reference}, ${request.body.name})
           `,
         );
@@ -255,30 +255,24 @@ switch (process.env.TYPE) {
     });
     application.push({
       method: "GET",
-      pathname: new RegExp("^/feeds/(?<inboxReference>[A-Za-z0-9]+)\\.xml$"),
+      pathname: new RegExp("^/feeds/(?<feedReference>[A-Za-z0-9]+)\\.xml$"),
       handler: (
-        request: serverTypes.Request<
-          { inboxReference: string },
-          {},
-          {},
-          {},
-          {}
-        >,
+        request: serverTypes.Request<{ feedReference: string }, {}, {}, {}, {}>,
         response,
       ) => {
-        if (typeof request.pathname.inboxReference !== "string") return;
-        const inbox = database.get<{
+        if (typeof request.pathname.feedReference !== "string") return;
+        const feed = database.get<{
           id: number;
           reference: string;
           title: string;
         }>(
           sql`
             SELECT "id", "reference", "title"
-            FROM "inboxes"
-            WHERE "reference" = ${request.pathname.inboxReference}
+            FROM "feeds"
+            WHERE "reference" = ${request.pathname.feedReference}
           `,
         );
-        if (inbox === undefined) return;
+        if (feed === undefined) return;
         const entries = database.all<{
           reference: string;
           createdAt: string;
@@ -288,7 +282,7 @@ switch (process.env.TYPE) {
           sql`
             SELECT "reference", "createdAt", "title", "content"
             FROM "entries"
-            WHERE "inbox" = ${inbox.id}
+            WHERE "feed" = ${feed.id}
             ORDER BY "id" DESC
           `,
         );
@@ -297,15 +291,15 @@ switch (process.env.TYPE) {
           .end(html`
             <?xml version="1.0" encoding="utf-8"?>
             <feed xmlns="http://www.w3.org/2005/Atom">
-              <id>urn:${inbox.reference}</id>
+              <id>urn:${feed.reference}</id>
               <link
-                href="${request.URL.origin}/feeds/${inbox.reference}.xml"
+                href="${request.URL.origin}/feeds/${feed.reference}.xml"
                 rel="self"
               />
               <updated>
                 ${entries[0]?.createdAt ?? "2003-12-13T18:30:02Z"}
               </updated>
-              <title>${inbox.title}</title>
+              <title>${feed.title}</title>
               $${entries.map(
                 (entry) => html`
                   <entry>
@@ -314,7 +308,7 @@ switch (process.env.TYPE) {
                       rel="alternate"
                       type="text/html"
                       href="${request.URL
-                        .origin}/feeds/${inbox.reference}/entries/${entry.reference}.html"
+                        .origin}/feeds/${feed.reference}/entries/${entry.reference}.html"
                     />
                     <published>${entry.createdAt}</published>
                     <title>${entry.title}</title>
@@ -329,12 +323,12 @@ switch (process.env.TYPE) {
     application.push({
       method: "GET",
       pathname: new RegExp(
-        "^/feeds/(?<inboxReference>[A-Za-z0-9]+)/entries/(?<entryReference>[A-Za-z0-9]+)\\.html$",
+        "^/feeds/(?<feedReference>[A-Za-z0-9]+)/entries/(?<entryReference>[A-Za-z0-9]+)\\.html$",
       ),
       handler: (
         request: serverTypes.Request<
           {
-            inboxReference: string;
+            feedReference: string;
             entryReference: string;
           },
           {},
@@ -345,7 +339,7 @@ switch (process.env.TYPE) {
         response,
       ) => {
         if (
-          typeof request.pathname.inboxReference !== "string" ||
+          typeof request.pathname.feedReference !== "string" ||
           typeof request.pathname.entryReference !== "string"
         )
           return;
@@ -355,10 +349,10 @@ switch (process.env.TYPE) {
           sql`
             SELECT "entries"."content" AS "content"
             FROM "entries"
-            JOIN "inboxes" ON
-              "entry"."inbox" = "inboxes"."id" AND
-              "inboxes"."reference" = ${request.pathname.inboxReference}
-            WHERE "entries"."reference" = ${request.pathname.inboxReference}
+            JOIN "feeds" ON
+              "entry"."feed" = "feeds"."id" AND
+              "feeds"."reference" = ${request.pathname.feedReference}
+            WHERE "entries"."reference" = ${request.pathname.feedReference}
           `,
         );
         if (entry === undefined) return;
@@ -407,32 +401,32 @@ switch (process.env.TYPE) {
             )
           )
             throw new Error("Invalid ‘mailFrom’.");
-          const inboxesIds = session.envelope.rcptTo.flatMap(({ address }) => {
+          const feedsIds = session.envelope.rcptTo.flatMap(({ address }) => {
             if (
               configuration.environment !== "development" &&
               address.match(utilities.emailRegExp) === null
             )
               return [];
-            const [inboxReference, hostname] = address.split("@");
+            const [feedReference, hostname] = address.split("@");
             if (hostname !== configuration.hostname) return [];
-            const inbox = database.get<{ id: number }>(
+            const feed = database.get<{ id: number }>(
               sql`
-                SELECT "id" FROM "inboxes" WHERE "reference" = ${inboxReference}
+                SELECT "id" FROM "feeds" WHERE "reference" = ${feedReference}
               `,
             );
-            if (inbox === undefined) return [];
-            return [inbox.id];
+            if (feed === undefined) return [];
+            return [feed.id];
           });
-          if (inboxesIds.length === 0) throw new Error("No valid recipients.");
+          if (feedsIds.length === 0) throw new Error("No valid recipients.");
           const email = await mailParser.simpleParser(emailStream);
           if (emailStream.sizeExceeded) throw new Error("Email is too big.");
-          for (const inboxId of inboxesIds) {
+          for (const feedId of feedsIds) {
             database.run(
               sql`
                 INSERT INTO "entries" (
                   "reference",
                   "createdAt",
-                  "inbox",
+                  "feed",
                   "title",
                   "content"
                 )
@@ -442,13 +436,13 @@ switch (process.env.TYPE) {
                     characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                   })},
                   ${new Date().toISOString()},
-                  ${inboxId},
+                  ${feedId},
                   ${email.subject ?? "Untitled"},
                   ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
                 )
               `,
             );
-            utilities.log("EMAIL", "SUCCESS", String(inboxId));
+            utilities.log("EMAIL", "SUCCESS", String(feedId));
           }
         } catch (error) {
           utilities.log("EMAIL", "ERROR", String(error));
