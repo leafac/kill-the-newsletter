@@ -334,9 +334,9 @@ switch (process.env.TYPE) {
             SELECT "entries"."content" AS "content"
             FROM "entries"
             JOIN "feeds" ON
-              "entry"."feed" = "feeds"."id" AND
+              "entries"."feed" = "feeds"."id" AND
               "feeds"."reference" = ${request.pathname.feedReference}
-            WHERE "entries"."reference" = ${request.pathname.feedReference}
+            WHERE "entries"."reference" = ${request.pathname.entryReference}
           `,
         );
         if (entry === undefined) return;
