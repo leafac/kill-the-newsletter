@@ -18,14 +18,6 @@ import cryptoRandomString from "crypto-random-string";
 import { SMTPServer } from "smtp-server";
 import * as mailParser from "mailparser";
 
-const commandLineArguments = util.parseArgs({
-  options: {
-    type: { type: "string" },
-    port: { type: "string" },
-  },
-  allowPositionals: true,
-});
-
 const configuration: {
   hostname: string;
   administratorEmail: string;
@@ -34,7 +26,7 @@ const configuration: {
   environment: "production" | "development";
   hstsPreload: boolean;
   ports: number[];
-} = (await import(path.resolve(commandLineArguments.positionals[0]))).default;
+} = (await import(path.resolve(process.argv[2]))).default;
 configuration.dataDirectory ??= path.resolve("./data/");
 configuration.environment ??= "production";
 configuration.hstsPreload ??= false;
@@ -67,7 +59,7 @@ const database = await new Database(
   `,
 );
 
-switch (commandLineArguments.values.type) {
+switch (process.env.TYPE) {
   case undefined: {
     utilities.log("KILL-THE-NEWSLETTER", "2.0.0", "START");
     process.once("beforeExit", () => {
@@ -75,30 +67,25 @@ switch (commandLineArguments.values.type) {
     });
     for (const port of configuration.ports)
       node.childProcessKeepAlive(() =>
-        childProcess.spawn(
-          process.execPath,
-          [
-            process.argv[1],
-            commandLineArguments.positionals[0],
-            "--type",
-            "web",
-            "--port",
-            String(port),
-          ],
-          { stdio: "inherit" },
-        ),
+        childProcess.spawn(process.execPath, process.argv.slice(1), {
+          env: {
+            ...process.env,
+            NODE_ENV: configuration.environment,
+            TYPE: "web",
+            PORT: String(port),
+          },
+          stdio: "inherit",
+        }),
       );
     node.childProcessKeepAlive(() =>
-      childProcess.spawn(
-        process.execPath,
-        [
-          process.argv[1],
-          commandLineArguments.positionals[0],
-          "--type",
-          "email",
-        ],
-        { stdio: "inherit" },
-      ),
+      childProcess.spawn(process.execPath, process.argv.slice(1), {
+        env: {
+          ...process.env,
+          NODE_ENV: configuration.environment,
+          TYPE: "email",
+        },
+        stdio: "inherit",
+      }),
     );
     caddy.start({
       address: configuration.hostname,
@@ -112,7 +99,7 @@ switch (commandLineArguments.values.type) {
 
   case "web": {
     const application = server({
-      port: Number(commandLineArguments.values.port),
+      port: Number(process.env.PORT),
     });
     function layout({
       request,
