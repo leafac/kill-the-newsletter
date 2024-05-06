@@ -218,17 +218,30 @@ switch (process.env.TYPE) {
                     font-size: var(--font-size--4-5);
                     line-height: var(--font-size--4-5--line-height);
                     font-weight: 700;
-                    display: flex;
-                    gap: var(--space--2);
                   `}"
                 >
-                  <div>
-                    <i class="bi bi-envelope-fill"></i> <i
-                      class="bi bi-arrow-right"
-                      > </i
-                    ><i class="bi bi-rss-fill"></i>
-                  </div>
-                  <div>Kill the Newsletter!</div>
+                  <a
+                    href="/"
+                    css="${css`
+                      text-decoration: none;
+                      &:not(:hover, :focus-within, :active) {
+                        color: var(--color--stone--800);
+                        @media (prefers-color-scheme: dark) {
+                          color: var(--color--stone--200);
+                        }
+                      }
+                      display: inline-flex;
+                      gap: var(--space--2);
+                    `}"
+                  >
+                    <div>
+                      <i class="bi bi-envelope-fill"></i> <i
+                        class="bi bi-arrow-right"
+                        > </i
+                      ><i class="bi bi-rss-fill"></i>
+                    </div>
+                    <div>Kill the Newsletter!</div>
+                  </a>
                 </h1>
                 <p><small>Convert email newsletters into Atom feeds</small></p>
               </div>
@@ -272,14 +285,14 @@ switch (process.env.TYPE) {
 
             <p>
               <small>
-                Created by
-                <a href="https://leafac.com">Leandro Facchinetti</a> ·
+                <a href="https://leafac.com">By Leandro Facchinetti</a> ·
                 <a href="https://github.com/leafac/kill-the-newsletter"
                   >Source</a
-                > · Contribute via
-                <a href="https://patreon.com/leafac">Patreon</a>,
-                <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a>, or
-                <a href="https://github.com/sponsors/leafac">GitHub</a>
+                > ·
+                <a href="mailto:kill-the-newsletter@leafac.com">Report Issue</a
+                > · <a href="https://patreon.com/leafac">Patreon</a> ·
+                <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a> ·
+                <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
               </small>
             </p>
 
@@ -610,13 +623,32 @@ switch (process.env.TYPE) {
     });
     application.push({
       handler: (request, response) => {
-        response.end(layout(html` <p>TODO: Not found.</p> `));
+        response.end(
+          layout(html`
+            <p>Not found.</p>
+            <p>
+              If you expected to see the web version of a newsletter entry, you
+              may be interested in the answer to the question
+              <a href="/">“Why are old entries disappearing?”</a>.
+            </p>
+          `),
+        );
       },
     });
     application.push({
       error: true,
       handler: (request, response) => {
-        response.end(layout(html` <p>TODO: Error.</p> `));
+        response.end(
+          layout(html`
+            <p>Something went wrong.</p>
+            <p>
+              Please report this issue to
+              <a href="mailto:kill-the-newsletter@leafac.com"
+                >kill-the-newsletter@leafac.com</a
+              >.
+            </p>
+          `),
+        );
       },
     });
     break;
