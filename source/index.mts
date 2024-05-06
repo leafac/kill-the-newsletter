@@ -57,6 +57,7 @@ const database = await new Database(
     CREATE TABLE "entries" (
       "id" INTEGER PRIMARY KEY AUTOINCREMENT,
       "reference" TEXT NOT NULL UNIQUE,
+      "createdAt" TEXT NOT NULL,
       "inbox" INTEGER NOT NULL REFERENCES "inboxes" ON DELETE CASCADE,
       "title" TEXT NOT NULL,
       "content" TEXT NOT NULL
@@ -280,17 +281,102 @@ switch (commandLineArguments.values.type) {
         response,
       ) => {
         if (typeof request.pathname.inboxReference !== "string") return;
-        const inbox = database.get<{ id: number; title: string }>(
+        const inbox = database.get<{
+          id: number;
+          reference: string;
+          title: string;
+        }>(
           sql`
-            SELECT "id", "title"
+            SELECT "id", "reference", "title"
             FROM "inboxes"
             WHERE "reference" = ${request.pathname.inboxReference}
           `,
         );
         if (inbox === undefined) return;
+        const entries = database.all<{
+          reference: string;
+          createdAt: string;
+          title: string;
+          content: string;
+        }>(
+          sql`
+            SELECT "reference", "createdAt", "title", "content"
+            FROM "entries"
+            WHERE "inbox" = ${inbox.id}
+            ORDER BY "id" DESC
+          `,
+        );
         response
           .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
-          .end(html``);
+          .end(html`
+            <?xml version="1.0" encoding="utf-8"?>
+            <feed xmlns="http://www.w3.org/2005/Atom">
+              <id>urn:${inbox.reference}</id>
+              <link
+                href="${request.URL.origin}/feeds/${inbox.reference}.xml"
+                rel="self"
+              />
+              <updated>
+                ${entries[0]?.createdAt ?? "2003-12-13T18:30:02Z"}
+              </updated>
+              <title>${inbox.title}</title>
+              $${entries.map(
+                (entry) => html`
+                  <entry>
+                    <id>urn:${entry.reference}</id>
+                    <link
+                      rel="alternate"
+                      type="text/html"
+                      href="${request.URL
+                        .origin}/feeds/${inbox.reference}/entries/${entry.reference}.html"
+                    />
+                    <published>${entry.createdAt}</published>
+                    <title>${entry.title}</title>
+                    <content type="html">${entry.content}</content>
+                  </entry>
+                `,
+              )}
+            </feed>
+          `);
+      },
+    });
+    application.push({
+      method: "GET",
+      pathname: new RegExp(
+        "^/feeds/(?<inboxReference>[A-Za-z0-9]+)/entries/(?<entryReference>[A-Za-z0-9]+)\\.html$",
+      ),
+      handler: (
+        request: serverTypes.Request<
+          {
+            inboxReference: string;
+            entryReference: string;
+          },
+          {},
+          {},
+          {},
+          {}
+        >,
+        response,
+      ) => {
+        if (
+          typeof request.pathname.inboxReference !== "string" ||
+          typeof request.pathname.entryReference !== "string"
+        )
+          return;
+        const entry = database.get<{
+          content: string;
+        }>(
+          sql`
+            SELECT "entries"."content" AS "content"
+            FROM "entries"
+            JOIN "inboxes" ON
+              "entry"."inbox" = "inboxes"."id" AND
+              "inboxes"."reference" = ${request.pathname.inboxReference}
+            WHERE "entries"."reference" = ${request.pathname.inboxReference}
+          `,
+        );
+        if (entry === undefined) return;
+        response.end(entry.content);
       },
     });
     application.push({
@@ -359,6 +445,7 @@ switch (commandLineArguments.values.type) {
               sql`
                 INSERT INTO "entries" (
                   "reference",
+                  "createdAt",
                   "inbox",
                   "title",
                   "content"
@@ -368,6 +455,7 @@ switch (commandLineArguments.values.type) {
                     length: 20,
                     characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                   })},
+                  ${new Date().toISOString()},
                   ${inboxId},
                   ${email.subject ?? "Untitled"},
                   ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
