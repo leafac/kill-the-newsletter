@@ -17,10 +17,10 @@ jobs:
       - run: |
           npm install-ci-test
           npx package
-          mv ../kill-the-newsletter.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }} ../kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+          mv ../kill-the-newsletter.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }} ./kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
       - uses: actions/upload-artifact@main
         with:
-          path: ../kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+          path: ./kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
           name: kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
 
   release:
