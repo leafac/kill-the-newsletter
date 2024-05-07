@@ -9,4 +9,5 @@
   - Changelog.
   - Installation.
 - Backup.
+  - Delete snapshot.
 - Why is the migration script using a lot of memory?
