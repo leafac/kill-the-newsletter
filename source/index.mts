@@ -138,17 +138,17 @@ switch (process.env.TYPE) {
                 var(--font-family--sans-serif);
               font-size: var(--font-size--3-5);
               line-height: var(--font-size--3-5--line-height);
-              background-color: var(--color--stone--50);
+              background-color: var(--color--white);
               color: var(--color--stone--800);
               @media (prefers-color-scheme: dark) {
-                background-color: var(--color--stone--950);
+                background-color: var(--color--black);
                 color: var(--color--stone--200);
               }
               padding: var(--space--4) var(--space--4);
 
               input[type="text"],
               button {
-                background-color: var(--color--stone--100);
+                background-color: var(--color--stone--50);
                 padding: var(--space--1) var(--space--2);
                 border: var(--border-width--1) solid var(--color--stone--400);
                 border-radius: var(--border-radius--1);
@@ -159,7 +159,7 @@ switch (process.env.TYPE) {
                   border-color: var(--color--blue--400);
                 }
                 @media (prefers-color-scheme: dark) {
-                  background-color: var(--color--stone--900);
+                  background-color: var(--color--stone--950);
                   border-color: var(--color--stone--600);
                   &:hover {
                     border-color: var(--color--stone--400);
