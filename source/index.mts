@@ -109,7 +109,6 @@ switch (process.env.TYPE) {
         @import "@radically-straightforward/css/static/index.css";
         @import "@radically-straightforward/javascript/static/index.css";
         @import "@fontsource-variable/public-sans";
-        @import "@fontsource-variable/public-sans/wght-italic.css";
         @import "bootstrap-icons/font/bootstrap-icons.css";
       `;
       javascript`
@@ -153,14 +152,14 @@ switch (process.env.TYPE) {
                 border: var(--border-width--1) solid var(--color--stone--400);
                 border-radius: var(--border-radius--1);
                 &:hover {
-                  border-color: var(--color--stone--600);
+                  border-color: var(--color--stone--500);
                 }
                 &:focus-within {
                   border-color: var(--color--blue--400);
                 }
                 @media (prefers-color-scheme: dark) {
                   background-color: var(--color--stone--950);
-                  border-color: var(--color--stone--600);
+                  border-color: var(--color--stone--500);
                   &:hover {
                     border-color: var(--color--stone--400);
                   }
@@ -190,6 +189,16 @@ switch (process.env.TYPE) {
                 &:active {
                   color: var(--color--blue--600);
                 }
+                @media (prefers-color-scheme: dark) {
+                  color: var(--color--blue--500);
+                  &:hover,
+                  &:focus-within {
+                    color: var(--color--blue--400);
+                  }
+                  &:active {
+                    color: var(--color--blue--600);
+                  }
+                }
                 transition-property: var(--transition-property--colors);
                 transition-duration: var(--transition-duration--150);
                 transition-timing-function: var(
@@ -207,7 +216,7 @@ switch (process.env.TYPE) {
                 font-weight: 700;
                 color: var(--color--stone--500);
                 @media (prefers-color-scheme: dark) {
-                  color: var(--color--stone--500);
+                  color: var(--color--stone--400);
                 }
               }
             `}"
@@ -252,7 +261,13 @@ switch (process.env.TYPE) {
                     <div>Kill the Newsletter!</div>
                   </a>
                 </h1>
-                <p><small>Convert email newsletters into Atom feeds</small></p>
+                <p
+                  css="${css`
+                    margin-top: var(--space---1);
+                  `}"
+                >
+                  <small>Convert email newsletters into Atom feeds</small>
+                </p>
               </div>
               $${body}
             </div>
@@ -294,12 +309,12 @@ switch (process.env.TYPE) {
 
             <p>
               <small>
-                <a href="https://leafac.com">By Leandro Facchinetti</a> ·
+                <a href="https://leafac.com">By Leandro Facchinetti</a> |
                 <a href="https://github.com/leafac/kill-the-newsletter"
                   >Source</a
-                > ·
+                > |
                 <a href="mailto:kill-the-newsletter@leafac.com">Report Issue</a
-                > · <a href="https://patreon.com/leafac">Patreon</a> ·
+                > | <a href="https://patreon.com/leafac">Patreon</a> ·
                 <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a> ·
                 <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
               </small>
@@ -308,9 +323,9 @@ switch (process.env.TYPE) {
             <hr
               css="${css`
                 border-top: var(--border-width--1) solid
-                  var(--color--stone--400);
+                  var(--color--stone--500);
                 @media (prefers-color-scheme: dark) {
-                  border-color: var(--color--stone--600);
+                  border-color: var(--color--stone--500);
                 }
               `}"
             />
@@ -318,18 +333,18 @@ switch (process.env.TYPE) {
             <div>
               <h2>How does Kill the Newsletter! work?</h2>
               <p>
-                Create a feed in the form above and Kill the Newsletter!
+                Create a feed with the form above and Kill the Newsletter!
                 provides you with an email address and an Atom feed. Emails that
-                are received at the address are turned into entries in the feed.
-                Sign up to a newsletter with that address and use your feed
-                reader to subscribe to that feed.
+                are received at that address are turned into entries in that
+                feed. Sign up to a newsletter with that address and use your
+                feed reader to subscribe to that feed.
               </p>
             </div>
 
             <div>
               <h2>How do I confirm my newsletter subscription?</h2>
               <p>
-                Typically when you subscribe to a newsletter the newsletter
+                In most cases when you subscribe to a newsletter the newsletter
                 publisher sends you an email with a confirmation link. Kill the
                 Newsletter! converts that email into a feed entry as usual, so
                 it appears in your feed reader and you may follow the
@@ -349,7 +364,7 @@ switch (process.env.TYPE) {
               <p>
                 Some newsletter publishers block Kill the Newsletter!. You may
                 contact them to explain why using Kill the Newsletter! is
-                important to you and ask them to reconsider their policy, but
+                important to you and ask them to reconsider their decision, but
                 ultimately it’s their content and their choice of who has access
                 to it and by what means.
               </p>
@@ -383,8 +398,8 @@ switch (process.env.TYPE) {
               <h2>Why isn’t my feed updating?</h2>
               <p>
                 Send an email to the address that corresponds to your Kill the
-                Newsletter! feed. Wait a few minutes. If the email shows up on
-                your feed reader, then the issue must be with the newsletter
+                Newsletter! feed and wait a few minutes. If the email shows up
+                on your feed reader, then the issue must be with the newsletter
                 publisher and you should contact them. Otherwise, please
                 <a href="mailto:kill-the-newsletter@leafac.com"
                   >report the issue us</a
@@ -410,7 +425,9 @@ switch (process.env.TYPE) {
               <p>
                 Think of Kill the Newsletter! as an email provider like Gmail,
                 but the emails get delivered through Atom feeds for people who
-                prefer to use feed readers.
+                prefer to read with feed readers instead of email. Also,
+                consider providing your content through an Atom feed—your
+                readers will appreciate it.
               </p>
             </div>
           `),
@@ -442,6 +459,7 @@ switch (process.env.TYPE) {
         );
         response.end(
           layout(html`
+            <p>Feed “${request.body.title}” created.</p>
             <div>
               <p>Subscribe to a newsletter with the following email address:</p>
               <div
@@ -532,7 +550,9 @@ switch (process.env.TYPE) {
                 </div>
               </div>
             </div>
-            <p><a href="/">Create Another Feed</a></p>
+            <p>
+              <a href="/">← Create Another Feed</a>
+            </p>
           `),
         );
       },
