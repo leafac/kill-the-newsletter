@@ -63,7 +63,7 @@ const database = await new Database(
 
 switch (process.env.TYPE) {
   case undefined: {
-    utilities.log("KILL THE NEWSLETTER!", "2.0.0", "START");
+    utilities.log("KILL THE NEWSLETTER!", "2.0.1", "START");
     process.once("beforeExit", () => {
       utilities.log("KILL THE NEWSLETTER!", "STOP");
     });
