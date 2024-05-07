@@ -1,5 +1,8 @@
 # TODO
 
+- Backup.
+  - Test backup.
+  - Schedule to delete snapshot in a few days.
 - Answer:
   - blogtrottr
   - straynic
@@ -8,6 +11,5 @@
 - Documentation.
   - Changelog.
   - Installation.
-- Backup.
-  - Delete snapshot.
+- Release version 2.0.1.
 - Why is the migration script using a lot of memory?
