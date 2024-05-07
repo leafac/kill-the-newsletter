@@ -8,3 +8,4 @@
   - blogtrottr
   - straynic
 - Documentation.
+- Builds for macOS and Windows.
