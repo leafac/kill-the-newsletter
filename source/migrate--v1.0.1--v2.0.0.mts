@@ -1,3 +1,4 @@
+import timers from "node:timers/promises";
 import sql, { Database } from "@radically-straightforward/sqlite";
 import * as utilities from "@radically-straightforward/utilities";
 
@@ -29,6 +30,7 @@ let feedsCount = oldDatabase.get<{ count: number }>(
   `,
 )!.count;
 utilities.log(String(feedsCount));
+let feedsMigrated = 0;
 for (const feed of oldDatabase.iterate<{
   id: number;
   reference: string;
@@ -40,36 +42,52 @@ for (const feed of oldDatabase.iterate<{
 )) {
   if (feedsCount % 1000 === 0) utilities.log(String(feedsCount));
   feedsCount--;
-  const newFeedId = newDatabase.run(
-    sql`
-      INSERT INTO "feeds" ("reference", "title") VALUES (${feed.reference}, ${feed.title})
-    `,
-  ).lastInsertRowid;
-  for (const entry of oldDatabase.iterate<{
-    reference: string;
-    createdAt: string;
-    title: string;
-    content: string;
-  }>(
-    sql`
-      SELECT "reference", "createdAt", "title", "content"
-      FROM "entries"
-      WHERE "feed" = ${feed.id}
-      ORDER BY "id" ASC
-    `,
-  ))
-    newDatabase.run(
+  if (
+    newDatabase.get(
       sql`
-        INSERT INTO "entries" ("reference", "createdAt", "feed", "title", "content")
-        VALUES (
-          ${entry.reference},
-          ${new Date(entry.createdAt).toISOString()},
-          ${newFeedId},
-          ${entry.title},
-          ${entry.content}
-        )
+      SELECT TRUE FROM "feeds" WHERE "reference" = ${feed.reference}
+    `,
+    ) !== undefined
+  )
+    continue;
+  newDatabase.executeTransaction(() => {
+    const newFeedId = newDatabase.run(
+      sql`
+        INSERT INTO "feeds" ("reference", "title") VALUES (${feed.reference}, ${feed.title})
       `,
-    );
+    ).lastInsertRowid;
+    for (const entry of oldDatabase.iterate<{
+      reference: string;
+      createdAt: string;
+      title: string;
+      content: string;
+    }>(
+      sql`
+        SELECT "reference", "createdAt", "title", "content"
+        FROM "entries"
+        WHERE "feed" = ${feed.id}
+        ORDER BY "id" ASC
+      `,
+    ))
+      newDatabase.run(
+        sql`
+          INSERT INTO "entries" ("reference", "createdAt", "feed", "title", "content")
+          VALUES (
+            ${entry.reference},
+            ${new Date(entry.createdAt).toISOString()},
+            ${newFeedId},
+            ${entry.title},
+            ${entry.content}
+          )
+        `,
+      );
+  });
+  feedsMigrated++;
+  if (feedsMigrated === 10000) {
+    utilities.log("STOPPING EARLY");
+    process.exit(1);
+  }
+  await timers.setTimeout();
 }
 
 utilities.log("SUCCESS");
