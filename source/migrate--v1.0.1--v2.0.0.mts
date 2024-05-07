@@ -21,12 +21,12 @@ await new Database(process.argv[3]).migrate((newDatabase) => {
       ) STRICT;
       CREATE INDEX "entriesReference" ON "entries" ("reference");
       CREATE INDEX "entriesFeed" ON "entries" ("feed");
-    `
+    `,
   );
   let feedsCount = oldDatabase.get<{ count: number }>(
     sql`
       SELECT COUNT(*) AS "count" FROM "feeds"
-    `
+    `,
   )!.count;
   utilities.log(String(feedsCount));
   for (const feed of oldDatabase.iterate<{
@@ -36,14 +36,14 @@ await new Database(process.argv[3]).migrate((newDatabase) => {
   }>(
     sql`
       SELECT "id", "reference", "title" FROM "feeds" ORDER BY "id" ASC
-    `
+    `,
   )) {
     if (feedsCount % 1000 === 0) utilities.log(String(feedsCount));
     feedsCount--;
     const newFeedId = newDatabase.run(
       sql`
         INSERT INTO "feeds" ("reference", "title") VALUES (${feed.reference}, ${feed.title})
-      `
+      `,
     ).lastInsertRowid;
     for (const entry of oldDatabase.iterate<{
       reference: string;
@@ -56,7 +56,7 @@ await new Database(process.argv[3]).migrate((newDatabase) => {
         FROM "entries"
         WHERE "feed" = ${feed.id}
         ORDER BY "id" ASC
-      `
+      `,
     ))
       newDatabase.run(
         sql`
@@ -68,7 +68,7 @@ await new Database(process.argv[3]).migrate((newDatabase) => {
             ${entry.title},
             ${entry.content}
           )
-        `
+        `,
       );
   }
 });
