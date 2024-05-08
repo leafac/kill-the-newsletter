@@ -1,6 +1,5 @@
 # TODO
 
-- Setup future deploys with GitHub Actions.
 - Builds for macOS and Windows.
 - Documentation.
   - Changelog.
