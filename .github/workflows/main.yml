@@ -22,6 +22,42 @@ jobs:
         with:
           path: ./kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
           name: kill-the-newsletter--${{ matrix.os }}--${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || github.sha }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
+      - if: ${{ matrix.os == 'ubuntu' && startsWith(github.ref, 'refs/tags/v') }}
+        uses: webfactory/ssh-agent@master
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - if: ${{ matrix.os == 'ubuntu' && startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          cat >> ~/.ssh/known_hosts << "EOF"
+            # $ ssh-keyscan kill-the-newsletter.com
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+            kill-the-newsletter.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDSx09epSENSE5QAUVe3fWEmMsBMUasFBYqXJMdcpakmt0dlaKgSLrgwXpks0yelHLnYqPv+PfKxIffR4t2tOa3HNAQSY7NHLyHbLW0RVAyEOkRflqUjNdpC8iv1lvF31ZwFtbLKQZ7iOZLkpLZjkfOfLZnBX8Kp+agLbX++BIWtsTEuLMQVzrUOch4EjoIWw2/+fKI4fkXvgPREaUsKEIA8vmyrym+A2pUu2+WFQe6FomhD6hlOUhutOKGOlEamWhQydV/6AIuyLI+k7rm2V7lhyRVSxRhMEjHMkKiDFVtMf2IpMBjEoSFdoWqqM3eDHVJTd9VRAtsD4cm7QoMm6bbZeNRRZppckvldQNTVZGxKpf3So1phf+O71WVRwRAzSkX8ywb6GbjQ0QtCBEVLRn2cbHv1TDaXlvDGCl2wpneO865b7XwCdMQ6/8q3k+zrPHWe/xxdNCoNTJKoxBWa/Ae5t7YW8GzIF1e5X12V8ePT2h/njEZLVLi0ckFn1ndPBs=
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+            kill-the-newsletter.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHME/qZBfCgIM4kgEG+o4m8kbykc8jq0wX95YiclHA6lAEtp/mnjhYRcL4SFFWdSdtlA4Xd5pxp9QIB8rrU9yHQ=
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+            kill-the-newsletter.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAT36G3KwKsiCaZujOaNYBJ8YWQbt9gt8tf3COVwn5ki
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+          EOF
+          ssh root@kill-the-newsletter.com << "EOF"
+            mkdir -p /root/kill-the-newsletter/
+            rm -rf /root/kill-the-newsletter--deploy/
+            mkdir /root/kill-the-newsletter--deploy/
+          EOF
+          rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:/root/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+          rsync -a ./configuration/kill-the-newsletter.com.mjs root@kill-the-newsletter.com:kill-the-newsletter/configuration.mjs
+          rsync -a ./configuration/kill-the-newsletter.service root@kill-the-newsletter.com:/etc/systemd/system/kill-the-newsletter.service
+          ssh root@kill-the-newsletter.com << "EOF"
+            cd /root/kill-the-newsletter--deploy/
+            tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+            systemctl daemon-reload
+            systemctl stop kill-the-newsletter
+            mv /root/kill-the-newsletter/kill-the-newsletter/ /root/kill-the-newsletter--deploy/kill-the-newsletter--old/ || true
+            mv /root/kill-the-newsletter--deploy/kill-the-newsletter/ /root/kill-the-newsletter/kill-the-newsletter/
+            systemctl start kill-the-newsletter
+            systemctl enable kill-the-newsletter
+            rm -rf /root/kill-the-newsletter--deploy/
+          EOF
 
   release:
     needs: build
