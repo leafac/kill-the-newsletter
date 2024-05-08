@@ -1,6 +1,5 @@
 # TODO
 
-- Builds for macOS and Windows.
 - Documentation.
   - Changelog.
   - Installation.
