@@ -39,17 +39,15 @@ jobs:
             # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
             # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
           EOF
+          rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
           ssh root@kill-the-newsletter.com << "EOF"
             mkdir -p /root/kill-the-newsletter/
             rm -rf /root/kill-the-newsletter--deploy/
             mkdir /root/kill-the-newsletter--deploy/
-          EOF
-          rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:/root/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
-          rsync -a ./configuration/kill-the-newsletter.com.mjs root@kill-the-newsletter.com:kill-the-newsletter/configuration.mjs
-          rsync -a ./configuration/kill-the-newsletter.service root@kill-the-newsletter.com:/etc/systemd/system/kill-the-newsletter.service
-          ssh root@kill-the-newsletter.com << "EOF"
-            cd /root/kill-the-newsletter--deploy/
-            tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+            mv /root/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz /root/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+            (cd /root/kill-the-newsletter--deploy/ && tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz)
+            cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.com.mjs /root/kill-the-newsletter/configuration.mjs
+            cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.service /etc/systemd/system/kill-the-newsletter.service
             systemctl daemon-reload
             systemctl stop kill-the-newsletter
             mv /root/kill-the-newsletter/kill-the-newsletter/ /root/kill-the-newsletter--deploy/kill-the-newsletter--old/ || true
