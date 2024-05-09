@@ -45,7 +45,8 @@ jobs:
             rm -rf /root/kill-the-newsletter--deploy/
             mkdir /root/kill-the-newsletter--deploy/
             mv /root/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz /root/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
-            (cd /root/kill-the-newsletter--deploy/ && tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz)
+            cd /root/kill-the-newsletter--deploy/
+            tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
             cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.com.mjs /root/kill-the-newsletter/configuration.mjs
             cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.service /etc/systemd/system/kill-the-newsletter.service
             systemctl daemon-reload
