@@ -30,7 +30,7 @@ const commandLineArguments = util.parseArgs({
 
 const configuration: {
   hostname: string;
-  administratorEmail: string;
+  systemAdministratorEmail: string;
   tls: { key: string; certificate: string };
   dataDirectory: string;
   environment: "production" | "development";
@@ -114,7 +114,7 @@ switch (commandLineArguments.values.type) {
       address: configuration.hostname,
       untrustedStaticFilesRoots: [],
       dynamicServerPorts: configuration.ports,
-      email: configuration.administratorEmail,
+      email: configuration.systemAdministratorEmail,
       hstsPreload: configuration.hstsPreload,
       extraCaddyfile: configuration.extraCaddyfile,
     });

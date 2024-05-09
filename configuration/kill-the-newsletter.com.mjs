@@ -1,6 +1,6 @@
 export default {
   hostname: "kill-the-newsletter.com",
-  administratorEmail: "kill-the-newsletter@leafac.com",
+  systemAdministratorEmail: "kill-the-newsletter@leafac.com",
   tls: {
     key: "/root/.local/share/caddy/certificates/acme-v02.api.letsencrypt.org-directory/kill-the-newsletter.com/kill-the-newsletter.com.key",
     certificate:

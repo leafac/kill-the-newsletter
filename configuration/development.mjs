@@ -3,7 +3,6 @@ import * as caddy from "@radically-straightforward/caddy";
 
 export default {
   hostname: process.env.HOSTNAME ?? "localhost",
-  administratorEmail: "kill-the-newsletter@example.com",
   tls: {
     key: path.join(
       caddy.dataDirectory(),
