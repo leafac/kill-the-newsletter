@@ -2,7 +2,7 @@ import path from "node:path";
 import * as caddy from "@radically-straightforward/caddy";
 
 export default {
-  hostname: "localhost",
+  hostname: process.env.HOSTNAME ?? "localhost",
   administratorEmail: "kill-the-newsletter@example.com",
   tls: {
     key: path.join(
