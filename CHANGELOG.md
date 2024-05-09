@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Changed the `email` configuration option into `systemAdministratorEmail`.
+- Changed the configuration option from `administratorEmail` to `systemAdministratorEmail`.
 
 ## 2.0.1 · 2024-05-07
 
