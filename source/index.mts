@@ -73,7 +73,7 @@ const database = await new Database(
 );
 
 if (typeof commandLineArguments.values.migrate === "string") {
-  const oldDatabase = new Database(process.argv[2]);
+  const oldDatabase = new Database(commandLineArguments.values.migrate);
   let feedsCount = oldDatabase.get<{ count: number }>(
     sql`
       SELECT COUNT(*) AS "count" FROM "feeds"
