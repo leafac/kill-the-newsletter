@@ -1,3 +1,4 @@
+import util from "node:util";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
@@ -18,6 +19,15 @@ import cryptoRandomString from "crypto-random-string";
 import { SMTPServer } from "smtp-server";
 import * as mailParser from "mailparser";
 
+const commandLineArguments = util.parseArgs({
+  options: {
+    migrate: { type: "string" },
+    type: { type: "string" },
+    port: { type: "string" },
+  },
+  allowPositionals: true,
+});
+
 const configuration: {
   hostname: string;
   administratorEmail: string;
@@ -27,7 +37,7 @@ const configuration: {
   hstsPreload: boolean;
   extraCaddyfile: string;
   ports: number[];
-} = (await import(path.resolve(process.argv[2]))).default;
+} = (await import(path.resolve(commandLineArguments.positionals[0]))).default;
 configuration.dataDirectory ??= path.resolve("./data/");
 configuration.environment ??= "production";
 configuration.hstsPreload ??= false;
@@ -61,7 +71,7 @@ const database = await new Database(
   `,
 );
 
-switch (process.env.TYPE) {
+switch (commandLineArguments.values.type) {
   case undefined: {
     utilities.log("KILL THE NEWSLETTER!", "2.0.1", "START");
     process.once("beforeExit", () => {
@@ -69,25 +79,36 @@ switch (process.env.TYPE) {
     });
     for (const port of configuration.ports)
       node.childProcessKeepAlive(() =>
-        childProcess.spawn(process.argv[0], process.argv.slice(1), {
-          env: {
-            ...process.env,
-            NODE_ENV: configuration.environment,
-            TYPE: "web",
-            PORT: String(port),
+        childProcess.spawn(
+          process.argv[0],
+          [
+            process.argv[1],
+            "--type",
+            "web",
+            "--port",
+            String(port),
+            ...commandLineArguments.positionals,
+          ],
+          {
+            env: { ...process.env, NODE_ENV: configuration.environment },
+            stdio: "inherit",
           },
-          stdio: "inherit",
-        }),
+        ),
       );
     node.childProcessKeepAlive(() =>
-      childProcess.spawn(process.argv[0], process.argv.slice(1), {
-        env: {
-          ...process.env,
-          NODE_ENV: configuration.environment,
-          TYPE: "email",
+      childProcess.spawn(
+        process.argv[0],
+        [
+          process.argv[1],
+          "--type",
+          "email",
+          ...commandLineArguments.positionals,
+        ],
+        {
+          env: { ...process.env, NODE_ENV: configuration.environment },
+          stdio: "inherit",
         },
-        stdio: "inherit",
-      }),
+      ),
     );
     caddy.start({
       address: configuration.hostname,
@@ -102,7 +123,7 @@ switch (process.env.TYPE) {
 
   case "web": {
     const application = server({
-      port: Number(process.env.PORT),
+      port: Number(commandLineArguments.values.port),
     });
     function layout(body: HTML): HTML {
       css`
@@ -306,7 +327,6 @@ switch (process.env.TYPE) {
               />
               <div><button>Create Feed</button></div>
             </form>
-
             <p>
               <small>
                 <a href="https://leafac.com">By Leandro Facchinetti</a> |
@@ -319,7 +339,6 @@ switch (process.env.TYPE) {
                 <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
               </small>
             </p>
-
             <hr
               css="${css`
                 border-top: var(--border-width--1) solid
@@ -329,7 +348,6 @@ switch (process.env.TYPE) {
                 }
               `}"
             />
-
             <div>
               <h2>How does Kill the Newsletter! work?</h2>
               <p>
@@ -340,7 +358,6 @@ switch (process.env.TYPE) {
                 feed reader to subscribe to that feed.
               </p>
             </div>
-
             <div>
               <h2>How do I confirm my newsletter subscription?</h2>
               <p>
@@ -355,7 +372,6 @@ switch (process.env.TYPE) {
                 publisher and ask them to verify you manually.
               </p>
             </div>
-
             <div>
               <h2>
                 Why can’t I subscribe to a newsletter with my Kill the
@@ -369,7 +385,6 @@ switch (process.env.TYPE) {
                 to it and by what means.
               </p>
             </div>
-
             <div>
               <h2>How do I share a Kill the Newsletter! feed?</h2>
               <p>
@@ -384,7 +399,6 @@ switch (process.env.TYPE) {
                 that Kill the Newsletter! itself doesn’t track users in any way.
               </p>
             </div>
-
             <div>
               <h2>Why are old entries disappearing?</h2>
               <p>
@@ -393,7 +407,6 @@ switch (process.env.TYPE) {
                 readers don’t support feeds that are too big.
               </p>
             </div>
-
             <div>
               <h2>Why isn’t my feed updating?</h2>
               <p>
@@ -406,7 +419,6 @@ switch (process.env.TYPE) {
                 >.
               </p>
             </div>
-
             <div>
               <h2>How do I delete my Kill the Newsletter! feed?</h2>
               <p>
@@ -416,7 +428,6 @@ switch (process.env.TYPE) {
                 reader, and abandon the feed.
               </p>
             </div>
-
             <div>
               <h2>
                 I’m a newsletter publisher and I saw some people subscribing
