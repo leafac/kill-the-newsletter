@@ -30,7 +30,6 @@ let feedsCount = oldDatabase.get<{ count: number }>(
   `,
 )!.count;
 utilities.log(String(feedsCount));
-let feedsMigrated = 0;
 for (const feed of oldDatabase.iterate<{
   id: number;
   reference: string;
@@ -82,11 +81,6 @@ for (const feed of oldDatabase.iterate<{
         `,
       );
   });
-  feedsMigrated++;
-  if (feedsMigrated === 10000) {
-    utilities.log("STOPPING EARLY");
-    process.exit(1);
-  }
   await timers.setTimeout();
 }
 
