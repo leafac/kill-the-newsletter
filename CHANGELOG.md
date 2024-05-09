@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Changed the `email` configuration option into `systemAdministratorEmail`.
+
 ## 2.0.1 · 2024-05-07
 
 Adapted Kill the Newsletter! to use [Radically Straightforward](https://github.com/radically-straightforward/radically-straightforward).
