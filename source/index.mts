@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import childProcess from "node:child_process";
 import stream from "node:stream/promises";
+import timers from "node:timers/promises";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
 import sql, { Database } from "@radically-straightforward/sqlite";
@@ -70,6 +71,72 @@ const database = await new Database(
     CREATE INDEX "entriesFeed" ON "entries" ("feed");
   `,
 );
+
+if (typeof commandLineArguments.values.migrate === "string") {
+  const oldDatabase = new Database(process.argv[2]);
+  let feedsCount = oldDatabase.get<{ count: number }>(
+    sql`
+      SELECT COUNT(*) AS "count" FROM "feeds"
+    `,
+  )!.count;
+  utilities.log("MIGRATION", "FEEDS REMAINING", String(feedsCount));
+  for (const feed of oldDatabase.iterate<{
+    id: number;
+    reference: string;
+    title: string;
+  }>(
+    sql`
+      SELECT "id", "reference", "title" FROM "feeds" ORDER BY "id" ASC
+    `,
+  )) {
+    if (feedsCount % 1000 === 0)
+      utilities.log("MIGRATION", "FEEDS REMAINING", String(feedsCount));
+    feedsCount--;
+    if (
+      database.get(
+        sql`
+        SELECT TRUE FROM "feeds" WHERE "reference" = ${feed.reference}
+      `,
+      ) !== undefined
+    )
+      continue;
+    database.executeTransaction(() => {
+      const newFeedId = database.run(
+        sql`
+          INSERT INTO "feeds" ("reference", "title") VALUES (${feed.reference}, ${feed.title})
+        `,
+      ).lastInsertRowid;
+      for (const entry of oldDatabase.iterate<{
+        reference: string;
+        createdAt: string;
+        title: string;
+        content: string;
+      }>(
+        sql`
+          SELECT "reference", "createdAt", "title", "content"
+          FROM "entries"
+          WHERE "feed" = ${feed.id}
+          ORDER BY "id" ASC
+        `,
+      ))
+        database.run(
+          sql`
+            INSERT INTO "entries" ("reference", "createdAt", "feed", "title", "content")
+            VALUES (
+              ${entry.reference},
+              ${new Date(entry.createdAt).toISOString()},
+              ${newFeedId},
+              ${entry.title},
+              ${entry.content}
+            )
+          `,
+        );
+    });
+    await timers.setTimeout();
+  }
+  utilities.log("MIGRATION", "SUCCESS");
+  process.exit();
+}
 
 switch (commandLineArguments.values.type) {
   case undefined: {
