@@ -678,7 +678,14 @@ switch (commandLineArguments.values.type) {
           `,
         );
         if (entry === undefined) return;
-        response.setHeader("X-Robots-Tag", "none").end(entry.content);
+        response
+          .setHeader(
+            "Content-Security-Policy",
+            "default-src 'self'; img-src *; style-src 'self' 'unsafe-inline'; frame-src 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'none'",
+          )
+          .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
+          .setHeader("X-Robots-Tag", "none")
+          .end(entry.content);
       },
     });
     application.push({
