@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 2.0.2 · 2024-05-14
 
-- Changed the configuration option from `administratorEmail` to `systemAdministratorEmail`.
+- **Breaking Change:** Changed the configuration option from `administratorEmail` to `systemAdministratorEmail`.
+- Allowed hotlinked images in alternate HTML.
 
 ## 2.0.1 · 2024-05-07
 
