@@ -21,7 +21,6 @@ import * as mailParser from "mailparser";
 
 const commandLineArguments = util.parseArgs({
   options: {
-    migrate: { type: "string" },
     type: { type: "string" },
     port: { type: "string" },
   },
