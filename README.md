@@ -1,7 +1,8 @@
 # Kill the Newsletter!
 
-**Convert email newsletters into Atom feeds** · **[kill-the-newsletter.com](https://kill-the-newsletter.com/)**
+**Convert email newsletters into Atom feeds**
 
-## Installation
+**<https://kill-the-newsletter.com>**
 
-Kill the Newsletter! uses [Radically Straightforward](https://github.com/radically-straightforward/radically-straightforward) and may be self-hosted like any Radically Straightforward application.
+- [**Deployment**](https://github.com/radically-straightforward/radically-straightforward/blob/main/guides/deployment.md)
+- [**Development**](https://github.com/radically-straightforward/radically-straightforward/blob/main/guides/development.md)
