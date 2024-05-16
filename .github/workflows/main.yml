@@ -59,14 +59,11 @@ jobs:
           EOF
 
   release:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        uses: actions/download-artifact@main
-        with:
-          pattern: kill-the-newsletter--*
-      - if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-        uses: softprops/action-gh-release@master
+      - uses: actions/download-artifact@main
+      - uses: softprops/action-gh-release@master
         with:
           files: ./**/*.*
