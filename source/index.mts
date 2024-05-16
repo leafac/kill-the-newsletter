@@ -82,11 +82,11 @@ switch (commandLineArguments.values.type) {
           process.argv[0],
           [
             process.argv[1],
+            ...commandLineArguments.positionals,
             "--type",
             "web",
             "--port",
             String(port),
-            ...commandLineArguments.positionals,
           ],
           {
             env: { ...process.env, NODE_ENV: configuration.environment },
@@ -99,9 +99,9 @@ switch (commandLineArguments.values.type) {
         process.argv[0],
         [
           process.argv[1],
+          ...commandLineArguments.positionals,
           "--type",
           "email",
-          ...commandLineArguments.positionals,
         ],
         {
           env: { ...process.env, NODE_ENV: configuration.environment },
