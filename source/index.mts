@@ -39,6 +39,7 @@ export type Application = {
   };
   database: Database;
   server: undefined | ReturnType<typeof server>;
+  layout: (body: HTML) => HTML;
   email: undefined | SMTPServer;
 };
 const application = {} as Application;
@@ -110,7 +111,7 @@ application.database = await new Database(
 application.server = server({
   port: Number(application.commandLineArguments.values.port),
 });
-function layout(body: HTML): HTML {
+application.layout = (body) => {
   css`
     @import "@radically-straightforward/css/static/index.css";
     @import "@radically-straightforward/javascript/static/index.css";
@@ -279,13 +280,13 @@ function layout(body: HTML): HTML {
       </body>
     </html>
   `;
-}
+};
 application.server?.push({
   method: "GET",
   pathname: "/",
   handler: (request, response) => {
     response.end(
-      layout(html`
+      application.layout(html`
         <form
           method="POST"
           action="/"
@@ -449,7 +450,7 @@ application.server?.push({
       `,
     );
     response.end(
-      layout(html`
+      application.layout(html`
         <p>Feed “${request.body.title}” created.</p>
         <div>
           <p>Subscribe to a newsletter with the following email address:</p>
@@ -670,7 +671,7 @@ application.server?.push({
 application.server?.push({
   handler: (request, response) => {
     response.end(
-      layout(html`
+      application.layout(html`
         <p>Not found.</p>
         <p>
           If you expected to see the web version of a newsletter entry, you may
@@ -685,7 +686,7 @@ application.server?.push({
   error: true,
   handler: (request, response) => {
     response.end(
-      layout(html`
+      application.layout(html`
         <p>Something went wrong.</p>
         <p>
           Please report this issue to
