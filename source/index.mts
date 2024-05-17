@@ -848,7 +848,7 @@ if (application.commandLineArguments.values.type === undefined) {
           process.argv[1],
           ...application.commandLineArguments.positionals,
           "--type",
-          "web",
+          "server",
           "--port",
           String(port),
         ],
