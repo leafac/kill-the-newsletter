@@ -69,7 +69,7 @@ if (application.commandLineArguments.values.type === "server")
 
 utilities.log(
   "KILL THE NEWSLETTER!",
-  "9.0.0",
+  "2.0.2",
   "START",
   application.commandLineArguments.values.type ??
     application.configuration.hostname,
