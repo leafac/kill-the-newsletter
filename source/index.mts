@@ -836,10 +836,6 @@ if (application.commandLineArguments.values.type === "email") {
 }
 
 if (application.commandLineArguments.values.type === undefined) {
-  utilities.log("KILL THE NEWSLETTER!", "2.0.2", "START");
-  process.once("beforeExit", () => {
-    utilities.log("KILL THE NEWSLETTER!", "STOP");
-  });
   for (const port of application.configuration.ports)
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
