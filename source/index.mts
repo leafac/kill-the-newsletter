@@ -875,12 +875,5 @@ if (application.commandLineArguments.values.type === undefined) {
       },
     ),
   );
-  caddy.start({
-    address: application.configuration.hostname,
-    untrustedStaticFilesRoots: [],
-    dynamicServerPorts: application.configuration.ports,
-    email: application.configuration.systemAdministratorEmail,
-    hstsPreload: application.configuration.hstsPreload,
-    extraCaddyfile: application.configuration.extraCaddyfile,
-  });
+  caddy.start(application.configuration);
 }
