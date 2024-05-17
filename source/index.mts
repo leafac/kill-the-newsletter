@@ -108,9 +108,6 @@ application.database = await new Database(
   `,
 );
 
-application.server = server({
-  port: Number(application.commandLineArguments.values.port),
-});
 application.layout = (body) => {
   css`
     @import "@radically-straightforward/css/static/index.css";
