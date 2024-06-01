@@ -442,8 +442,7 @@ application.server?.push({
     });
     application.database.run(
       sql`
-        INSERT INTO "feeds" ("reference", "title")
-        VALUES (${reference}, ${request.body.title})
+        insert into "feeds" ("reference", "title") values (${reference}, ${request.body.title});
       `,
     );
     response.end(
@@ -560,9 +559,9 @@ application.server?.push({
       title: string;
     }>(
       sql`
-        SELECT "id", "reference", "title"
-        FROM "feeds"
-        WHERE "reference" = ${request.pathname.feedReference}
+        select "id", "reference", "title"
+        from "feeds"
+        where "reference" = ${request.pathname.feedReference};
       `,
     );
     if (feed === undefined) return;
@@ -573,10 +572,10 @@ application.server?.push({
       content: string;
     }>(
       sql`
-        SELECT "reference", "createdAt", "title", "content"
-        FROM "entries"
-        WHERE "feed" = ${feed.id}
-        ORDER BY "id" DESC
+        select "reference", "createdAt", "title", "content"
+        from "entries"
+        where "feed" = ${feed.id}
+        order by "id" desc;
       `,
     );
     response
@@ -646,12 +645,12 @@ application.server?.push({
       content: string;
     }>(
       sql`
-        SELECT "entries"."content" AS "content"
-        FROM "entries"
-        JOIN "feeds" ON
-          "entries"."feed" = "feeds"."id" AND
+        select "entries"."content" as "content"
+        from "entries"
+        join "feeds" on
+          "entries"."feed" = "feeds"."id" and
           "feeds"."reference" = ${request.pathname.feedReference}
-        WHERE "entries"."reference" = ${request.pathname.entryReference}
+        where "entries"."reference" = ${request.pathname.entryReference};
       `,
     );
     if (entry === undefined) return;
@@ -728,7 +727,7 @@ if (application.commandLineArguments.values.type === "email") {
             reference: string;
           }>(
             sql`
-              SELECT "id", "reference" FROM "feeds" WHERE "reference" = ${feedReference}
+              select "id", "reference" from "feeds" where "reference" = ${feedReference};
             `,
           );
           if (feed === undefined) return [];
@@ -746,20 +745,20 @@ if (application.commandLineArguments.values.type === "email") {
           application.database.executeTransaction(() => {
             application.database.run(
               sql`
-                INSERT INTO "entries" (
+                insert into "entries" (
                   "reference",
                   "createdAt",
                   "feed",
                   "title",
                   "content"
                 )
-                VALUES (
+                values (
                   ${reference},
                   ${new Date().toISOString()},
                   ${feed.id},
                   ${email.subject ?? "Untitled"},
                   ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
-                )
+                );
               `,
             );
             const entries = application.database.all<{
@@ -769,10 +768,10 @@ if (application.commandLineArguments.values.type === "email") {
               content: string;
             }>(
               sql`
-                SELECT "id", "reference", "title", "content"
-                FROM "entries"
-                WHERE "feed" = ${feed.id}
-                ORDER BY "id" ASC
+                select "id", "reference", "title", "content"
+                from "entries"
+                where "feed" = ${feed.id}
+                order by "id" asc;
               `,
             );
             let contentLength = 0;
@@ -784,7 +783,7 @@ if (application.commandLineArguments.values.type === "email") {
             for (const entry of entries) {
               application.database.run(
                 sql`
-                  DELETE FROM "entries" WHERE "id" = ${entry.id}
+                  delete from "entries" where "id" = ${entry.id};
                 `,
               );
               deletedEntriesReferences.push(entry.reference);
