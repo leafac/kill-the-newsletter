@@ -214,30 +214,30 @@ application.layout = (body) => {
           font-size: var(--font-size--3-5);
           line-height: var(--font-size--3-5--line-height);
           background-color: var(--color--white);
-          color: var(--color--stone--800);
+          color: var(--color--slate--800);
           @media (prefers-color-scheme: dark) {
             background-color: var(--color--black);
-            color: var(--color--stone--200);
+            color: var(--color--slate--200);
           }
           padding: var(--space--4) var(--space--4);
 
           input[type="text"],
           button {
-            background-color: var(--color--stone--50);
+            background-color: var(--color--slate--50);
             padding: var(--space--1) var(--space--2);
-            border: var(--border-width--1) solid var(--color--stone--400);
+            border: var(--border-width--1) solid var(--color--slate--400);
             border-radius: var(--border-radius--1);
             &:hover {
-              border-color: var(--color--stone--500);
+              border-color: var(--color--slate--500);
             }
             &:focus-within {
               border-color: var(--color--blue--400);
             }
             @media (prefers-color-scheme: dark) {
-              background-color: var(--color--stone--950);
-              border-color: var(--color--stone--500);
+              background-color: var(--color--slate--950);
+              border-color: var(--color--slate--500);
               &:hover {
-                border-color: var(--color--stone--400);
+                border-color: var(--color--slate--400);
               }
               &:focus-within {
                 border-color: var(--color--blue--600);
@@ -290,9 +290,9 @@ application.layout = (body) => {
             font-size: var(--font-size--3);
             line-height: var(--font-size--3--line-height);
             font-weight: 700;
-            color: var(--color--stone--500);
+            color: var(--color--slate--500);
             @media (prefers-color-scheme: dark) {
-              color: var(--color--stone--400);
+              color: var(--color--slate--400);
             }
           }
         `}"
@@ -319,9 +319,9 @@ application.layout = (body) => {
                 css="${css`
                   text-decoration: none;
                   &:not(:hover, :focus-within, :active) {
-                    color: var(--color--stone--800);
+                    color: var(--color--slate--800);
                     @media (prefers-color-scheme: dark) {
-                      color: var(--color--stone--200);
+                      color: var(--color--slate--200);
                     }
                   }
                   display: inline-flex;
@@ -394,9 +394,9 @@ application.server?.push({
         </p>
         <hr
           css="${css`
-            border-top: var(--border-width--1) solid var(--color--stone--500);
+            border-top: var(--border-width--1) solid var(--color--slate--500);
             @media (prefers-color-scheme: dark) {
-              border-color: var(--color--stone--500);
+              border-color: var(--color--slate--500);
             }
           `}"
         />
