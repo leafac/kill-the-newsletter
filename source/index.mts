@@ -509,18 +509,30 @@ application.server?.push({
       request.body.title.length > 200
     )
       throw "validation";
-    const externalId = cryptoRandomString({
-      length: 20,
-      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-    });
-    application.database.run(
+    const feed = application.database.get<{
+      externalId: string;
+      title: string;
+    }>(
       sql`
-        insert into "feeds" ("externalId", "title") values (${externalId}, ${request.body.title});
+        select * from "feeds" where "id" = ${
+          application.database.run(
+            sql`
+              insert into "feeds" ("externalId", "title")
+              values (
+                ${cryptoRandomString({
+                  length: 20,
+                  characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+                })},
+                ${request.body.title}
+              );
+            `,
+          ).lastInsertRowid
+        };
       `,
-    );
+    )!;
     response.end(
       application.layout(html`
-        <p>Feed “${request.body.title}” created.</p>
+        <p>Feed “${feed.title}” created.</p>
         <div>
           <p>Subscribe to a newsletter with the following email address:</p>
           <div
@@ -534,7 +546,7 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${externalId}@${request.URL.hostname}"
+              value="${feed.externalId}@${request.URL.hostname}"
               readonly
               css="${css`
                 flex: 1;
@@ -549,7 +561,7 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${externalId}@${request.URL.hostname}`});
+                    await navigator.clipboard.writeText(${`${feed.externalId}@${request.URL.hostname}`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -579,7 +591,8 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${request.URL.origin}/feeds/${externalId}.xml"
+              value="${new URL(`/feeds/${feed.externalId}.xml`, request.URL)
+                .href}"
               readonly
               css="${css`
                 flex: 1;
@@ -594,7 +607,7 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${request.URL.origin}/feeds/${externalId}.xml`});
+                    await navigator.clipboard.writeText(${`${new URL(`/feeds/${feed.externalId}.xml`, request.URL).href}`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -646,7 +659,7 @@ application.server?.push({
     }>(
       sql`
         select "externalId", "createdAt", "title", "content"
-        from "entries"
+        from "feedEntries"
         where "feed" = ${feed.id}
         order by "id" desc;
       `,
@@ -660,30 +673,31 @@ application.server?.push({
             <id>urn:kill-the-newsletter:${feed.externalId}</id>
             <link
               rel="self"
-              href="${request.URL.origin}/feeds/${feed.externalId}.xml"
+              href="${new URL(`/feeds/${feed.externalId}.xml`, request.URL)
+                .href}"
             />
             <updated
               >${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
             >
             <title>${feed.title}</title>
             $${entries.map(
-              (entry) => html`
+              (feedEntry) => html`
                 <entry>
-                  <id>urn:kill-the-newsletter:${entry.externalId}</id>
+                  <id>urn:kill-the-newsletter:${feedEntry.externalId}</id>
                   <link
                     rel="alternate"
                     type="text/html"
                     href="${request.URL
-                      .origin}/feeds/${feed.externalId}/entries/${entry.externalId}.html"
+                      .origin}/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html"
                   />
-                  <published>${entry.createdAt}</published>
-                  <updated>${entry.createdAt}</updated>
+                  <published>${feedEntry.createdAt}</published>
+                  <updated>${feedEntry.createdAt}</updated>
                   <author>
                     <name>Kill the Newsletter!</name>
                     <email>kill-the-newsletter@leafac.com</email>
                   </author>
-                  <title>${entry.title}</title>
-                  <content type="html">${entry.content}</content>
+                  <title>${feedEntry.title}</title>
+                  <content type="html">${feedEntry.content}</content>
                 </entry>
               `,
             )}
@@ -694,13 +708,13 @@ application.server?.push({
 application.server?.push({
   method: "GET",
   pathname: new RegExp(
-    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/entries/(?<entryExternalId>[A-Za-z0-9]+)\\.html$",
+    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/entries/(?<feedEntryExternalId>[A-Za-z0-9]+)\\.html$",
   ),
   handler: (
     request: serverTypes.Request<
       {
         feedExternalId: string;
-        entryExternalId: string;
+        feedEntryExternalId: string;
       },
       {},
       {},
@@ -711,22 +725,22 @@ application.server?.push({
   ) => {
     if (
       typeof request.pathname.feedExternalId !== "string" ||
-      typeof request.pathname.entryExternalId !== "string"
+      typeof request.pathname.feedEntryExternalId !== "string"
     )
       return;
-    const entry = application.database.get<{
+    const feedEntry = application.database.get<{
       content: string;
     }>(
       sql`
-        select "entries"."content" as "content"
-        from "entries"
+        select "feedEntries"."content" as "content"
+        from "feedEntries"
         join "feeds" on
-          "entries"."feed" = "feeds"."id" and
+          "feedEntries"."feed" = "feeds"."id" and
           "feeds"."externalId" = ${request.pathname.feedExternalId}
-        where "entries"."externalId" = ${request.pathname.entryExternalId};
+        where "feedEntries"."externalId" = ${request.pathname.feedEntryExternalId};
       `,
     );
-    if (entry === undefined) return;
+    if (feedEntry === undefined) return;
     response
       .setHeader(
         "Content-Security-Policy",
@@ -734,7 +748,7 @@ application.server?.push({
       )
       .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
       .setHeader("X-Robots-Tag", "none")
-      .end(entry.content);
+      .end(feedEntry.content);
   },
 });
 application.server?.push({
@@ -809,32 +823,36 @@ if (application.commandLineArguments.values.type === "email") {
         if (feeds.length === 0) throw new Error("No valid recipients.");
         const email = await mailParser.simpleParser(emailStream);
         if (emailStream.sizeExceeded) throw new Error("Email is too big.");
-        for (const feed of feeds) {
-          const externalId = cryptoRandomString({
-            length: 20,
-            characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-          });
-          const deletedEntriesExternalIds = new Array<string>();
+        for (const feed of feeds)
           application.database.executeTransaction(() => {
-            application.database.run(
+            const feedEntry = application.database.get<{ externalId: string }>(
               sql`
-                insert into "entries" (
-                  "externalId",
-                  "createdAt",
-                  "feed",
-                  "title",
-                  "content"
-                )
-                values (
-                  ${externalId},
-                  ${new Date().toISOString()},
-                  ${feed.id},
-                  ${email.subject ?? "Untitled"},
-                  ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
-                );
+                select * from "feedEntries" where "id" = ${
+                  application.database.run(
+                    sql`
+                      insert into "feedEntries" (
+                        "externalId",
+                        "feed",
+                        "createdAt",
+                        "title",
+                        "content"
+                      )
+                      values (
+                        ${cryptoRandomString({
+                          length: 20,
+                          characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+                        })},
+                        ${feed.id},
+                        ${new Date().toISOString()},
+                        ${email.subject ?? "Untitled"},
+                        ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
+                      );
+                    `,
+                  ).lastInsertRowid
+                };
               `,
-            );
-            const entries = application.database.all<{
+            )!;
+            const deletedFeedEntries = application.database.all<{
               id: number;
               externalId: string;
               title: string;
@@ -842,40 +860,41 @@ if (application.commandLineArguments.values.type === "email") {
             }>(
               sql`
                 select "id", "externalId", "title", "content"
-                from "entries"
+                from "feedEntries"
                 where "feed" = ${feed.id}
                 order by "id" asc;
               `,
             );
-            let contentLength = 0;
-            while (entries.length > 0) {
-              const entry = entries.pop()!;
-              contentLength += entry.title.length + entry.content.length;
-              if (contentLength > 2 ** 20) break;
+            let feedLength = 0;
+            while (deletedFeedEntries.length > 0) {
+              const feedEntry = deletedFeedEntries.pop()!;
+              feedLength += feedEntry.title.length + feedEntry.content.length;
+              if (feedLength > 2 ** 20) break;
             }
-            for (const entry of entries) {
+            for (const deletedFeedEntry of deletedFeedEntries)
               application.database.run(
                 sql`
-                  delete from "entries" where "id" = ${entry.id};
+                  delete from "feedEntries" where "id" = ${deletedFeedEntry.id};
                 `,
               );
-              deletedEntriesExternalIds.push(entry.externalId);
-            }
+            utilities.log(
+              "EMAIL",
+              "SUCCESS",
+              "FEED",
+              String(feed.externalId),
+              "ENTRY",
+              feedEntry.externalId,
+              session.envelope.mailFrom === false
+                ? ""
+                : session.envelope.mailFrom.address,
+              "DELETED ENTRIES",
+              JSON.stringify(
+                deletedFeedEntries.map(
+                  (deletedFeedEntry) => deletedFeedEntry.externalId,
+                ),
+              ),
+            );
           });
-          utilities.log(
-            "EMAIL",
-            "SUCCESS",
-            "FEED",
-            String(feed.externalId),
-            "ENTRY",
-            externalId,
-            session.envelope.mailFrom === false
-              ? ""
-              : session.envelope.mailFrom.address,
-            "DELETED ENTRIES",
-            JSON.stringify(deletedEntriesExternalIds),
-          );
-        }
       } catch (error) {
         utilities.log(
           "EMAIL",
