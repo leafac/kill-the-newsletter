@@ -509,13 +509,13 @@ application.server?.push({
       request.body.title.length > 200
     )
       throw "validation";
-    const reference = cryptoRandomString({
+    const externalId = cryptoRandomString({
       length: 20,
       characters: "abcdefghijklmnopqrstuvwxyz0123456789",
     });
     application.database.run(
       sql`
-        insert into "feeds" ("externalId", "title") values (${reference}, ${request.body.title});
+        insert into "feeds" ("externalId", "title") values (${externalId}, ${request.body.title});
       `,
     );
     response.end(
@@ -534,7 +534,7 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${reference}@${request.URL.hostname}"
+              value="${externalId}@${request.URL.hostname}"
               readonly
               css="${css`
                 flex: 1;
@@ -549,7 +549,7 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${reference}@${request.URL.hostname}`});
+                    await navigator.clipboard.writeText(${`${externalId}@${request.URL.hostname}`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -579,7 +579,7 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${request.URL.origin}/feeds/${reference}.xml"
+              value="${request.URL.origin}/feeds/${externalId}.xml"
               readonly
               css="${css`
                 flex: 1;
@@ -594,7 +594,7 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${request.URL.origin}/feeds/${reference}.xml`});
+                    await navigator.clipboard.writeText(${`${request.URL.origin}/feeds/${externalId}.xml`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -620,26 +620,26 @@ application.server?.push({
 });
 application.server?.push({
   method: "GET",
-  pathname: new RegExp("^/feeds/(?<feedReference>[A-Za-z0-9]+)\\.xml$"),
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)\\.xml$"),
   handler: (
-    request: serverTypes.Request<{ feedReference: string }, {}, {}, {}, {}>,
+    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
     response,
   ) => {
-    if (typeof request.pathname.feedReference !== "string") return;
+    if (typeof request.pathname.feedExternalId !== "string") return;
     const feed = application.database.get<{
       id: number;
-      reference: string;
+      externalId: string;
       title: string;
     }>(
       sql`
         select "id", "externalId", "title"
         from "feeds"
-        where "externalId" = ${request.pathname.feedReference};
+        where "externalId" = ${request.pathname.feedExternalId};
       `,
     );
     if (feed === undefined) return;
     const entries = application.database.all<{
-      reference: string;
+      externalId: string;
       createdAt: string;
       title: string;
       content: string;
@@ -657,10 +657,10 @@ application.server?.push({
       .end(
         html`<?xml version="1.0" encoding="utf-8"?>
           <feed xmlns="http://www.w3.org/2005/Atom">
-            <id>urn:kill-the-newsletter:${feed.reference}</id>
+            <id>urn:kill-the-newsletter:${feed.externalId}</id>
             <link
               rel="self"
-              href="${request.URL.origin}/feeds/${feed.reference}.xml"
+              href="${request.URL.origin}/feeds/${feed.externalId}.xml"
             />
             <updated
               >${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
@@ -669,12 +669,12 @@ application.server?.push({
             $${entries.map(
               (entry) => html`
                 <entry>
-                  <id>urn:kill-the-newsletter:${entry.reference}</id>
+                  <id>urn:kill-the-newsletter:${entry.externalId}</id>
                   <link
                     rel="alternate"
                     type="text/html"
                     href="${request.URL
-                      .origin}/feeds/${feed.reference}/entries/${entry.reference}.html"
+                      .origin}/feeds/${feed.externalId}/entries/${entry.externalId}.html"
                   />
                   <published>${entry.createdAt}</published>
                   <updated>${entry.createdAt}</updated>
@@ -694,13 +694,13 @@ application.server?.push({
 application.server?.push({
   method: "GET",
   pathname: new RegExp(
-    "^/feeds/(?<feedReference>[A-Za-z0-9]+)/entries/(?<entryReference>[A-Za-z0-9]+)\\.html$",
+    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/entries/(?<entryExternalId>[A-Za-z0-9]+)\\.html$",
   ),
   handler: (
     request: serverTypes.Request<
       {
-        feedReference: string;
-        entryReference: string;
+        feedExternalId: string;
+        entryExternalId: string;
       },
       {},
       {},
@@ -710,8 +710,8 @@ application.server?.push({
     response,
   ) => {
     if (
-      typeof request.pathname.feedReference !== "string" ||
-      typeof request.pathname.entryReference !== "string"
+      typeof request.pathname.feedExternalId !== "string" ||
+      typeof request.pathname.entryExternalId !== "string"
     )
       return;
     const entry = application.database.get<{
@@ -722,8 +722,8 @@ application.server?.push({
         from "entries"
         join "feeds" on
           "entries"."feed" = "feeds"."id" and
-          "feeds"."externalId" = ${request.pathname.feedReference}
-        where "entries"."externalId" = ${request.pathname.entryReference};
+          "feeds"."externalId" = ${request.pathname.feedExternalId}
+        where "entries"."externalId" = ${request.pathname.entryExternalId};
       `,
     );
     if (entry === undefined) return;
@@ -793,14 +793,14 @@ if (application.commandLineArguments.values.type === "email") {
             address.match(utilities.emailRegExp) === null
           )
             return [];
-          const [feedReference, hostname] = address.split("@");
+          const [feedExternalId, hostname] = address.split("@");
           if (hostname !== application.configuration.hostname) return [];
           const feed = application.database.get<{
             id: number;
-            reference: string;
+            externalId: string;
           }>(
             sql`
-              select "id", "externalId" from "feeds" where "externalId" = ${feedReference};
+              select "id", "externalId" from "feeds" where "externalId" = ${feedExternalId};
             `,
           );
           if (feed === undefined) return [];
@@ -810,11 +810,11 @@ if (application.commandLineArguments.values.type === "email") {
         const email = await mailParser.simpleParser(emailStream);
         if (emailStream.sizeExceeded) throw new Error("Email is too big.");
         for (const feed of feeds) {
-          const reference = cryptoRandomString({
+          const externalId = cryptoRandomString({
             length: 20,
             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
           });
-          const deletedEntriesReferences = new Array<string>();
+          const deletedEntriesExternalIds = new Array<string>();
           application.database.executeTransaction(() => {
             application.database.run(
               sql`
@@ -826,7 +826,7 @@ if (application.commandLineArguments.values.type === "email") {
                   "content"
                 )
                 values (
-                  ${reference},
+                  ${externalId},
                   ${new Date().toISOString()},
                   ${feed.id},
                   ${email.subject ?? "Untitled"},
@@ -836,7 +836,7 @@ if (application.commandLineArguments.values.type === "email") {
             );
             const entries = application.database.all<{
               id: number;
-              reference: string;
+              externalId: string;
               title: string;
               content: string;
             }>(
@@ -859,21 +859,21 @@ if (application.commandLineArguments.values.type === "email") {
                   delete from "entries" where "id" = ${entry.id};
                 `,
               );
-              deletedEntriesReferences.push(entry.reference);
+              deletedEntriesExternalIds.push(entry.externalId);
             }
           });
           utilities.log(
             "EMAIL",
             "SUCCESS",
             "FEED",
-            String(feed.reference),
+            String(feed.externalId),
             "ENTRY",
-            reference,
+            externalId,
             session.envelope.mailFrom === false
               ? ""
               : session.envelope.mailFrom.address,
             "DELETED ENTRIES",
-            JSON.stringify(deletedEntriesReferences),
+            JSON.stringify(deletedEntriesExternalIds),
           );
         }
       } catch (error) {
