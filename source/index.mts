@@ -106,6 +106,79 @@ application.database = await new Database(
     CREATE INDEX "entriesReference" ON "entries" ("reference");
     CREATE INDEX "entriesFeed" ON "entries" ("feed");
   `,
+
+  (database) => {
+    database.execute(
+      sql`
+        alter table "feeds" rename to "old_feeds";
+        alter table "entries" rename to "old_entries";
+
+        create table "feeds" (
+          "id" integer primary key autoincrement,
+          "externalId" text not null unique,
+          "title" text not null
+        ) strict;
+        create index "feeds_externalId" on "feeds" ("externalId");
+        create table "feedEntries" (
+          "id" integer primary key autoincrement,
+          "externalId" text not null unique,
+          "feed" integer not null references "feeds",
+          "createdAt" text not null,
+          "title" text not null,
+          "content" text not null
+        ) strict;
+        create index "feedEntries_externalId" on "feedEntries" ("externalId");
+        create index "feedEntries_feed" on "feedEntries" ("feed");
+
+        insert into "feeds" ("id", "externalId", "title")
+        select "id", "reference", "title" from "old_feeds" order by "id" asc;
+        insert into "feedEntries" ("id", "externalId", "feed", "createdAt", "title", "content")
+        select "id", "reference", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
+
+        drop table "old_feeds";
+        drop table "old_entries";
+      `,
+    );
+
+    if (application.configuration.environment === "development") {
+      const feed = database.get<{ id: number }>(
+        sql`
+          select * from "feeds" where "id" = ${
+            database.run(
+              sql`
+                insert into "feeds" ("externalId", "title")
+                values (${"r5bsqg3w6gqrsv7m59f1"}, ${"Example of a feed"});
+              `,
+            ).lastInsertRowid
+          };
+        `,
+      )!;
+      database.run(
+        sql`
+          insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
+          values (
+            ${"fjdkqejwpk22"},
+            ${feed.id},
+            ${new Date().toISOString()},
+            ${"Example of a feed entry"},
+            ${html`<p>Hello <strong>World</strong> <img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg" /></p>`}
+          );
+        `,
+      );
+      database.run(
+        sql`
+          insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
+          values (
+            ${"fjrl1k4j234"},
+            ${feed.id},
+            ${new Date().toISOString()},
+            ${"Another example of a feed entry"},
+            ${html`<p>Hello <strong>World</strong></p>`}
+          );
+        `,
+      );
+    }
+  },
 );
 
 application.layout = (body) => {
