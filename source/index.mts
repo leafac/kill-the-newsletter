@@ -194,7 +194,11 @@ application.layout = (body) => {
   `;
   return html`
     <!doctype html>
-    <html>
+    <html
+      css="${css`
+        color-scheme: light dark;
+      `}"
+    >
       <head>
         <title>Kill the Newsletter!</title>
         <meta
@@ -213,35 +217,34 @@ application.layout = (body) => {
           font-family: "Public Sans Variable", var(--font-family--sans-serif);
           font-size: var(--font-size--3-5);
           line-height: var(--font-size--3-5--line-height);
-          background-color: var(--color--white);
-          color: var(--color--slate--800);
-          @media (prefers-color-scheme: dark) {
-            background-color: var(--color--black);
-            color: var(--color--slate--200);
-          }
+          background-color: light-dark(
+            var(--color--white),
+            var(--color--black)
+          );
+          color: light-dark(var(--color--slate--800), var(--color--slate--200));
           padding: var(--space--4) var(--space--4);
 
           input[type="text"],
           button {
-            background-color: var(--color--slate--50);
+            background-color: light-dark(
+              var(--color--slate--50),
+              var(--color--slate--950)
+            );
             padding: var(--space--1) var(--space--2);
-            border: var(--border-width--1) solid var(--color--slate--400);
+            border: var(--border-width--1) solid
+              light-dark(var(--color--slate--400), var(--color--slate--500));
             border-radius: var(--border-radius--1);
             &:hover {
-              border-color: var(--color--slate--500);
+              border-color: light-dark(
+                var(--color--slate--500),
+                var(--color--slate--400)
+              );
             }
             &:focus-within {
-              border-color: var(--color--blue--400);
-            }
-            @media (prefers-color-scheme: dark) {
-              background-color: var(--color--slate--950);
-              border-color: var(--color--slate--500);
-              &:hover {
-                border-color: var(--color--slate--400);
-              }
-              &:focus-within {
-                border-color: var(--color--blue--600);
-              }
+              border-color: light-dark(
+                var(--color--blue--400),
+                var(--color--blue--600)
+              );
             }
             transition-property: var(--transition-property--colors);
             transition-duration: var(--transition-duration--150);
@@ -257,23 +260,19 @@ application.layout = (body) => {
           a {
             cursor: pointer;
             text-decoration: underline;
-            color: var(--color--blue--500);
+            color: light-dark(var(--color--blue--500), var(--color--blue--500));
             &:hover,
             &:focus-within {
-              color: var(--color--blue--400);
+              color: light-dark(
+                var(--color--blue--400),
+                var(--color--blue--400)
+              );
             }
             &:active {
-              color: var(--color--blue--600);
-            }
-            @media (prefers-color-scheme: dark) {
-              color: var(--color--blue--500);
-              &:hover,
-              &:focus-within {
-                color: var(--color--blue--400);
-              }
-              &:active {
-                color: var(--color--blue--600);
-              }
+              color: light-dark(
+                var(--color--blue--600),
+                var(--color--blue--600)
+              );
             }
             transition-property: var(--transition-property--colors);
             transition-duration: var(--transition-duration--150);
@@ -290,10 +289,10 @@ application.layout = (body) => {
             font-size: var(--font-size--3);
             line-height: var(--font-size--3--line-height);
             font-weight: 700;
-            color: var(--color--slate--500);
-            @media (prefers-color-scheme: dark) {
-              color: var(--color--slate--400);
-            }
+            color: light-dark(
+              var(--color--slate--500),
+              var(--color--slate--400)
+            );
           }
         `}"
       >
@@ -319,10 +318,10 @@ application.layout = (body) => {
                 css="${css`
                   text-decoration: none;
                   &:not(:hover, :focus-within, :active) {
-                    color: var(--color--slate--800);
-                    @media (prefers-color-scheme: dark) {
-                      color: var(--color--slate--200);
-                    }
+                    color: light-dark(
+                      var(--color--slate--800),
+                      var(--color--slate--200)
+                    );
                   }
                   display: inline-flex;
                   gap: var(--space--2);
@@ -394,10 +393,8 @@ application.server?.push({
         </p>
         <hr
           css="${css`
-            border-top: var(--border-width--1) solid var(--color--slate--500);
-            @media (prefers-color-scheme: dark) {
-              border-color: var(--color--slate--500);
-            }
+            border-top: var(--border-width--1) solid
+              light-dark(var(--color--slate--500), var(--color--slate--500));
           `}"
         />
         <div>
