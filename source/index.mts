@@ -131,9 +131,9 @@ application.database = await new Database(
         create index "feedEntries_feed" on "feedEntries" ("feed");
 
         insert into "feeds" ("id", "externalId", "title")
-        select "id", "reference", "title" from "old_feeds" order by "id" asc;
+        select "id", "externalId", "title" from "old_feeds" order by "id" asc;
         insert into "feedEntries" ("id", "externalId", "feed", "createdAt", "title", "content")
-        select "id", "reference", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
+        select "id", "externalId", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
 
         drop table "old_feeds";
         drop table "old_entries";
@@ -515,7 +515,7 @@ application.server?.push({
     });
     application.database.run(
       sql`
-        insert into "feeds" ("reference", "title") values (${reference}, ${request.body.title});
+        insert into "feeds" ("externalId", "title") values (${reference}, ${request.body.title});
       `,
     );
     response.end(
@@ -632,9 +632,9 @@ application.server?.push({
       title: string;
     }>(
       sql`
-        select "id", "reference", "title"
+        select "id", "externalId", "title"
         from "feeds"
-        where "reference" = ${request.pathname.feedReference};
+        where "externalId" = ${request.pathname.feedReference};
       `,
     );
     if (feed === undefined) return;
@@ -645,7 +645,7 @@ application.server?.push({
       content: string;
     }>(
       sql`
-        select "reference", "createdAt", "title", "content"
+        select "externalId", "createdAt", "title", "content"
         from "entries"
         where "feed" = ${feed.id}
         order by "id" desc;
@@ -722,8 +722,8 @@ application.server?.push({
         from "entries"
         join "feeds" on
           "entries"."feed" = "feeds"."id" and
-          "feeds"."reference" = ${request.pathname.feedReference}
-        where "entries"."reference" = ${request.pathname.entryReference};
+          "feeds"."externalId" = ${request.pathname.feedReference}
+        where "entries"."externalId" = ${request.pathname.entryReference};
       `,
     );
     if (entry === undefined) return;
@@ -800,7 +800,7 @@ if (application.commandLineArguments.values.type === "email") {
             reference: string;
           }>(
             sql`
-              select "id", "reference" from "feeds" where "reference" = ${feedReference};
+              select "id", "externalId" from "feeds" where "externalId" = ${feedReference};
             `,
           );
           if (feed === undefined) return [];
@@ -819,7 +819,7 @@ if (application.commandLineArguments.values.type === "email") {
             application.database.run(
               sql`
                 insert into "entries" (
-                  "reference",
+                  "externalId",
                   "createdAt",
                   "feed",
                   "title",
@@ -841,7 +841,7 @@ if (application.commandLineArguments.values.type === "email") {
               content: string;
             }>(
               sql`
-                select "id", "reference", "title", "content"
+                select "id", "externalId", "title", "content"
                 from "entries"
                 where "feed" = ${feed.id}
                 order by "id" asc;
