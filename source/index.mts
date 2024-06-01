@@ -131,9 +131,9 @@ application.database = await new Database(
         create index "feedEntries_feed" on "feedEntries" ("feed");
 
         insert into "feeds" ("id", "externalId", "title")
-        select "id", "externalId", "title" from "old_feeds" order by "id" asc;
+        select "id", "reference", "title" from "old_feeds" order by "id" asc;
         insert into "feedEntries" ("id", "externalId", "feed", "createdAt", "title", "content")
-        select "id", "externalId", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
+        select "id", "reference", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
 
         drop table "old_feeds";
         drop table "old_entries";
