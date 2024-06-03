@@ -179,6 +179,16 @@ application.database = await new Database(
       );
     }
   },
+
+  sql`
+    create table "feedVisualizations" (
+      "id" integer primary key autoincrement,
+      "feed" integer not null references "feeds",
+      "createdAt" text not null
+    ) strict;
+    create index "feedVisualizations_feed" on "feedVisualizations" ("feed");
+    create index "feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
+  `,
 );
 
 application.layout = (body) => {
@@ -648,6 +658,34 @@ application.server?.push({
       `,
     );
     if (feed === undefined) return;
+    if (
+      application.database.get<{ count: number }>(
+        sql`
+          select count(*) as "count"
+          from "feedVisualizations"
+          where
+            "feed" = ${feed.id} and
+            ${new Date(Date.now() - 60 * 60 * 1000).toISOString()} < "createdAt";
+      `,
+      )!.count > 10
+    ) {
+      response.statusCode = 429;
+      response.end(
+        application.layout(html`
+          <p>
+            Rate limit. This feed was visualized too often. Please return in one
+            hour.
+          </p>
+        `),
+      );
+      return;
+    }
+    application.database.run(
+      sql`
+        insert into "feedVisualizations" ("feed", "createdAt")
+        values (${feed.id}, ${new Date().toISOString()});
+      `,
+    );
     const entries = application.database.all<{
       externalId: string;
       createdAt: string;
