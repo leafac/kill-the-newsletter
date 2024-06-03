@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Rate limiting.
+- Deletion of feeds.
+
 ## 2.0.2 · 2024-05-14
 
 - **Breaking Change:** Changed the configuration option from `administratorEmail` to `systemAdministratorEmail`.
