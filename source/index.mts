@@ -490,10 +490,8 @@ application.server?.push({
         <div>
           <h2>How do I delete my Kill the Newsletter! feed?</h2>
           <p>
-            You don’t. If you’re no longer interested in a newsletter,
-            unsubscribe from the publisher (typically you may do that by
-            following a link in a feed entry), unsubscribe on the feed reader,
-            and abandon the feed.
+            At the end of each feed entry there’s a link to delete the Kill the
+            Newsletter! feed.
           </p>
         </div>
         <div>
@@ -640,9 +638,7 @@ application.server?.push({
             </div>
           </div>
         </div>
-        <p>
-          <a href="/">← Create Another Feed</a>
-        </p>
+        <p><a href="/">← Create Another Feed</a></p>
       `),
     );
   },
@@ -741,7 +737,21 @@ application.server?.push({
                     <email>kill-the-newsletter@leafac.com</email>
                   </author>
                   <title>${feedEntry.title}</title>
-                  <content type="html">${feedEntry.content}</content>
+                  <content type="html">
+                    ${feedEntry.content}
+                    ${html`
+                      <hr />
+                      <p>
+                        <small>
+                          <a
+                            href="${request.URL
+                              .origin}/feeds/${feed.externalId}/delete"
+                            >Delete Kill the Newsletter! feed</a
+                          >
+                        </small>
+                      </p>
+                    `}
+                  </content>
                 </entry>
               `,
             )}
@@ -793,6 +803,113 @@ application.server?.push({
       .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
       .setHeader("X-Robots-Tag", "none")
       .end(feedEntry.content);
+  },
+});
+application.server?.push({
+  method: "GET",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/delete$"),
+  handler: (
+    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
+    response,
+  ) => {
+    if (typeof request.pathname.feedExternalId !== "string") return;
+    const feed = application.database.get<{
+      externalId: string;
+      title: string;
+    }>(
+      sql`
+        select "externalId", "title"
+        from "feeds"
+        where "externalId" = ${request.pathname.feedExternalId};
+      `,
+    );
+    if (feed === undefined) return;
+    response.end(
+      application.layout(html`
+        <p>
+          <i class="bi bi-exclamation-triangle-fill"></i> This action is
+          irreversible! Your feed and all its entries will be lost!
+        </p>
+        <p>
+          Before you proceed, we recommend that you unsubscribe from the
+          publisher (typically you do that by following a link in a feed entry)
+          and unsubscribe from the feed on the feed reader.
+        </p>
+        <p>
+          To delete the feed, please confirm the feed title: “${feed.title}”
+        </p>
+        <form
+          method="DELETE"
+          action="${request.URL.origin}/feeds/${feed.externalId}"
+          novalidate
+          css="${css`
+            display: flex;
+            gap: var(--space--2);
+            @media (max-width: 400px) {
+              flex-direction: column;
+            }
+          `}"
+        >
+          <input
+            type="text"
+            placeholder="${feed.title}"
+            required
+            autofocus
+            css="${css`
+              flex: 1;
+            `}"
+            javascript="${javascript`
+              this.onvalidate = () => {
+                if (this.value !== ${feed.title})
+                  throw new javascript.ValidationError(${`Incorrect feed title: “${feed.title}”`});
+              };
+            `}"
+          />
+          <button>Delete Feed</button>
+        </form>
+      `),
+    );
+  },
+});
+application.server?.push({
+  method: "DELETE",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  handler: (
+    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
+    response,
+  ) => {
+    if (typeof request.pathname.feedExternalId !== "string") return;
+    const feed = application.database.get<{ id: number }>(
+      sql`
+        select "id"
+        from "feeds"
+        where "externalId" = ${request.pathname.feedExternalId};
+      `,
+    );
+    if (feed === undefined) return;
+    application.database.executeTransaction(() => {
+      application.database.run(
+        sql`
+          delete from "feedVisualizations" where "feed" = ${feed.id};
+        `,
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntries" where "feed" = ${feed.id};
+        `,
+      );
+      application.database.run(
+        sql`
+          delete from "feeds" where "id" = ${feed.id};
+        `,
+      );
+    });
+    response.end(
+      application.layout(html`
+        <p>Feed deleted successfully.</p>
+        <p><a href="/">← Create a New Feed</a></p>
+      `),
+    );
   },
 });
 application.server?.push({
