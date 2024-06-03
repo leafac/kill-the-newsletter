@@ -22,7 +22,7 @@ import * as mailParser from "mailparser";
 export type Application = {
   commandLineArguments: {
     values: {
-      type: undefined | "server" | "email";
+      type: undefined | "server" | "email" | "backgroundJob";
       port: undefined | string;
     };
     positionals: string[];
@@ -190,6 +190,15 @@ application.database = await new Database(
     create index "feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
   `,
 );
+
+if (application.commandLineArguments.values.type === "backgroundJob")
+  node.backgroundJob({ interval: 60 * 60 * 1000 }, () => {
+    application.database.run(
+      sql`
+        delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
+      `,
+    );
+  });
 
 application.layout = (body) => {
   css`
@@ -991,6 +1000,24 @@ if (application.commandLineArguments.values.type === undefined) {
         ...application.commandLineArguments.positionals,
         "--type",
         "email",
+      ],
+      {
+        env: {
+          ...process.env,
+          NODE_ENV: application.configuration.environment,
+        },
+        stdio: "inherit",
+      },
+    ),
+  );
+  node.childProcessKeepAlive(() =>
+    childProcess.spawn(
+      process.argv[0],
+      [
+        process.argv[1],
+        ...application.commandLineArguments.positionals,
+        "--type",
+        "backgroundJob",
       ],
       {
         env: {
