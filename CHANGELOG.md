@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Rate limiting.
-- Deletion of feeds.
+- Fixed an issue in which email redirects weren’t coming through (because they often include the `=` character, which we disallowed previously).
+- Added a feature to allow deleting a feed.
+- Added rate limiting to control server costs.
 
 ## 2.0.2 · 2024-05-14
 
