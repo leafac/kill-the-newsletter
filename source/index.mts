@@ -20,6 +20,11 @@ import { SMTPServer } from "smtp-server";
 import * as mailParser from "mailparser";
 
 export type Application = {
+  types: {
+    states: {
+      Feed: { feed: { id: number; externalId: string; title: string } };
+    };
+  };
   commandLineArguments: {
     values: {
       type: undefined | "server" | "email" | "backgroundJob";
@@ -644,14 +649,19 @@ application.server?.push({
   },
 });
 application.server?.push({
-  method: "GET",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)\\.xml$"),
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)(?:$|/|\\.xml$)"),
   handler: (
-    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
+    request: serverTypes.Request<
+      { feedExternalId: string },
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
     response,
   ) => {
     if (typeof request.pathname.feedExternalId !== "string") return;
-    const feed = application.database.get<{
+    request.state.feed = application.database.get<{
       id: number;
       externalId: string;
       title: string;
@@ -662,14 +672,31 @@ application.server?.push({
         where "externalId" = ${request.pathname.feedExternalId};
       `,
     );
-    if (feed === undefined) return;
+    if (request.state.feed === undefined) return;
+    response.setHeader("X-Robots-Tag", "none");
+  },
+});
+application.server?.push({
+  method: "GET",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)\\.xml$"),
+  handler: (
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
+    response,
+  ) => {
+    if (request.state.feed === undefined) return;
     if (
       application.database.get<{ count: number }>(
         sql`
           select count(*) as "count"
           from "feedVisualizations"
           where
-            "feed" = ${feed.id} and
+            "feed" = ${request.state.feed.id} and
             ${new Date(Date.now() - 60 * 60 * 1000).toISOString()} < "createdAt";
       `,
       )!.count > 10
@@ -688,7 +715,7 @@ application.server?.push({
     application.database.run(
       sql`
         insert into "feedVisualizations" ("feed", "createdAt")
-        values (${feed.id}, ${new Date().toISOString()});
+        values (${request.state.feed.id}, ${new Date().toISOString()});
       `,
     );
     const entries = application.database.all<{
@@ -700,26 +727,27 @@ application.server?.push({
       sql`
         select "externalId", "createdAt", "title", "content"
         from "feedEntries"
-        where "feed" = ${feed.id}
+        where "feed" = ${request.state.feed.id}
         order by "id" desc;
       `,
     );
     response
       .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
-      .setHeader("X-Robots-Tag", "none")
       .end(
         html`<?xml version="1.0" encoding="utf-8"?>
           <feed xmlns="http://www.w3.org/2005/Atom">
-            <id>urn:kill-the-newsletter:${feed.externalId}</id>
+            <id>urn:kill-the-newsletter:${request.state.feed.externalId}</id>
             <link
               rel="self"
-              href="${new URL(`/feeds/${feed.externalId}.xml`, request.URL)
-                .href}"
+              href="${new URL(
+                `/feeds/${request.state.feed.externalId}.xml`,
+                request.URL,
+              ).href}"
             />
             <updated
               >${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
             >
-            <title>${feed.title}</title>
+            <title>${request.state.feed.title}</title>
             $${entries.map(
               (feedEntry) => html`
                 <entry>
@@ -728,7 +756,7 @@ application.server?.push({
                     rel="alternate"
                     type="text/html"
                     href="${new URL(
-                      `/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html`,
+                      `/feeds/${request.state.feed!.externalId}/entries/${feedEntry.externalId}.html`,
                       request.URL,
                     ).href}"
                   />
@@ -747,7 +775,7 @@ application.server?.push({
                         <small>
                           <a
                             href="${new URL(
-                              `/feeds/${feed.externalId}/delete`,
+                              `/feeds/${request.state.feed!.externalId}/delete`,
                               request.URL,
                             ).href}"
                             >Delete Kill the Newsletter! feed</a
@@ -770,19 +798,16 @@ application.server?.push({
   ),
   handler: (
     request: serverTypes.Request<
-      {
-        feedExternalId: string;
-        feedEntryExternalId: string;
-      },
+      { feedEntryExternalId: string },
       {},
       {},
       {},
-      {}
+      Application["types"]["states"]["Feed"]
     >,
     response,
   ) => {
     if (
-      typeof request.pathname.feedExternalId !== "string" ||
+      request.state.feed === undefined ||
       typeof request.pathname.feedEntryExternalId !== "string"
     )
       return;
@@ -792,10 +817,9 @@ application.server?.push({
       sql`
         select "feedEntries"."content" as "content"
         from "feedEntries"
-        join "feeds" on
-          "feedEntries"."feed" = "feeds"."id" and
-          "feeds"."externalId" = ${request.pathname.feedExternalId}
-        where "feedEntries"."externalId" = ${request.pathname.feedEntryExternalId};
+        where
+          "feedEntries"."feed" = ${request.state.feed.id} and
+          "feedEntries"."externalId" = ${request.pathname.feedEntryExternalId};
       `,
     );
     if (feedEntry === undefined) return;
@@ -805,7 +829,6 @@ application.server?.push({
         "default-src 'self'; img-src *; style-src 'self' 'unsafe-inline'; frame-src 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'none'",
       )
       .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
-      .setHeader("X-Robots-Tag", "none")
       .end(feedEntry.content);
   },
 });
@@ -813,21 +836,16 @@ application.server?.push({
   method: "GET",
   pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/delete$"),
   handler: (
-    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
     response,
   ) => {
-    if (typeof request.pathname.feedExternalId !== "string") return;
-    const feed = application.database.get<{
-      externalId: string;
-      title: string;
-    }>(
-      sql`
-        select "externalId", "title"
-        from "feeds"
-        where "externalId" = ${request.pathname.feedExternalId};
-      `,
-    );
-    if (feed === undefined) return;
+    if (request.state.feed === undefined) return;
     response.end(
       application.layout(html`
         <p>
@@ -840,11 +858,15 @@ application.server?.push({
           and unsubscribe from the feed on the feed reader.
         </p>
         <p>
-          To delete the feed, please confirm the feed title: “${feed.title}”
+          To delete the feed, please confirm the feed title:
+          “${request.state.feed.title}”
         </p>
         <form
           method="DELETE"
-          action="${new URL(`/feeds/${feed.externalId}`, request.URL).href}"
+          action="${new URL(
+            `/feeds/${request.state.feed.externalId}`,
+            request.URL,
+          ).href}"
           novalidate
           css="${css`
             display: flex;
@@ -856,7 +878,7 @@ application.server?.push({
         >
           <input
             type="text"
-            placeholder="${feed.title}"
+            placeholder="${request.state.feed.title}"
             required
             autofocus
             css="${css`
@@ -864,8 +886,8 @@ application.server?.push({
             `}"
             javascript="${javascript`
               this.onvalidate = () => {
-                if (this.value !== ${feed.title})
-                  throw new javascript.ValidationError(${`Incorrect feed title: “${feed.title}”`});
+                if (this.value !== ${request.state.feed.title})
+                  throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
               };
             `}"
           />
@@ -879,32 +901,30 @@ application.server?.push({
   method: "DELETE",
   pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
   handler: (
-    request: serverTypes.Request<{ feedExternalId: string }, {}, {}, {}, {}>,
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
     response,
   ) => {
-    if (typeof request.pathname.feedExternalId !== "string") return;
-    const feed = application.database.get<{ id: number }>(
-      sql`
-        select "id"
-        from "feeds"
-        where "externalId" = ${request.pathname.feedExternalId};
-      `,
-    );
-    if (feed === undefined) return;
+    if (request.state.feed === undefined) return;
     application.database.executeTransaction(() => {
       application.database.run(
         sql`
-          delete from "feedVisualizations" where "feed" = ${feed.id};
+          delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
         `,
       );
       application.database.run(
         sql`
-          delete from "feedEntries" where "feed" = ${feed.id};
+          delete from "feedEntries" where "feed" = ${request.state.feed!.id};
         `,
       );
       application.database.run(
         sql`
-          delete from "feeds" where "id" = ${feed.id};
+          delete from "feeds" where "id" = ${request.state.feed!.id};
         `,
       );
     });
@@ -918,6 +938,7 @@ application.server?.push({
 });
 application.server?.push({
   handler: (request, response) => {
+    response.statusCode = 404;
     response.end(
       application.layout(html`
         <p>Not found.</p>
