@@ -727,8 +727,10 @@ application.server?.push({
                   <link
                     rel="alternate"
                     type="text/html"
-                    href="${request.URL
-                      .origin}/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html"
+                    href="${new URL(
+                      `/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html`,
+                      request.URL,
+                    ).href}"
                   />
                   <published>${feedEntry.createdAt}</published>
                   <updated>${feedEntry.createdAt}</updated>
@@ -744,8 +746,10 @@ application.server?.push({
                       <p>
                         <small>
                           <a
-                            href="${request.URL
-                              .origin}/feeds/${feed.externalId}/delete"
+                            href="${new URL(
+                              `/feeds/${feed.externalId}/delete`,
+                              request.URL,
+                            ).href}"
                             >Delete Kill the Newsletter! feed</a
                           >
                         </small>
@@ -840,7 +844,7 @@ application.server?.push({
         </p>
         <form
           method="DELETE"
-          action="${request.URL.origin}/feeds/${feed.externalId}"
+          action="${new URL(`/feeds/${feed.externalId}`, request.URL).href}"
           novalidate
           css="${css`
             display: flex;
