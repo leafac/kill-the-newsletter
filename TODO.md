@@ -9,8 +9,8 @@
     - https://blog.superfeedr.com/howto-pubsubhubbub/
     - https://indieweb.org/How_to_publish_and_consume_WebSub
   - Hubs
-    - https://pubsubhubbub.appspot.com/
     - https://websubhub.com/
+    - https://pubsubhubbub.appspot.com/
     - https://pubsubhubbub.superfeedr.com/
     - https://switchboard.p3k.io/
     - http://phubb.cweiske.de/
