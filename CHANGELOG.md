@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased
+## 2.0.3 · 2024-06-05
 
 - Fixed an issue in which email redirects weren’t coming through (because they often include the `=` character, which we disallowed previously).
 - Added a feature to allow deleting a feed.
-- Added rate limiting to control server costs.
+- Added rate limiting to try and control server costs.
 
 ## 2.0.2 · 2024-05-14
 
