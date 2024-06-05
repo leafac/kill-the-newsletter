@@ -6,7 +6,7 @@
     "backup": "rsync -av --delete --progress root@kill-the-newsletter.com:kill-the-newsletter/data/ /Volumes/leafac--external-storage/Backups/kill-the-newsletter/"
   },
   "dependencies": {
-    "@radically-straightforward/production": "^1.0.18",
+    "@radically-straightforward/production": "^1.0.19",
     "crypto-random-string": "^5.0.0",
     "mailparser": "^3.7.1",
     "smtp-server": "^3.13.4"
@@ -20,7 +20,7 @@
     "bootstrap-icons": "^1.11.3",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.3",
-    "prettier": "^3.3.0",
+    "prettier": "^3.3.1",
     "typescript": "^5.4.5"
   },
   "prettier": {}
