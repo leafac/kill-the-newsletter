@@ -649,7 +649,9 @@ application.server?.push({
   },
 });
 application.server?.push({
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)(?:$|/|\\.xml$)"),
+  pathname: new RegExp(
+    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)(?:$|/|\\.xml$)",
+  ),
   handler: (
     request: serverTypes.Request<
       { feedExternalId: string },
