@@ -631,7 +631,9 @@ application.server?.push({
             using the address that subscribed to the newsletter. Unfortunately
             Kill the Newsletter! doesn’t support this scenario, but you may
             contact the newsletter publisher and ask them to verify you
-            manually.
+            manually. As a workaround, some people have had success with signing
+            up for the newsletter using their regular email address and setting
+            up a filter to forward the emails to Kill the Newsletter!
           </p>
         </div>
         <div>
