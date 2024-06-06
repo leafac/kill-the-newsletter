@@ -660,7 +660,7 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${feed.externalId}@${request.URL.hostname}"
+              value="${feed.externalId}@${application.configuration.hostname}"
               readonly
               css="${css`
                 flex: 1;
@@ -675,7 +675,7 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${feed.externalId}@${request.URL.hostname}`});
+                    await navigator.clipboard.writeText(${`${feed.externalId}@${application.configuration.hostname}`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -705,8 +705,8 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${new URL(`/feeds/${feed.externalId}.xml`, request.URL)
-                .href}"
+              value="https://${application.configuration
+                .hostname}/feeds/${feed.externalId}.xml"
               readonly
               css="${css`
                 flex: 1;
@@ -721,7 +721,9 @@ application.server?.push({
               <button
                 javascript="${javascript`
                   this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${new URL(`/feeds/${feed.externalId}.xml`, request.URL).href}`});
+                    await navigator.clipboard.writeText(${`https://${
+                      application.configuration.hostname
+                    }/feeds/${feed.externalId}.xml`});
                     javascript.tippy({
                       element: this,
                       trigger: "manual",
@@ -901,8 +903,9 @@ application.server?.push({
       (request.body["hub.mode"] !== "subscribe" &&
         request.body["hub.mode"] !== "unsubscribe") ||
       request.body["hub.topic"] !==
-        new URL(`/feeds/${request.state.feed.externalId}.xml`, request.URL)
-          .href ||
+        `https://${
+          application.configuration.hostname
+        }/feeds/${request.state.feed.externalId}.xml` ||
       typeof request.body["hub.callback"] !== "string" ||
       (() => {
         try {
@@ -913,7 +916,8 @@ application.server?.push({
       })() !== request.body["hub.callback"] ||
       (new URL(request.body["hub.callback"]).protocol !== "https:" &&
         new URL(request.body["hub.callback"]).protocol !== "http:") ||
-      new URL(request.body["hub.callback"]).hostname === request.URL.hostname ||
+      new URL(request.body["hub.callback"]).hostname ===
+        application.configuration.hostname ||
       new URL(request.body["hub.callback"]).hostname === "localhost" ||
       new URL(request.body["hub.callback"]).hostname === "127.0.0.1" ||
       (request.body["hub.secret"] !== undefined &&
@@ -1040,10 +1044,8 @@ application.server?.push({
         </p>
         <form
           method="DELETE"
-          action="${new URL(
-            `/feeds/${request.state.feed.externalId}`,
-            request.URL,
-          ).href}"
+          action="https://${application.configuration.hostname}/feeds/${request
+            .state.feed.externalId}"
           novalidate
           css="${css`
             display: flex;
