@@ -1470,7 +1470,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
   );
 
 if (application.commandLineArguments.values.type === undefined) {
-  for (const port of application.configuration.ports)
+  for (const port of application.configuration.ports) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.argv[0],
@@ -1491,6 +1491,27 @@ if (application.commandLineArguments.values.type === undefined) {
         },
       ),
     );
+    node.childProcessKeepAlive(() =>
+      childProcess.spawn(
+        process.argv[0],
+        [
+          process.argv[1],
+          ...application.commandLineArguments.positionals,
+          "--type",
+          "backgroundJob",
+          "--port",
+          String(port),
+        ],
+        {
+          env: {
+            ...process.env,
+            NODE_ENV: application.configuration.environment,
+          },
+          stdio: "inherit",
+        },
+      ),
+    );
+  }
   node.childProcessKeepAlive(() =>
     childProcess.spawn(
       process.argv[0],
@@ -1499,24 +1520,6 @@ if (application.commandLineArguments.values.type === undefined) {
         ...application.commandLineArguments.positionals,
         "--type",
         "email",
-      ],
-      {
-        env: {
-          ...process.env,
-          NODE_ENV: application.configuration.environment,
-        },
-        stdio: "inherit",
-      },
-    ),
-  );
-  node.childProcessKeepAlive(() =>
-    childProcess.spawn(
-      process.argv[0],
-      [
-        process.argv[1],
-        ...application.commandLineArguments.positionals,
-        "--type",
-        "backgroundJob",
       ],
       {
         env: {
