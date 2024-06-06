@@ -1396,7 +1396,6 @@ if (application.commandLineArguments.values.type === "email") {
       })
       .unref();
 }
-
 if (application.commandLineArguments.values.type === "backgroundJob")
   application.database.backgroundJob(
     { type: "feedWebSubSubscriptions.dispatch" },
