@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import childProcess from "node:child_process";
 import stream from "node:stream/promises";
+import crypto from "node:crypto";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
 import sql, { Database } from "@radically-straightforward/sqlite";
@@ -45,6 +46,23 @@ export type Application = {
   database: Database;
   server: undefined | ReturnType<typeof server>;
   layout: (body: HTML) => HTML;
+  partials: {
+    feed: ({
+      feed,
+      feedEntries,
+    }: {
+      feed: {
+        externalId: string;
+        title: string;
+      };
+      feedEntries: {
+        externalId: string;
+        createdAt: string;
+        title: string;
+        content: string;
+      }[];
+    }) => HTML;
+  };
   email: undefined | SMTPServer;
 };
 const application = {} as Application;
@@ -71,6 +89,7 @@ if (application.commandLineArguments.values.type === "server")
   application.server = server({
     port: Number(application.commandLineArguments.values.port),
   });
+application.partials = {} as any;
 
 utilities.log(
   "KILL THE NEWSLETTER!",
@@ -194,6 +213,20 @@ application.database = await new Database(
     create index "feedVisualizations_feed" on "feedVisualizations" ("feed");
     create index "feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
   `,
+
+  sql`
+    create table "feedWebSubSubscriptions" (
+      "id" integer primary key autoincrement,
+      "feed" integer not null references "feeds",
+      "createdAt" text not null,
+      "callback" text not null,
+      "secret" text null,
+      unique ("feed", "callback")
+    ) strict;
+    create index "feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
+    create index "feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
+    create index "feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
+  `,
 );
 
 if (application.commandLineArguments.values.type === "backgroundJob")
@@ -201,6 +234,11 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     application.database.run(
       sql`
         delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
+      `,
+    );
+    application.database.run(
+      sql`
+        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
       `,
     );
   });
@@ -374,6 +412,60 @@ application.layout = (body) => {
     </html>
   `;
 };
+application.partials.feed = ({ feed, feedEntries }) =>
+  html`<?xml version="1.0" encoding="utf-8"?>
+    <feed xmlns="http://www.w3.org/2005/Atom">
+      <id>urn:kill-the-newsletter:${feed.externalId}</id>
+      <link
+        rel="self"
+        href="https://${application.configuration
+          .hostname}/feeds/${feed.externalId}.xml"
+      />
+      <link
+        rel="hub"
+        href="https://${application.configuration
+          .hostname}/feeds/${feed.externalId}/websub"
+      />
+      <updated
+        >${feedEntries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
+      >
+      <title>${feed.title}</title>
+      $${feedEntries.map(
+        (feedEntry) => html`
+          <entry>
+            <id>urn:kill-the-newsletter:${feedEntry.externalId}</id>
+            <link
+              rel="alternate"
+              type="text/html"
+              href="https://${application.configuration
+                .hostname}/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html"
+            />
+            <published>${feedEntry.createdAt}</published>
+            <updated>${feedEntry.createdAt}</updated>
+            <author>
+              <name>Kill the Newsletter!</name>
+              <email>kill-the-newsletter@leafac.com</email>
+            </author>
+            <title>${feedEntry.title}</title>
+            <content type="html">
+              ${feedEntry.content}
+              ${html`
+                <hr />
+                <p>
+                  <small>
+                    <a
+                      href="https://${application.configuration
+                        .hostname}/feeds/${feed.externalId}/delete"
+                      >Delete Kill the Newsletter! feed</a
+                    >
+                  </small>
+                </p>
+              `}
+            </content>
+          </entry>
+        `,
+      )}
+    </feed>`;
 application.server?.push({
   method: "GET",
   pathname: "/",
@@ -720,7 +812,7 @@ application.server?.push({
         values (${request.state.feed.id}, ${new Date().toISOString()});
       `,
     );
-    const entries = application.database.all<{
+    const feedEntries = application.database.all<{
       externalId: string;
       createdAt: string;
       title: string;
@@ -736,60 +828,7 @@ application.server?.push({
     response
       .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
       .end(
-        html`<?xml version="1.0" encoding="utf-8"?>
-          <feed xmlns="http://www.w3.org/2005/Atom">
-            <id>urn:kill-the-newsletter:${request.state.feed.externalId}</id>
-            <link
-              rel="self"
-              href="${new URL(
-                `/feeds/${request.state.feed.externalId}.xml`,
-                request.URL,
-              ).href}"
-            />
-            <updated
-              >${entries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
-            >
-            <title>${request.state.feed.title}</title>
-            $${entries.map(
-              (feedEntry) => html`
-                <entry>
-                  <id>urn:kill-the-newsletter:${feedEntry.externalId}</id>
-                  <link
-                    rel="alternate"
-                    type="text/html"
-                    href="${new URL(
-                      `/feeds/${request.state.feed!.externalId}/entries/${feedEntry.externalId}.html`,
-                      request.URL,
-                    ).href}"
-                  />
-                  <published>${feedEntry.createdAt}</published>
-                  <updated>${feedEntry.createdAt}</updated>
-                  <author>
-                    <name>Kill the Newsletter!</name>
-                    <email>kill-the-newsletter@leafac.com</email>
-                  </author>
-                  <title>${feedEntry.title}</title>
-                  <content type="html">
-                    ${feedEntry.content}
-                    ${html`
-                      <hr />
-                      <p>
-                        <small>
-                          <a
-                            href="${new URL(
-                              `/feeds/${request.state.feed!.externalId}/delete`,
-                              request.URL,
-                            ).href}"
-                            >Delete Kill the Newsletter! feed</a
-                          >
-                        </small>
-                      </p>
-                    `}
-                  </content>
-                </entry>
-              `,
-            )}
-          </feed> `,
+        application.partials.feed({ feed: request.state.feed, feedEntries }),
       );
   },
 });
@@ -832,6 +871,139 @@ application.server?.push({
       )
       .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
       .end(feedEntry.content);
+  },
+});
+application.server?.push({
+  method: "POST",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/websub$"),
+  handler: async (
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {
+        "hub.mode": "subscribe" | "unsubscribe";
+        "hub.topic": string;
+        "hub.url": string;
+        "hub.callback": string;
+        "hub.secret": string;
+      },
+      Application["types"]["states"]["Feed"]
+    >,
+    response,
+  ) => {
+    if (request.state.feed === undefined) return;
+    request.body["hub.topic"] ??= request.body["hub.url"];
+    if (
+      (request.body["hub.mode"] !== "subscribe" &&
+        request.body["hub.mode"] !== "unsubscribe") ||
+      request.body["hub.topic"] !==
+        new URL(`/feeds/${request.state.feed.externalId}.xml`, request.URL)
+          .href ||
+      typeof request.body["hub.callback"] !== "string" ||
+      (() => {
+        try {
+          return new URL(request.body["hub.callback"]).href;
+        } catch {
+          return undefined;
+        }
+      })() !== request.body["hub.callback"] ||
+      (new URL(request.body["hub.callback"]).protocol !== "https:" &&
+        new URL(request.body["hub.callback"]).protocol !== "http:") ||
+      new URL(request.body["hub.callback"]).hostname === request.URL.hostname ||
+      new URL(request.body["hub.callback"]).hostname === "localhost" ||
+      new URL(request.body["hub.callback"]).hostname === "127.0.0.1" ||
+      (request.body["hub.secret"] !== undefined &&
+        typeof request.body["hub.secret"] !== "string") ||
+      (typeof request.body["hub.secret"] === "string" &&
+        request.body["hub.secret"].length === 0) ||
+      application.database.get<{ count: number }>(
+        sql`
+          select count(*) as "count"
+          from "feedWebSubSubscriptions"
+          where
+            "feed" = ${request.state.feed.id} and
+            ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt" and
+            "callback" != ${request.body["hub.callback"]};
+        `,
+      )!.count > 10
+    )
+      throw "validation";
+    const feedWebSubSubscription = application.database.get<{ id: number }>(
+      sql`
+        select "id"
+        from "feedWebSubSubscriptions"
+        where
+          "feed" = ${request.state.feed!.id} and
+          "callback" = ${request.body["hub.callback"]};
+      `,
+    );
+    if (
+      request.body["hub.mode"] === "unsubscribe" &&
+      feedWebSubSubscription === undefined
+    )
+      return;
+    const verificationChallenge = cryptoRandomString({
+      length: 100,
+      characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+    });
+    const verificationURL = new URL(request.body["hub.callback"]);
+    verificationURL.searchParams.append("hub.mode", request.body["hub.mode"]);
+    verificationURL.searchParams.append("hub.topic", request.body["hub.topic"]);
+    verificationURL.searchParams.append("hub.challenge", verificationChallenge);
+    if (request.body["hub.mode"] === "subscribe")
+      verificationURL.searchParams.append(
+        "hub.lease_seconds",
+        String(24 * 60 * 60),
+      );
+    const verificationResponse = await fetch(verificationURL, {
+      redirect: "manual",
+    });
+    if (
+      !verificationResponse.ok ||
+      (await verificationResponse.text()) !== verificationChallenge
+    )
+      throw "validation";
+    switch (request.body["hub.mode"]) {
+      case "subscribe":
+        if (feedWebSubSubscription === undefined)
+          application.database.run(
+            sql`
+              insert into "feedWebSubSubscriptions" (
+                "feed",
+                "createdAt",
+                "callback",
+                "secret"
+              )
+              values (
+                ${request.state.feed!.id},
+                ${new Date().toISOString()},
+                ${request.body["hub.callback"]},
+                ${request.body["hub.secret"]}
+              );
+            `,
+          );
+        else
+          application.database.run(
+            sql`
+              update "feedWebSubSubscriptions"
+              set
+                "createdAt" = ${new Date().toISOString()},
+                "secret" = ${request.body["hub.secret"]}
+              where "id" = ${feedWebSubSubscription.id};
+            `,
+          );
+        break;
+      case "unsubscribe":
+        application.database.run(
+          sql`
+            delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
+          `,
+        );
+        break;
+    }
+    response.statusCode = 202;
+    response.end();
   },
 });
 application.server?.push({
@@ -914,6 +1086,11 @@ application.server?.push({
   ) => {
     if (request.state.feed === undefined) return;
     application.database.executeTransaction(() => {
+      application.database.run(
+        sql`
+          delete from "feedWebSubSubscriptions" where "feed" = ${request.state.feed!.id};
+        `,
+      );
       application.database.run(
         sql`
           delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
@@ -1013,7 +1190,10 @@ if (application.commandLineArguments.values.type === "email") {
         if (emailStream.sizeExceeded) throw new Error("Email is too big.");
         for (const feed of feeds)
           application.database.executeTransaction(() => {
-            const feedEntry = application.database.get<{ externalId: string }>(
+            const feedEntry = application.database.get<{
+              id: number;
+              externalId: string;
+            }>(
               sql`
                 select * from "feedEntries" where "id" = ${
                   application.database.run(
@@ -1065,6 +1245,35 @@ if (application.commandLineArguments.values.type === "email") {
                   delete from "feedEntries" where "id" = ${deletedFeedEntry.id};
                 `,
               );
+            for (const feedWebSubSubscription of application.database.all<{
+              id: number;
+            }>(
+              sql`
+                select "id"
+                from "feedWebSubSubscriptions"
+                where
+                  "feed" = ${feed.id} and
+                  ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt";
+              `,
+            ))
+              application.database.run(
+                sql`
+                  insert into "_backgroundJobs" (
+                    "type",
+                    "startAt",
+                    "parameters"
+                  )
+                  values (
+                    ${"feedWebSubSubscriptions.dispatch"},
+                    ${new Date().toISOString()},
+                    ${JSON.stringify({
+                      feedId: feed.id,
+                      feedEntryId: feedEntry.id,
+                      feedWebSubSubscriptionId: feedWebSubSubscription.id,
+                    })}
+                  );
+                `,
+              );
             utilities.log(
               "EMAIL",
               "SUCCESS",
@@ -1113,6 +1322,88 @@ if (application.commandLineArguments.values.type === "email") {
       })
       .unref();
 }
+
+if (application.commandLineArguments.values.type === "backgroundJob")
+  application.database.backgroundJob(
+    { type: "feedWebSubSubscriptions.dispatch" },
+    async (job: {
+      feedId: number;
+      feedEntryId: number;
+      feedWebSubSubscriptionId: number;
+    }) => {
+      const feed = application.database.get<{
+        externalId: string;
+        title: string;
+      }>(
+        sql`
+          select "externalId", "title"
+          from "feeds"
+          where "id" = ${job.feedId};
+        `,
+      );
+      if (feed === undefined) return;
+      const feedEntry = application.database.get<{
+        externalId: string;
+        createdAt: string;
+        title: string;
+        content: string;
+      }>(
+        sql`
+          select "externalId", "createdAt", "title", "content"
+          from "feedEntries"
+          where "id" = ${job.feedEntryId};
+        `,
+      );
+      if (feedEntry === undefined) return;
+      const feedWebSubSubscription = application.database.get<{
+        id: number;
+        callback: string;
+        secret: string | null;
+      }>(
+        sql`
+          select "id", "callback", "secret"
+          from "feedWebSubSubscriptions"
+          where "id" = ${job.feedWebSubSubscriptionId};
+        `,
+      );
+      if (feedWebSubSubscription === undefined) return;
+      const body = application.partials.feed({
+        feed,
+        feedEntries: [feedEntry],
+      });
+      const response = await fetch(feedWebSubSubscription.callback, {
+        redirect: "manual",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/atom+xml; charset=utf-8",
+          Link: `<https://${
+            application.configuration.hostname
+          }/feeds/${feed.externalId}.xml>; rel="self", <https://${
+            application.configuration.hostname
+          }/feeds/${feed.externalId}/websub>; rel="hub"`,
+          ...(typeof feedWebSubSubscription.secret === "string"
+            ? {
+                "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
+              }
+            : {}),
+        },
+        body,
+      });
+      if (response.status === 410)
+        application.database.run(
+          sql`
+            delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription.id};
+          `,
+        );
+      else if (String(response.status).startsWith("4"))
+        utilities.log(
+          "feedWebSubSubscriptions.dispatch",
+          "REQUEST ERROR",
+          String(response),
+        );
+      else if (!response.ok) throw new Error(`Response: ${String(response)}`);
+    },
+  );
 
 if (application.commandLineArguments.values.type === undefined) {
   for (const port of application.configuration.ports)
