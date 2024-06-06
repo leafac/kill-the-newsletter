@@ -645,35 +645,44 @@ application.server?.push({
       `,
     )!;
     response.end(
-      application.layout(html`
-        <p>Feed “${feed.title}” created.</p>
-        <div>
-          <p>Subscribe to a newsletter with the following email address:</p>
-          <div
-            css="${css`
-              display: flex;
-              gap: var(--space--2);
-              @media (max-width: 400px) {
-                flex-direction: column;
-              }
-            `}"
-          >
-            <input
-              type="text"
-              value="${feed.externalId}@${application.configuration.hostname}"
-              readonly
-              css="${css`
-                flex: 1;
-              `}"
-              javascript="${javascript`
+      request.headers.accept === "application/json"
+        ? JSON.stringify({
+            feedId: feed.externalId,
+            email: `${feed.externalId}@${application.configuration.hostname}`,
+            feed: `https://${
+              application.configuration.hostname
+            }/feeds/${feed.externalId}.xml`,
+          })
+        : application.layout(html`
+            <p>Feed “${feed.title}” created.</p>
+            <div>
+              <p>Subscribe to a newsletter with the following email address:</p>
+              <div
+                css="${css`
+                  display: flex;
+                  gap: var(--space--2);
+                  @media (max-width: 400px) {
+                    flex-direction: column;
+                  }
+                `}"
+              >
+                <input
+                  type="text"
+                  value="${feed.externalId}@${application.configuration
+                    .hostname}"
+                  readonly
+                  css="${css`
+                    flex: 1;
+                  `}"
+                  javascript="${javascript`
                 this.onclick = () => {
                   this.select();
                 };
               `}"
-            />
-            <div>
-              <button
-                javascript="${javascript`
+                />
+                <div>
+                  <button
+                    javascript="${javascript`
                   this.onclick = async () => {
                     await navigator.clipboard.writeText(${`${feed.externalId}@${application.configuration.hostname}`});
                     javascript.tippy({
@@ -686,40 +695,40 @@ application.server?.push({
                     this.tooltip.hide();
                   };
                 `}"
-              >
-                <i class="bi bi-copy"></i>  Copy
-              </button>
+                  >
+                    <i class="bi bi-copy"></i>  Copy
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div>
-          <p>Subscribe on your feed reader to the following Atom feed:</p>
-          <div
-            css="${css`
-              display: flex;
-              gap: var(--space--2);
-              @media (max-width: 400px) {
-                flex-direction: column;
-              }
-            `}"
-          >
-            <input
-              type="text"
-              value="https://${application.configuration
-                .hostname}/feeds/${feed.externalId}.xml"
-              readonly
-              css="${css`
-                flex: 1;
-              `}"
-              javascript="${javascript`
+            <div>
+              <p>Subscribe on your feed reader to the following Atom feed:</p>
+              <div
+                css="${css`
+                  display: flex;
+                  gap: var(--space--2);
+                  @media (max-width: 400px) {
+                    flex-direction: column;
+                  }
+                `}"
+              >
+                <input
+                  type="text"
+                  value="https://${application.configuration
+                    .hostname}/feeds/${feed.externalId}.xml"
+                  readonly
+                  css="${css`
+                    flex: 1;
+                  `}"
+                  javascript="${javascript`
                 this.onclick = () => {
                   this.select();
                 };
               `}"
-            />
-            <div>
-              <button
-                javascript="${javascript`
+                />
+                <div>
+                  <button
+                    javascript="${javascript`
                   this.onclick = async () => {
                     await navigator.clipboard.writeText(${`https://${
                       application.configuration.hostname
@@ -734,14 +743,14 @@ application.server?.push({
                     this.tooltip.hide();
                   };
                 `}"
-              >
-                <i class="bi bi-copy"></i>  Copy
-              </button>
+                  >
+                    <i class="bi bi-copy"></i>  Copy
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <p><a href="/">← Create Another Feed</a></p>
-      `),
+            <p><a href="/">← Create Another Feed</a></p>
+          `),
     );
   },
 });
