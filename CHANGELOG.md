@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added support for `<icon>` (https://github.com/leafac/kill-the-newsletter/issues/92).
+- Added author to entry (https://github.com/leafac/kill-the-newsletter/issues/102).
 
 ## 2.0.5 · 2024-06-06
 

@@ -67,6 +67,7 @@ export type Application = {
         id: number;
         externalId: string;
         createdAt: string;
+        author: string | null;
         title: string;
         content: string;
       }[];
@@ -260,6 +261,7 @@ application.database = await new Database(
 
   sql`
     alter table "feeds" add column "icon" text null;
+    alter table "feedEntries" add column "author" text null;
   `,
 );
 
@@ -536,8 +538,10 @@ application.partials.feed = ({ feed, feedEntries }) =>
             <published>${feedEntry.createdAt}</published>
             <updated>${feedEntry.createdAt}</updated>
             <author>
-              <name>Kill the Newsletter!</name>
-              <email>kill-the-newsletter@leafac.com</email>
+              <name>${feedEntry.author ?? "Kill the Newsletter!"}</name>
+              <email
+                >${feedEntry.author ?? "kill-the-newsletter@leafac.com"}</email
+              >
             </author>
             <title>${feedEntry.title}</title>
             <content type="html">
@@ -921,11 +925,12 @@ application.server?.push({
       id: number;
       externalId: string;
       createdAt: string;
+      author: string | null;
       title: string;
       content: string;
     }>(
       sql`
-        select "id", "externalId", "createdAt", "title", "content"
+        select "id", "externalId", "createdAt", "author", "title", "content"
         from "feedEntries"
         where "feed" = ${request.state.feed.id}
         order by "id" desc;
@@ -1439,6 +1444,7 @@ if (application.commandLineArguments.values.type === "email") {
                         "externalId",
                         "feed",
                         "createdAt",
+                        "author",
                         "title",
                         "content"
                       )
@@ -1449,6 +1455,7 @@ if (application.commandLineArguments.values.type === "email") {
                         })},
                         ${feed.id},
                         ${new Date().toISOString()},
+                        ${(session.envelope.mailFrom as SMTPServerAddress).address},
                         ${email.subject ?? "Untitled"},
                         ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
                       );
@@ -1601,11 +1608,12 @@ if (application.commandLineArguments.values.type === "backgroundJob")
         id: number;
         externalId: string;
         createdAt: string;
+        author: string | null;
         title: string;
         content: string;
       }>(
         sql`
-          select "id", "externalId", "createdAt", "title", "content"
+          select "id", "externalId", "createdAt", "author", "title", "content"
           from "feedEntries"
           where "id" = ${job.feedEntryId};
         `,
