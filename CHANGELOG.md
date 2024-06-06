@@ -1,8 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Added support for API-like use of feed creation (https://github.com/leafac/kill-the-newsletter/issues/43), for example:
+
+  ```console
+  $ curl --request POST --header "CSRF-Protection: true" --header "Accept: application/json" --data "title=Example of a feed" https://localhost/
+  {"feedId":"r4n7siivh4iiho0gtv59","email":"r4n7siivh4iiho0gtv59@localhost","feed":"https://localhost/feeds/r4n7siivh4iiho0gtv59.xml"}
+  ```
+
 ## 2.0.4 · 2024-06-06
 
-- Add support for WebSub (https://github.com/leafac/kill-the-newsletter/issues/68).
+- Added support for WebSub (https://github.com/leafac/kill-the-newsletter/issues/68).
 
 ## 2.0.3 · 2024-06-05
 
