@@ -644,7 +644,9 @@ application.server?.push({
             contact them to explain why using Kill the Newsletter! is important
             to you and ask them to reconsider their decision, but ultimately
             it’s their content and their choice of who has access to it and by
-            what means.
+            what means. As a workaround, some people have had success with
+            signing up for the newsletter using their regular email address and
+            setting up a filter to forward the emails to Kill the Newsletter!
           </p>
         </div>
         <div>
