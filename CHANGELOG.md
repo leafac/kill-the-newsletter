@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.6 · 2024-06-06
 
 - Added support for `<icon>` (https://github.com/leafac/kill-the-newsletter/issues/92).
 - Added author to entry (https://github.com/leafac/kill-the-newsletter/issues/102).

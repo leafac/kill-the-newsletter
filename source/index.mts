@@ -106,7 +106,7 @@ application.partials = {} as any;
 
 utilities.log(
   "KILL THE NEWSLETTER!",
-  "2.0.5",
+  "2.0.6",
   "START",
   application.commandLineArguments.values.type ??
     application.configuration.hostname,
