@@ -88,9 +88,7 @@ application.configuration.ports = Array.from(
 if (application.commandLineArguments.values.type === "server")
   application.server = server({
     port: Number(application.commandLineArguments.values.port),
-    csrfProtectionExceptionPathname: new RegExp(
-      "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/websub$",
-    ),
+    csrfProtectionExceptionPathname: new RegExp("^/feeds/[A-Za-z0-9]+/websub$"),
   });
 application.partials = {} as any;
 
