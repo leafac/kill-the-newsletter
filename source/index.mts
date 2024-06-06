@@ -924,8 +924,9 @@ application.server?.push({
         typeof request.body["hub.secret"] !== "string") ||
       (typeof request.body["hub.secret"] === "string" &&
         request.body["hub.secret"].length === 0) ||
-      application.database.get<{ count: number }>(
-        sql`
+      (request.body["hub.mode"] === "subscribe" &&
+        application.database.get<{ count: number }>(
+          sql`
           select count(*) as "count"
           from "feedWebSubSubscriptions"
           where
@@ -933,7 +934,7 @@ application.server?.push({
             ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt" and
             "callback" != ${request.body["hub.callback"]};
         `,
-      )!.count > 10
+        )!.count > 10)
     )
       throw "validation";
     const feedWebSubSubscription = application.database.get<{ id: number }>(
