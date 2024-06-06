@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4 · 2024-06-06
+
+- Add support for WebSub (https://github.com/leafac/kill-the-newsletter/issues/68).
+
 ## 2.0.3 · 2024-06-05
 
 - Fixed an issue in which email redirects weren’t coming through (because they often include the `=` character, which we disallowed previously).
