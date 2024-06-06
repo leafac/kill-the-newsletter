@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added support for `<icon>` (https://github.com/leafac/kill-the-newsletter/issues/92).
+
 ## 2.0.5 · 2024-06-06
 
 - Added support for attachments (https://github.com/leafac/kill-the-newsletter/issues/66).

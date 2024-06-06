@@ -17,13 +17,20 @@ import * as node from "@radically-straightforward/node";
 import caddyfile from "@radically-straightforward/caddy";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
-import { SMTPServer } from "smtp-server";
+import { SMTPServer, SMTPServerAddress } from "smtp-server";
 import * as mailParser from "mailparser";
 
 export type Application = {
   types: {
     states: {
-      Feed: { feed: { id: number; externalId: string; title: string } };
+      Feed: {
+        feed: {
+          id: number;
+          externalId: string;
+          title: string;
+          icon: string | null;
+        };
+      };
     };
   };
   commandLineArguments: {
@@ -54,6 +61,7 @@ export type Application = {
       feed: {
         externalId: string;
         title: string;
+        icon: string | null;
       };
       feedEntries: {
         id: number;
@@ -248,6 +256,10 @@ application.database = await new Database(
     ) strict;
     create index "feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
     create index "feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+  `,
+
+  sql`
+    alter table "feeds" add column "icon" text null;
   `,
 );
 
@@ -474,6 +486,9 @@ application.partials.feed = ({ feed, feedEntries }) =>
         href="https://${application.configuration
           .hostname}/feeds/${feed.externalId}/websub"
       />
+      $${typeof feed.icon === "string"
+        ? html`<icon>${feed.icon}</icon>`
+        : html``}
       <updated
         >${feedEntries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
       >
@@ -848,9 +863,10 @@ application.server?.push({
       id: number;
       externalId: string;
       title: string;
+      icon: string | null;
     }>(
       sql`
-        select "id", "externalId", "title"
+        select "id", "externalId", "title", "icon"
         from "feeds"
         where "externalId" = ${request.pathname.feedExternalId};
       `,
@@ -1318,12 +1334,13 @@ if (application.commandLineArguments.values.type === "email") {
     onData: async (emailStream, session, callback) => {
       try {
         if (
-          ["blogtrottr.com", "feedrabbit.com"].some(
-            (hostname) =>
-              session.envelope.mailFrom === false ||
-              session.envelope.mailFrom.address.match(utilities.emailRegExp) ===
-                null ||
-              session.envelope.mailFrom.address.endsWith("@" + hostname),
+          session.envelope.mailFrom === false ||
+          session.envelope.mailFrom.address.match(utilities.emailRegExp) ===
+            null ||
+          ["blogtrottr.com", "feedrabbit.com"].some((hostname) =>
+            (session.envelope.mailFrom as SMTPServerAddress).address.endsWith(
+              "@" + hostname,
+            ),
           )
         )
           throw new Error("Invalid ‘mailFrom’.");
@@ -1403,6 +1420,13 @@ if (application.commandLineArguments.values.type === "email") {
         }
         for (const feed of feeds)
           application.database.executeTransaction(() => {
+            application.database.run(
+              sql`
+                update "feeds"
+                set "icon" = ${`https://${(session.envelope.mailFrom as SMTPServerAddress).address.split("@")[1]}/favicon.ico`}
+                where "id" = ${feed.id};
+              `,
+            );
             const feedEntry = application.database.get<{
               id: number;
               externalId: string;
@@ -1564,9 +1588,10 @@ if (application.commandLineArguments.values.type === "backgroundJob")
       const feed = application.database.get<{
         externalId: string;
         title: string;
+        icon: string | null;
       }>(
         sql`
-          select "externalId", "title"
+          select "externalId", "title", "icon"
           from "feeds"
           where "id" = ${job.feedId};
         `,
