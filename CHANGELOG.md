@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.5 · 2024-06-06
 
 - Added support for attachments (https://github.com/leafac/kill-the-newsletter/issues/66).
 
