@@ -56,6 +56,7 @@ export type Application = {
         title: string;
       };
       feedEntries: {
+        id: number;
         externalId: string;
         createdAt: string;
         title: string;
@@ -230,10 +231,54 @@ application.database = await new Database(
     create index "feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
     create index "feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
   `,
+
+  sql`
+    create table "feedEntryEnclosures" (
+      "id" integer primary key autoincrement,
+      "externalId" text not null unique,
+      "type" text not null,
+      "length" integer not null,
+      "name" text not null
+    ) strict;
+
+    create table "feedEntryEnclosureLinks" (
+      "id" integer primary key autoincrement,
+      "feedEntry" integer not null references "feedEntries",
+      "feedEntryEnclosure" integer not null references "feedEntryEnclosures"
+    ) strict;
+    create index "feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
+    create index "feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+  `,
 );
 
 if (application.commandLineArguments.values.type === "backgroundJob")
-  node.backgroundJob({ interval: 60 * 60 * 1000 }, () => {
+  node.backgroundJob({ interval: 60 * 60 * 1000 }, async () => {
+    for (const feedEntryEnclosure of application.database.all<{
+      id: number;
+      externalId: string;
+    }>(
+      sql`
+        select
+          "feedEntryEnclosures"."id" as "id",
+          "feedEntryEnclosures"."externalId" as "externalId"
+        from "feedEntryEnclosures"
+        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+        where "feedEntryEnclosureLinks"."id" is null;
+      `,
+    )) {
+      await fs.rm(
+        path.join(
+          application.configuration.dataDirectory,
+          `files/${feedEntryEnclosure.externalId}`,
+        ),
+        { recursive: true, force: true },
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
+        `,
+      );
+    }
     application.database.run(
       sql`
         delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
@@ -443,6 +488,36 @@ application.partials.feed = ({ feed, feedEntries }) =>
               href="https://${application.configuration
                 .hostname}/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html"
             />
+            $${application.database
+              .all<{
+                externalId: string;
+                type: string;
+                length: number;
+                name: string;
+              }>(
+                sql`
+                  select
+                    "feedEntryEnclosures"."externalId" as "externalId",
+                    "feedEntryEnclosures"."type" as "type",
+                    "feedEntryEnclosures"."length" as "length",
+                    "feedEntryEnclosures"."name" as "name"
+                  from "feedEntryEnclosures"
+                  join "feedEntryEnclosureLinks" on
+                    "feedEntryEnclosureLinks"."feedEntry" = ${feedEntry.id} and
+                    "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+                `,
+              )
+              .map(
+                (feedEntryEnclosure) => html`
+                  <link
+                    rel="enclosure"
+                    type="${feedEntryEnclosure.type}"
+                    length="${String(feedEntryEnclosure.length)}"
+                    href="https://${application.configuration
+                      .hostname}/files/${feedEntryEnclosure.externalId}/${feedEntryEnclosure.name}"
+                  />
+                `,
+              )}
             <published>${feedEntry.createdAt}</published>
             <updated>${feedEntry.createdAt}</updated>
             <author>
@@ -827,13 +902,14 @@ application.server?.push({
       `,
     );
     const feedEntries = application.database.all<{
+      id: number;
       externalId: string;
       createdAt: string;
       title: string;
       content: string;
     }>(
       sql`
-        select "externalId", "createdAt", "title", "content"
+        select "id", "externalId", "createdAt", "title", "content"
         from "feedEntries"
         where "feed" = ${request.state.feed.id}
         order by "id" desc;
@@ -1170,11 +1246,22 @@ application.server?.push({
           delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
         `,
       );
-      application.database.run(
+      for (const feedEntry of application.database.all<{ id: number }>(
         sql`
-          delete from "feedEntries" where "feed" = ${request.state.feed!.id};
+          select "id" from "feedEntries" where "feed" = ${request.state.feed!.id};
         `,
-      );
+      )) {
+        application.database.run(
+          sql`
+            delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+          `,
+        );
+        application.database.run(
+          sql`
+            delete from "feedEntries" where "id" = ${feedEntry.id};
+          `,
+        );
+      }
       application.database.run(
         sql`
           delete from "feeds" where "id" = ${request.state.feed!.id};
@@ -1262,6 +1349,58 @@ if (application.commandLineArguments.values.type === "email") {
         if (feeds.length === 0) throw new Error("No valid recipients.");
         const email = await mailParser.simpleParser(emailStream);
         if (emailStream.sizeExceeded) throw new Error("Email is too big.");
+        const feedEntryEnclosures = new Array<{ id: number }>();
+        for (const attachment of email.attachments) {
+          const feedEntryEnclosure = application.database.get<{
+            id: number;
+            externalId: string;
+            name: string;
+          }>(
+            sql`
+              select * from "feedEntryEnclosures" where "id" = ${
+                application.database.run(
+                  sql`
+                    insert into "feedEntryEnclosures" (
+                      "externalId",
+                      "type",
+                      "length",
+                      "name"
+                    )
+                    values (
+                      ${cryptoRandomString({
+                        length: 20,
+                        characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+                      })},
+                      ${attachment.contentType},
+                      ${attachment.size},
+                      ${
+                        attachment.filename?.replaceAll(
+                          /[^A-Za-z0-9_.-]/g,
+                          "-",
+                        ) ?? "untitled"
+                      }
+                    );
+                  `,
+                ).lastInsertRowid
+              };
+            `,
+          )!;
+          await fs.mkdir(
+            path.join(
+              application.configuration.dataDirectory,
+              `files/${feedEntryEnclosure.externalId}`,
+            ),
+            { recursive: true },
+          );
+          await fs.writeFile(
+            path.join(
+              application.configuration.dataDirectory,
+              `files/${feedEntryEnclosure.externalId}/${feedEntryEnclosure.name}`,
+            ),
+            attachment.content,
+          );
+          feedEntryEnclosures.push(feedEntryEnclosure);
+        }
         for (const feed of feeds)
           application.database.executeTransaction(() => {
             const feedEntry = application.database.get<{
@@ -1294,6 +1433,18 @@ if (application.commandLineArguments.values.type === "email") {
                 };
               `,
             )!;
+            for (const feedEntryEnclosure of feedEntryEnclosures)
+              application.database.run(
+                sql`
+                  insert into "feedEntryEnclosureLinks" (
+                    "feedEntry",
+                    "feedEntryEnclosure"
+                  ) values (
+                    ${feedEntry.id},
+                    ${feedEntryEnclosure.id}
+                  );
+                `,
+              );
             const deletedFeedEntries = application.database.all<{
               id: number;
               externalId: string;
@@ -1313,12 +1464,18 @@ if (application.commandLineArguments.values.type === "email") {
               feedLength += feedEntry.title.length + feedEntry.content.length;
               if (feedLength > 2 ** 20) break;
             }
-            for (const deletedFeedEntry of deletedFeedEntries)
+            for (const deletedFeedEntry of deletedFeedEntries) {
+              application.database.run(
+                sql`
+                  delete from "feedEntryEnclosureLinks" where "feedEntry" = ${deletedFeedEntry.id};
+                `,
+              );
               application.database.run(
                 sql`
                   delete from "feedEntries" where "id" = ${deletedFeedEntry.id};
                 `,
               );
+            }
             for (const feedWebSubSubscription of application.database.all<{
               id: number;
             }>(
@@ -1416,13 +1573,14 @@ if (application.commandLineArguments.values.type === "backgroundJob")
       );
       if (feed === undefined) return;
       const feedEntry = application.database.get<{
+        id: number;
         externalId: string;
         createdAt: string;
         title: string;
         content: string;
       }>(
         sql`
-          select "externalId", "createdAt", "title", "content"
+          select "id", "externalId", "createdAt", "title", "content"
           from "feedEntries"
           where "id" = ${job.feedEntryId};
         `,
@@ -1539,5 +1697,10 @@ if (application.commandLineArguments.values.type === undefined) {
       },
     ),
   );
-  caddy.start(application.configuration);
+  caddy.start({
+    ...application.configuration,
+    untrustedStaticFilesRoots: [
+      `/files/* "${path.join(process.cwd(), "data")}"`,
+    ],
+  });
 }

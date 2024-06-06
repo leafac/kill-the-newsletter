@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added support for attachments (https://github.com/leafac/kill-the-newsletter/issues/66).
+
 - Added support for API-like use of feed creation (https://github.com/leafac/kill-the-newsletter/issues/43), for example:
 
   ```console
