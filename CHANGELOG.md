@@ -30,3 +30,5 @@ This is a breaking change, and to migrate you must do the following:
    ```console
    $ ./kill-the-newsletter/kill-the-newsletter ./configuration.mjs --migrate ../kill-the-newsletter--old/data/kill-the-newsletter.db >> ./migration.txt 2>&1
    ```
+
+   > **Note:** The `--migrate` option is only available in version 2.0.1. You first have to migrate to it, then to the later versions above.
