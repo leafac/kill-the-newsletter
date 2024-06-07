@@ -48,6 +48,7 @@ export type Application = {
     environment: "production" | "development";
     hstsPreload: boolean;
     extraCaddyfile: string;
+    tunnel: boolean;
     ports: number[];
   };
   database: Database;
