@@ -312,6 +312,62 @@ application.layout = (body) => {
     @import "@radically-straightforward/javascript/static/index.css";
     @import "@fontsource-variable/public-sans";
     @import "bootstrap-icons/font/bootstrap-icons.css";
+
+    input[type="text"],
+    button {
+      background-color: light-dark(
+        var(--color--slate--50),
+        var(--color--slate--950)
+      );
+      padding: var(--space--1) var(--space--2);
+      border: var(--border-width--1) solid
+        light-dark(var(--color--slate--400), var(--color--slate--600));
+      border-radius: var(--border-radius--1);
+      &:focus-within {
+        border-color: light-dark(
+          var(--color--blue--500),
+          var(--color--blue--500)
+        );
+      }
+      transition-property: var(--transition-property--colors);
+      transition-duration: var(--transition-duration--150);
+      transition-timing-function: var(
+        --transition-timing-function--ease-in-out
+      );
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      cursor: pointer;
+      text-decoration: underline;
+      color: light-dark(var(--color--blue--500), var(--color--blue--500));
+      &:hover,
+      &:focus-within {
+        color: light-dark(var(--color--blue--400), var(--color--blue--400));
+      }
+      &:active {
+        color: light-dark(var(--color--blue--600), var(--color--blue--600));
+      }
+      transition-property: var(--transition-property--colors);
+      transition-duration: var(--transition-duration--150);
+      transition-timing-function: var(
+        --transition-timing-function--ease-in-out
+      );
+    }
+
+    h2 {
+      font-weight: 700;
+    }
+
+    small {
+      font-size: var(--font-size--3);
+      line-height: var(--font-size--3--line-height);
+      font-weight: 700;
+      color: light-dark(var(--color--slate--500), var(--color--slate--500));
+    }
   `;
   javascript`
     import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
@@ -348,71 +404,6 @@ application.layout = (body) => {
           );
           color: light-dark(var(--color--black), var(--color--white));
           padding: var(--space--4) var(--space--4);
-
-          input[type="text"],
-          button {
-            background-color: light-dark(
-              var(--color--slate--50),
-              var(--color--slate--950)
-            );
-            padding: var(--space--1) var(--space--2);
-            border: var(--border-width--1) solid
-              light-dark(var(--color--slate--400), var(--color--slate--600));
-            border-radius: var(--border-radius--1);
-            &:focus-within {
-              border-color: light-dark(
-                var(--color--blue--500),
-                var(--color--blue--500)
-              );
-            }
-            transition-property: var(--transition-property--colors);
-            transition-duration: var(--transition-duration--150);
-            transition-timing-function: var(
-              --transition-timing-function--ease-in-out
-            );
-          }
-
-          button {
-            cursor: pointer;
-          }
-
-          a {
-            cursor: pointer;
-            text-decoration: underline;
-            color: light-dark(var(--color--blue--500), var(--color--blue--500));
-            &:hover,
-            &:focus-within {
-              color: light-dark(
-                var(--color--blue--400),
-                var(--color--blue--400)
-              );
-            }
-            &:active {
-              color: light-dark(
-                var(--color--blue--600),
-                var(--color--blue--600)
-              );
-            }
-            transition-property: var(--transition-property--colors);
-            transition-duration: var(--transition-duration--150);
-            transition-timing-function: var(
-              --transition-timing-function--ease-in-out
-            );
-          }
-
-          h2 {
-            font-weight: 700;
-          }
-
-          small {
-            font-size: var(--font-size--3);
-            line-height: var(--font-size--3--line-height);
-            font-weight: 700;
-            color: light-dark(
-              var(--color--slate--500),
-              var(--color--slate--500)
-            );
-          }
         `}"
       >
         <div
