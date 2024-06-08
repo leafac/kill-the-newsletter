@@ -346,7 +346,7 @@ application.layout = (body) => {
             var(--color--white),
             var(--color--black)
           );
-          color: light-dark(var(--color--slate--800), var(--color--slate--200));
+          color: light-dark(var(--color--black), var(--color--white));
           padding: var(--space--4) var(--space--4);
 
           input[type="text"],
@@ -357,18 +357,12 @@ application.layout = (body) => {
             );
             padding: var(--space--1) var(--space--2);
             border: var(--border-width--1) solid
-              light-dark(var(--color--slate--400), var(--color--slate--500));
+              light-dark(var(--color--slate--400), var(--color--slate--600));
             border-radius: var(--border-radius--1);
-            &:hover {
-              border-color: light-dark(
-                var(--color--slate--500),
-                var(--color--slate--400)
-              );
-            }
             &:focus-within {
               border-color: light-dark(
-                var(--color--blue--400),
-                var(--color--blue--600)
+                var(--color--blue--500),
+                var(--color--blue--500)
               );
             }
             transition-property: var(--transition-property--colors);
@@ -416,7 +410,7 @@ application.layout = (body) => {
             font-weight: 700;
             color: light-dark(
               var(--color--slate--500),
-              var(--color--slate--400)
+              var(--color--slate--500)
             );
           }
         `}"
@@ -443,10 +437,7 @@ application.layout = (body) => {
                 css="${css`
                   text-decoration: none;
                   &:not(:hover, :focus-within, :active) {
-                    color: light-dark(
-                      var(--color--slate--800),
-                      var(--color--slate--200)
-                    );
+                    color: light-dark(var(--color--black), var(--color--white));
                   }
                   display: inline-flex;
                   gap: var(--space--2);
@@ -608,7 +599,7 @@ application.server?.push({
         <hr
           css="${css`
             border-top: var(--border-width--1) solid
-              light-dark(var(--color--slate--500), var(--color--slate--500));
+              light-dark(var(--color--slate--400), var(--color--slate--600));
           `}"
         />
         <div>
