@@ -590,7 +590,7 @@ application.server?.push({
         <hr
           css="${css`
             border-top: var(--border-width--1) solid
-              light-dark(var(--color--slate--400), var(--color--slate--600));
+              light-dark(var(--color--slate--200), var(--color--slate--800));
           `}"
         />
         <div>
