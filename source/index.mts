@@ -33,6 +33,7 @@ export type Application = {
       };
     };
   };
+  version: string;
   commandLineArguments: {
     values: {
       type: undefined | "server" | "email" | "backgroundJob";
@@ -77,6 +78,7 @@ export type Application = {
   email: undefined | SMTPServer;
 };
 const application = {} as Application;
+application.version = "2.0.6";
 application.commandLineArguments = util.parseArgs({
   options: {
     type: { type: "string" },
@@ -107,7 +109,7 @@ application.partials = {} as any;
 
 utilities.log(
   "KILL THE NEWSLETTER!",
-  "2.0.6",
+  application.version,
   "START",
   application.commandLineArguments.values.type ??
     application.configuration.hostname,
@@ -368,6 +370,22 @@ application.layout = (body) => {
       font-weight: 700;
       color: light-dark(var(--color--slate--500), var(--color--slate--500));
     }
+
+    .tippy-box {
+      background-color: light-dark(
+        var(--color--slate--50),
+        var(--color--slate--950)
+      );
+      color: light-dark(var(--color--black), var(--color--white));
+      border: var(--border-width--1) solid
+        light-dark(var(--color--slate--400), var(--color--slate--600));
+      border-radius: var(--border-radius--1);
+      box-shadow: var(--box-shadow--4);
+
+      .tippy-content {
+        padding: var(--space--1) var(--space--2);
+      }
+    }
   `;
   javascript`
     import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
@@ -386,6 +404,7 @@ application.layout = (body) => {
           name="description"
           content="Convert email newsletters into Atom feeds"
         />
+        <meta name="version" content="${application.version}" />
         <link rel="stylesheet" href="/${caddy.staticFiles["index.css"]}" />
         <script src="/${caddy.staticFiles["index.mjs"]}"></script>
         <meta
