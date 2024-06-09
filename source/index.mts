@@ -310,7 +310,6 @@ if (application.commandLineArguments.values.type === "backgroundJob")
 
 application.layout = (body) => {
   css`
-    @import "@radically-straightforward/css/static/index.css";
     @import "@radically-straightforward/javascript/static/index.css";
     @import "@fontsource-variable/public-sans";
     @import "bootstrap-icons/font/bootstrap-icons.css";
