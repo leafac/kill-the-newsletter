@@ -783,26 +783,26 @@ application.server?.push({
                     flex: 1;
                   `}"
                   javascript="${javascript`
-                this.onclick = () => {
-                  this.select();
-                };
-              `}"
+                    this.onclick = () => {
+                      this.select();
+                    };
+                  `}"
                 />
                 <div>
                   <button
                     javascript="${javascript`
-                  this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${feed.externalId}@${application.configuration.hostname}`});
-                    javascript.tippy({
-                      element: this,
-                      trigger: "manual",
-                      hideOnClick: false,
-                      content: "Copied",
-                    }).show();
-                    await utilities.sleep(1000);
-                    this.tooltip.hide();
-                  };
-                `}"
+                      this.onclick = async () => {
+                        await navigator.clipboard.writeText(${`${feed.externalId}@${application.configuration.hostname}`});
+                        javascript.tippy({
+                          element: this,
+                          trigger: "manual",
+                          hideOnClick: false,
+                          content: "Copied",
+                        }).show();
+                        await utilities.sleep(1000);
+                        this.tooltip.hide();
+                      };
+                    `}"
                   >
                     <i class="bi bi-copy"></i>  Copy
                   </button>
@@ -829,28 +829,28 @@ application.server?.push({
                     flex: 1;
                   `}"
                   javascript="${javascript`
-                this.onclick = () => {
-                  this.select();
-                };
-              `}"
+                    this.onclick = () => {
+                      this.select();
+                    };
+                  `}"
                 />
                 <div>
                   <button
                     javascript="${javascript`
-                  this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`https://${
-                      application.configuration.hostname
-                    }/feeds/${feed.externalId}.xml`});
-                    javascript.tippy({
-                      element: this,
-                      trigger: "manual",
-                      hideOnClick: false,
-                      content: "Copied",
-                    }).show();
-                    await utilities.sleep(1000);
-                    this.tooltip.hide();
-                  };
-                `}"
+                      this.onclick = async () => {
+                        await navigator.clipboard.writeText(${`https://${
+                          application.configuration.hostname
+                        }/feeds/${feed.externalId}.xml`});
+                        javascript.tippy({
+                          element: this,
+                          trigger: "manual",
+                          hideOnClick: false,
+                          content: "Copied",
+                        }).show();
+                        await utilities.sleep(1000);
+                        this.tooltip.hide();
+                      };
+                    `}"
                   >
                     <i class="bi bi-copy"></i>  Copy
                   </button>
