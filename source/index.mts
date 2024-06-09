@@ -325,17 +325,17 @@ application.layout = (body) => {
       border: var(--border-width--1) solid
         light-dark(var(--color--slate--400), var(--color--slate--600));
       border-radius: var(--border-radius--1);
+      transition-property: var(--transition-property--colors);
+      transition-duration: var(--transition-duration--150);
+      transition-timing-function: var(
+        --transition-timing-function--ease-in-out
+      );
       &:focus-within {
         border-color: light-dark(
           var(--color--blue--500),
           var(--color--blue--500)
         );
       }
-      transition-property: var(--transition-property--colors);
-      transition-duration: var(--transition-duration--150);
-      transition-timing-function: var(
-        --transition-timing-function--ease-in-out
-      );
     }
 
     button {
@@ -346,6 +346,11 @@ application.layout = (body) => {
       cursor: pointer;
       text-decoration: underline;
       color: light-dark(var(--color--blue--500), var(--color--blue--500));
+      transition-property: var(--transition-property--colors);
+      transition-duration: var(--transition-duration--150);
+      transition-timing-function: var(
+        --transition-timing-function--ease-in-out
+      );
       &:hover,
       &:focus-within {
         color: light-dark(var(--color--blue--400), var(--color--blue--400));
@@ -353,11 +358,6 @@ application.layout = (body) => {
       &:active {
         color: light-dark(var(--color--blue--600), var(--color--blue--600));
       }
-      transition-property: var(--transition-property--colors);
-      transition-duration: var(--transition-duration--150);
-      transition-timing-function: var(
-        --transition-timing-function--ease-in-out
-      );
     }
 
     h2 {
@@ -372,18 +372,26 @@ application.layout = (body) => {
     }
 
     .tippy-box {
+      color: light-dark(var(--color--black), var(--color--white));
       background-color: light-dark(
         var(--color--slate--50),
         var(--color--slate--950)
       );
-      color: light-dark(var(--color--black), var(--color--white));
       border: var(--border-width--1) solid
         light-dark(var(--color--slate--400), var(--color--slate--600));
       border-radius: var(--border-radius--1);
       box-shadow: var(--box-shadow--4);
-
       .tippy-content {
         padding: var(--space--1) var(--space--2);
+      }
+      &[data-theme~="error"] {
+        color: light-dark(var(--color--red--800), var(--color--red--200));
+        background-color: light-dark(
+          var(--color--red--50),
+          var(--color--red--950)
+        );
+        border: var(--border-width--1) solid
+          light-dark(var(--color--red--400), var(--color--red--600));
       }
     }
   `;
@@ -417,11 +425,11 @@ application.layout = (body) => {
           font-family: "Public Sans Variable", var(--font-family--sans-serif);
           font-size: var(--font-size--3-5);
           line-height: var(--font-size--3-5--line-height);
+          color: light-dark(var(--color--black), var(--color--white));
           background-color: light-dark(
             var(--color--white),
             var(--color--black)
           );
-          color: light-dark(var(--color--black), var(--color--white));
           padding: var(--space--4) var(--space--4);
         `}"
       >
