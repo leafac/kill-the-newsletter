@@ -1,8 +1,9 @@
+import os from "node:os";
 import path from "node:path";
 import * as caddy from "@radically-straightforward/caddy";
 
 export default {
-  hostname: process.env.TUNNEL ?? process.env.HOSTNAME ?? "localhost",
+  hostname: process.env.TUNNEL ?? os.hostname(),
   tls: {
     key: path.join(
       caddy.dataDirectory(),
