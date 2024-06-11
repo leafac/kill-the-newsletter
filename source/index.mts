@@ -795,7 +795,6 @@ application.server?.push({
                         javascript.tippy({
                           element: this,
                           trigger: "manual",
-                          hideOnClick: false,
                           content: "Copied",
                         }).show();
                         await utilities.sleep(1000);
@@ -843,7 +842,6 @@ application.server?.push({
                         javascript.tippy({
                           element: this,
                           trigger: "manual",
-                          hideOnClick: false,
                           content: "Copied",
                         }).show();
                         await utilities.sleep(1000);
