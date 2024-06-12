@@ -434,7 +434,7 @@ application.layout = (body) => {
       >
         <div
           css="${css`
-            max-width: var(--space--prose);
+            max-width: var(--space--144);
             margin: var(--space--0) auto;
             display: flex;
             flex-direction: column;
