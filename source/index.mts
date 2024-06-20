@@ -1029,6 +1029,47 @@ application.server?.push({
   },
 });
 application.server?.push({
+  method: "PATCH",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  handler: (
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      { name: string; icon: string },
+      Application["types"]["states"]["Feed"]
+    >,
+    response,
+  ) => {
+    if (request.state.feed === undefined) return;
+    if (
+      typeof request.body.name !== "string" ||
+      request.body.name.trim() === "" ||
+      typeof request.body.icon !== "string" ||
+      (request.body.icon.trim() !== "" &&
+        (() => {
+          try {
+            new URL(request.body.icon);
+            return false;
+          } catch {
+            return true;
+          }
+        })())
+    )
+      throw "validation";
+    application.database.run(
+      sql`
+        update "feeds"
+        set
+          "name" = ${request.body.name},
+          "icon" = ${request.body.icon.trim() === "" ? null : request.body.icon}
+        where "id" = ${request.state.feed.id};
+      `,
+    );
+    response.redirect();
+  },
+});
+application.server?.push({
   method: "DELETE",
   pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
   handler: (
@@ -1075,12 +1116,7 @@ application.server?.push({
         `,
       );
     });
-    response.end(
-      application.layout(html`
-        <p>Feed deleted successfully.</p>
-        <p><a href="/">← Create a new feed</a></p>
-      `),
-    );
+    response.redirect("/");
   },
 });
 application.server?.push({
