@@ -712,8 +712,8 @@ application.server?.push({
         <div>
           <h2>How do I delete my Kill the Newsletter! feed?</h2>
           <p>
-            At the end of each feed entry there’s a link to delete the Kill the
-            Newsletter! feed.
+            At the end of each feed entry there’s a link to manage the Kill the
+            Newsletter! feed settings, including deleting it.
           </p>
         </div>
         <div>
