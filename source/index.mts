@@ -29,6 +29,7 @@ export type Application = {
           externalId: string;
           title: string;
           icon: string | null;
+          emailIcon: string | null;
         };
       };
     };
@@ -64,6 +65,7 @@ export type Application = {
         externalId: string;
         title: string;
         icon: string | null;
+        emailIcon: string | null;
       };
       feedEntries: {
         id: number;
@@ -270,7 +272,7 @@ application.database = await new Database(
   sql`
     alter table "feeds" rename column "icon" to "emailIcon";
     alter table "feeds" add column "icon" text null;
-  `
+  `,
 );
 
 if (application.commandLineArguments.values.type === "backgroundJob")
@@ -504,8 +506,14 @@ application.partials.feed = ({ feed, feedEntries }) =>
         href="https://${application.configuration
           .hostname}/feeds/${feed.externalId}/websub"
       />
-      $${typeof feed.icon === "string"
-        ? html`<icon>${feed.icon}</icon>`
+      $${typeof feed.icon === "string" || typeof feed.emailIcon === "string"
+        ? html`<icon
+            >${feed.icon ??
+            feed.emailIcon ??
+            (() => {
+              throw new Error();
+            })()}</icon
+          >`
         : html``}
       <updated
         >${feedEntries[0]?.createdAt ?? "2000-01-01T00:00:00.000Z"}</updated
@@ -790,9 +798,10 @@ application.server?.push({
       externalId: string;
       title: string;
       icon: string | null;
+      emailIcon: string | null;
     }>(
       sql`
-        select "id", "externalId", "title", "icon"
+        select "id", "externalId", "title", "icon", "emailIcon"
         from "feeds"
         where "externalId" = ${request.pathname.feedExternalId};
       `,
@@ -831,7 +840,8 @@ application.server?.push({
           >
             <input
               type="text"
-              value="${request.state.feed.externalId}@${application.configuration.hostname}"
+              value="${request.state.feed.externalId}@${application
+                .configuration.hostname}"
               readonly
               css="${css`
                 flex: 1;
@@ -1448,7 +1458,7 @@ if (application.commandLineArguments.values.type === "email") {
             application.database.run(
               sql`
                 update "feeds"
-                set "icon" = ${`https://${(session.envelope.mailFrom as SMTPServerAddress).address.split("@")[1]}/favicon.ico`}
+                set "emailIcon" = ${`https://${(session.envelope.mailFrom as SMTPServerAddress).address.split("@")[1]}/favicon.ico`}
                 where "id" = ${feed.id};
               `,
             );
@@ -1617,9 +1627,10 @@ if (application.commandLineArguments.values.type === "backgroundJob")
           externalId: string;
           title: string;
           icon: string | null;
+          emailIcon: string | null;
         }>(
           sql`
-            select "externalId", "title", "icon"
+            select "externalId", "title", "icon", "emailIcon"
             from "feeds"
             where "id" = ${job.feedId};
           `,
