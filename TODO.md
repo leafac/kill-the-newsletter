@@ -1,5 +1,6 @@
 # TODO
 
+- Disk is full.
 - WebSub background jobs not being worked on fast enough.
 - Setup DigitalOcean alert on disk usage.
 - Reduce bandwidth
