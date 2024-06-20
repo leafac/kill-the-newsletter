@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.7 · 2024-06-20
+
+- WebSub background jobs not being worked on fast enough https://github.com/leafac/kill-the-newsletter/issues/68
+
 ## 2.0.6 · 2024-06-06
 
 - Added support for `<icon>` (https://github.com/leafac/kill-the-newsletter/issues/92).
