@@ -1036,15 +1036,15 @@ application.server?.push({
       {},
       {},
       {},
-      { name: string; icon: string },
+      { title: string; icon: string },
       Application["types"]["states"]["Feed"]
     >,
     response,
   ) => {
     if (request.state.feed === undefined) return;
     if (
-      typeof request.body.name !== "string" ||
-      request.body.name.trim() === "" ||
+      typeof request.body.title !== "string" ||
+      request.body.title.trim() === "" ||
       typeof request.body.icon !== "string" ||
       (request.body.icon.trim() !== "" &&
         (() => {
@@ -1061,7 +1061,7 @@ application.server?.push({
       sql`
         update "feeds"
         set
-          "name" = ${request.body.name},
+          "title" = ${request.body.title},
           "icon" = ${request.body.icon.trim() === "" ? null : request.body.icon}
         where "id" = ${request.state.feed.id};
       `,
