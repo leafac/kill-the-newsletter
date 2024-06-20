@@ -370,6 +370,11 @@ application.layout = (body) => {
       font-weight: 700;
     }
 
+    hr {
+      border-top: var(--border-width--1) solid
+        light-dark(var(--color--slate--200), var(--color--slate--800));
+    }
+
     small {
       font-size: var(--font-size--3);
       line-height: var(--font-size--3--line-height);
@@ -594,6 +599,7 @@ application.server?.push({
     response.end(
       application.layout(html`
         <form
+          key="feeds/post"
           method="POST"
           action="/feeds"
           novalidate
@@ -616,7 +622,7 @@ application.server?.push({
               flex: 1;
             `}"
           />
-          <div><button>Create Feed</button></div>
+          <div><button>Create feed</button></div>
         </form>
         <p>
           <small>
@@ -628,12 +634,7 @@ application.server?.push({
             <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
           </small>
         </p>
-        <hr
-          css="${css`
-            border-top: var(--border-width--1) solid
-              light-dark(var(--color--slate--200), var(--color--slate--800));
-          `}"
-        />
+        <hr />
         <div>
           <h2>How does Kill the Newsletter! work?</h2>
           <p>
@@ -826,8 +827,8 @@ application.server?.push({
     if (request.state.feed === undefined) return;
     response.end(
       application.layout(html`
-        <p>Feed “${request.state.feed.title}” created.</p>
         <div>
+          <h2>${request.state.feed.title}</h2>
           <p>Subscribe to a newsletter with the following email address:</p>
           <div
             css="${css`
@@ -920,10 +921,70 @@ application.server?.push({
           </div>
         </div>
         <p><a href="/">← Create Another Feed</a></p>
-        <p>
-          <i class="bi bi-exclamation-triangle-fill"></i> This action is
-          irreversible! Your feed and all its entries will be lost!
-        </p>
+        <hr />
+        <div>
+          <h2>Settings</h2>
+          <form
+            key="feeds/patch"
+            method="PATCH"
+            action="/feeds/${request.state.feed.externalId}"
+            css="${css`
+              display: flex;
+              flex-direction: column;
+              gap: var(--space--2);
+            `}"
+          >
+            <label>
+              <div><small>Title</small></div>
+              <input
+                type="text"
+                name="title"
+                value="${request.state.feed.title}"
+                required
+                maxlength="200"
+                css="${css`
+                  width: 100%;
+                `}"
+              />
+            </label>
+            <label>
+              <div><small>Icon</small></div>
+              <input
+                type="text"
+                name="icon"
+                value="${request.state.feed.icon ?? ""}"
+                placeholder="https://example.com/favicon.ico"
+                maxlength="200"
+                css="${css`
+                  width: 100%;
+                `}"
+                javascript="${javascript`
+                  this.onvalidate = () => {
+                    try {
+                      new URL(this.value);
+                    }
+                    catch {
+                      throw new javascript.ValidationError("Invalid URL.");
+                    }
+                  };
+                `}"
+              />
+            </label>
+            <div><button>Update feed settings</button></div>
+          </form>
+        </div>
+        <hr />
+        <div>
+          <h2>Delete feed</h2>
+          <p
+            css="${css`
+              color: light-dark(var(--color--red--500), var(--color--red--500));
+            `}"
+          >
+            <i class="bi bi-exclamation-triangle-fill"></i> This action is
+            irreversible! Your feed and all its entries will be lost!
+          </p>
+        </div>
         <p>
           Before you proceed, we recommend that you unsubscribe from the
           publisher (typically you do that by following a link in a feed entry)
@@ -934,9 +995,9 @@ application.server?.push({
           “${request.state.feed.title}”
         </p>
         <form
+          key="feeds/delete"
           method="DELETE"
-          action="https://${application.configuration.hostname}/feeds/${request
-            .state.feed.externalId}"
+          action="/feeds/${request.state.feed.externalId}"
           novalidate
           css="${css`
             display: flex;
@@ -950,7 +1011,6 @@ application.server?.push({
             type="text"
             placeholder="${request.state.feed.title}"
             required
-            autofocus
             css="${css`
               flex: 1;
             `}"
@@ -961,7 +1021,7 @@ application.server?.push({
               };
             `}"
           />
-          <button>Delete Feed</button>
+          <button>Delete feed</button>
         </form>
       `),
     );
