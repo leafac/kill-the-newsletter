@@ -563,8 +563,8 @@ application.partials.feed = ({ feed, feedEntries }) =>
                   <small>
                     <a
                       href="https://${application.configuration
-                        .hostname}/feeds/${feed.externalId}/delete"
-                      >Delete Kill the Newsletter! feed</a
+                        .hostname}/feeds/${feed.externalId}"
+                      >Kill the Newsletter! feed settings</a
                     >
                   </small>
                 </p>
@@ -582,7 +582,7 @@ application.server?.push({
       application.layout(html`
         <form
           method="POST"
-          action="/"
+          action="/feeds"
           novalidate
           css="${css`
             display: flex;
@@ -721,7 +721,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "POST",
-  pathname: "/",
+  pathname: "/feeds",
   handler: (
     request: serverTypes.Request<{}, {}, {}, { title: string }, {}>,
     response,
@@ -734,7 +734,6 @@ application.server?.push({
       throw "validation";
     const feed = application.database.get<{
       externalId: string;
-      title: string;
     }>(
       sql`
         select * from "feeds" where "id" = ${
@@ -753,112 +752,7 @@ application.server?.push({
         };
       `,
     )!;
-    response.end(
-      request.headers.accept === "application/json"
-        ? JSON.stringify({
-            feedId: feed.externalId,
-            email: `${feed.externalId}@${application.configuration.hostname}`,
-            feed: `https://${
-              application.configuration.hostname
-            }/feeds/${feed.externalId}.xml`,
-          })
-        : application.layout(html`
-            <p>Feed “${feed.title}” created.</p>
-            <div>
-              <p>Subscribe to a newsletter with the following email address:</p>
-              <div
-                css="${css`
-                  display: flex;
-                  gap: var(--space--2);
-                  @media (max-width: 400px) {
-                    flex-direction: column;
-                  }
-                `}"
-              >
-                <input
-                  type="text"
-                  value="${feed.externalId}@${application.configuration
-                    .hostname}"
-                  readonly
-                  css="${css`
-                    flex: 1;
-                  `}"
-                  javascript="${javascript`
-                    this.onclick = () => {
-                      this.select();
-                    };
-                  `}"
-                />
-                <div>
-                  <button
-                    javascript="${javascript`
-                      this.onclick = async () => {
-                        await navigator.clipboard.writeText(${`${feed.externalId}@${application.configuration.hostname}`});
-                        javascript.tippy({
-                          element: this,
-                          trigger: "manual",
-                          content: "Copied",
-                        }).show();
-                        await utilities.sleep(1000);
-                        this.tooltip.hide();
-                      };
-                    `}"
-                  >
-                    <i class="bi bi-copy"></i>  Copy
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div>
-              <p>Subscribe on your feed reader to the following Atom feed:</p>
-              <div
-                css="${css`
-                  display: flex;
-                  gap: var(--space--2);
-                  @media (max-width: 400px) {
-                    flex-direction: column;
-                  }
-                `}"
-              >
-                <input
-                  type="text"
-                  value="https://${application.configuration
-                    .hostname}/feeds/${feed.externalId}.xml"
-                  readonly
-                  css="${css`
-                    flex: 1;
-                  `}"
-                  javascript="${javascript`
-                    this.onclick = () => {
-                      this.select();
-                    };
-                  `}"
-                />
-                <div>
-                  <button
-                    javascript="${javascript`
-                      this.onclick = async () => {
-                        await navigator.clipboard.writeText(${`https://${
-                          application.configuration.hostname
-                        }/feeds/${feed.externalId}.xml`});
-                        javascript.tippy({
-                          element: this,
-                          trigger: "manual",
-                          content: "Copied",
-                        }).show();
-                        await utilities.sleep(1000);
-                        this.tooltip.hide();
-                      };
-                    `}"
-                  >
-                    <i class="bi bi-copy"></i>  Copy
-                  </button>
-                </div>
-              </div>
-            </div>
-            <p><a href="/">← Create Another Feed</a></p>
-          `),
-    );
+    response.redirect(`/feeds/${feed.externalId}`);
   },
 });
 application.server?.push({
@@ -890,6 +784,124 @@ application.server?.push({
     );
     if (request.state.feed === undefined) return;
     response.setHeader("X-Robots-Tag", "none");
+  },
+});
+application.server?.push({
+  method: "GET",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  handler: (
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
+    response,
+  ) => {
+    if (request.state.feed === undefined) return;
+    response.end(
+      application.layout(html`
+        <p>
+          <i class="bi bi-exclamation-triangle-fill"></i> This action is
+          irreversible! Your feed and all its entries will be lost!
+        </p>
+        <p>
+          Before you proceed, we recommend that you unsubscribe from the
+          publisher (typically you do that by following a link in a feed entry)
+          and unsubscribe from the feed on the feed reader.
+        </p>
+        <p>
+          To delete the feed, please confirm the feed title:
+          “${request.state.feed.title}”
+        </p>
+        <form
+          method="DELETE"
+          action="https://${application.configuration.hostname}/feeds/${request
+            .state.feed.externalId}"
+          novalidate
+          css="${css`
+            display: flex;
+            gap: var(--space--2);
+            @media (max-width: 400px) {
+              flex-direction: column;
+            }
+          `}"
+        >
+          <input
+            type="text"
+            placeholder="${request.state.feed.title}"
+            required
+            autofocus
+            css="${css`
+              flex: 1;
+            `}"
+            javascript="${javascript`
+              this.onvalidate = () => {
+                if (this.value !== ${request.state.feed.title})
+                  throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
+              };
+            `}"
+          />
+          <button>Delete Feed</button>
+        </form>
+      `),
+    );
+  },
+});
+application.server?.push({
+  method: "DELETE",
+  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  handler: (
+    request: serverTypes.Request<
+      {},
+      {},
+      {},
+      {},
+      Application["types"]["states"]["Feed"]
+    >,
+    response,
+  ) => {
+    if (request.state.feed === undefined) return;
+    application.database.executeTransaction(() => {
+      application.database.run(
+        sql`
+          delete from "feedWebSubSubscriptions" where "feed" = ${request.state.feed!.id};
+        `,
+      );
+      application.database.run(
+        sql`
+          delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
+        `,
+      );
+      for (const feedEntry of application.database.all<{ id: number }>(
+        sql`
+          select "id" from "feedEntries" where "feed" = ${request.state.feed!.id};
+        `,
+      )) {
+        application.database.run(
+          sql`
+            delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+          `,
+        );
+        application.database.run(
+          sql`
+            delete from "feedEntries" where "id" = ${feedEntry.id};
+          `,
+        );
+      }
+      application.database.run(
+        sql`
+          delete from "feeds" where "id" = ${request.state.feed!.id};
+        `,
+      );
+    });
+    response.end(
+      application.layout(html`
+        <p>Feed deleted successfully.</p>
+        <p><a href="/">← Create a New Feed</a></p>
+      `),
+    );
   },
 });
 application.server?.push({
@@ -1197,124 +1209,6 @@ if (application.commandLineArguments.values.type === "backgroundJob")
         }
       },
     );
-application.server?.push({
-  method: "GET",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/delete$"),
-  handler: (
-    request: serverTypes.Request<
-      {},
-      {},
-      {},
-      {},
-      Application["types"]["states"]["Feed"]
-    >,
-    response,
-  ) => {
-    if (request.state.feed === undefined) return;
-    response.end(
-      application.layout(html`
-        <p>
-          <i class="bi bi-exclamation-triangle-fill"></i> This action is
-          irreversible! Your feed and all its entries will be lost!
-        </p>
-        <p>
-          Before you proceed, we recommend that you unsubscribe from the
-          publisher (typically you do that by following a link in a feed entry)
-          and unsubscribe from the feed on the feed reader.
-        </p>
-        <p>
-          To delete the feed, please confirm the feed title:
-          “${request.state.feed.title}”
-        </p>
-        <form
-          method="DELETE"
-          action="https://${application.configuration.hostname}/feeds/${request
-            .state.feed.externalId}"
-          novalidate
-          css="${css`
-            display: flex;
-            gap: var(--space--2);
-            @media (max-width: 400px) {
-              flex-direction: column;
-            }
-          `}"
-        >
-          <input
-            type="text"
-            placeholder="${request.state.feed.title}"
-            required
-            autofocus
-            css="${css`
-              flex: 1;
-            `}"
-            javascript="${javascript`
-              this.onvalidate = () => {
-                if (this.value !== ${request.state.feed.title})
-                  throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
-              };
-            `}"
-          />
-          <button>Delete Feed</button>
-        </form>
-      `),
-    );
-  },
-});
-application.server?.push({
-  method: "DELETE",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
-  handler: (
-    request: serverTypes.Request<
-      {},
-      {},
-      {},
-      {},
-      Application["types"]["states"]["Feed"]
-    >,
-    response,
-  ) => {
-    if (request.state.feed === undefined) return;
-    application.database.executeTransaction(() => {
-      application.database.run(
-        sql`
-          delete from "feedWebSubSubscriptions" where "feed" = ${request.state.feed!.id};
-        `,
-      );
-      application.database.run(
-        sql`
-          delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
-        `,
-      );
-      for (const feedEntry of application.database.all<{ id: number }>(
-        sql`
-          select "id" from "feedEntries" where "feed" = ${request.state.feed!.id};
-        `,
-      )) {
-        application.database.run(
-          sql`
-            delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
-          `,
-        );
-        application.database.run(
-          sql`
-            delete from "feedEntries" where "id" = ${feedEntry.id};
-          `,
-        );
-      }
-      application.database.run(
-        sql`
-          delete from "feeds" where "id" = ${request.state.feed!.id};
-        `,
-      );
-    });
-    response.end(
-      application.layout(html`
-        <p>Feed deleted successfully.</p>
-        <p><a href="/">← Create a New Feed</a></p>
-      `),
-    );
-  },
-});
 application.server?.push({
   handler: (request, response) => {
     response.statusCode = 404;
