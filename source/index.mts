@@ -266,6 +266,11 @@ application.database = await new Database(
     alter table "feeds" add column "icon" text null;
     alter table "feedEntries" add column "author" text null;
   `,
+
+  sql`
+    alter table "feeds" rename column "icon" to "emailIcon";
+    alter table "feeds" add column "icon" text null;
+  `
 );
 
 if (application.commandLineArguments.values.type === "backgroundJob")
@@ -752,7 +757,17 @@ application.server?.push({
         };
       `,
     )!;
-    response.redirect(`/feeds/${feed.externalId}`);
+    if (request.headers.accept === "application/json")
+      response.setHeader("Content-Type", "application/json").end(
+        JSON.stringify({
+          feedId: feed.externalId,
+          email: `${feed.externalId}@${application.configuration.hostname}`,
+          feed: `https://${
+            application.configuration.hostname
+          }/feeds/${feed.externalId}.xml`,
+        }),
+      );
+    else response.redirect(`/feeds/${feed.externalId}`);
   },
 });
 application.server?.push({
@@ -802,6 +817,99 @@ application.server?.push({
     if (request.state.feed === undefined) return;
     response.end(
       application.layout(html`
+        <p>Feed “${request.state.feed.title}” created.</p>
+        <div>
+          <p>Subscribe to a newsletter with the following email address:</p>
+          <div
+            css="${css`
+              display: flex;
+              gap: var(--space--2);
+              @media (max-width: 400px) {
+                flex-direction: column;
+              }
+            `}"
+          >
+            <input
+              type="text"
+              value="${request.state.feed.externalId}@${application.configuration.hostname}"
+              readonly
+              css="${css`
+                flex: 1;
+              `}"
+              javascript="${javascript`
+                this.onclick = () => {
+                  this.select();
+                };
+              `}"
+            />
+            <div>
+              <button
+                javascript="${javascript`
+                  this.onclick = async () => {
+                    await navigator.clipboard.writeText(${`${request.state.feed.externalId}@${application.configuration.hostname}`});
+                    javascript.tippy({
+                      element: this,
+                      trigger: "manual",
+                      content: "Copied",
+                    }).show();
+                    await utilities.sleep(1000);
+                    this.tooltip.hide();
+                  };
+                `}"
+              >
+                <i class="bi bi-copy"></i>  Copy
+              </button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p>Subscribe on your feed reader to the following Atom feed:</p>
+          <div
+            css="${css`
+              display: flex;
+              gap: var(--space--2);
+              @media (max-width: 400px) {
+                flex-direction: column;
+              }
+            `}"
+          >
+            <input
+              type="text"
+              value="https://${application.configuration
+                .hostname}/feeds/${request.state.feed.externalId}.xml"
+              readonly
+              css="${css`
+                flex: 1;
+              `}"
+              javascript="${javascript`
+                this.onclick = () => {
+                  this.select();
+                };
+              `}"
+            />
+            <div>
+              <button
+                javascript="${javascript`
+                  this.onclick = async () => {
+                    await navigator.clipboard.writeText(${`https://${
+                      application.configuration.hostname
+                    }/feeds/${request.state.feed.externalId}.xml`});
+                    javascript.tippy({
+                      element: this,
+                      trigger: "manual",
+                      content: "Copied",
+                    }).show();
+                    await utilities.sleep(1000);
+                    this.tooltip.hide();
+                  };
+                `}"
+              >
+                <i class="bi bi-copy"></i>  Copy
+              </button>
+            </div>
+          </div>
+        </div>
+        <p><a href="/">← Create Another Feed</a></p>
         <p>
           <i class="bi bi-exclamation-triangle-fill"></i> This action is
           irreversible! Your feed and all its entries will be lost!

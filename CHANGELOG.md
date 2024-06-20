@@ -3,6 +3,13 @@
 ## 2.0.7 · 2024-06-20
 
 - WebSub background jobs not being worked on fast enough https://github.com/leafac/kill-the-newsletter/issues/68
+- Changed the route of feed creation via API from `/` to `/feeds`, for example:
+
+  ```console
+  $ curl --request POST --header "CSRF-Protection: true" --header "Accept: application/json" --data "title=Example of a feed" https://localhost/feeds
+  ```
+
+  Also, now that API endpoint responds with `Content-Type: application/json`.
 
 ## 2.0.6 · 2024-06-06
 
