@@ -864,7 +864,7 @@ application.server?.push({
                       content: "Copied",
                     }).show();
                     await utilities.sleep(1000);
-                    this.tooltip.hide();
+                    this.tippy.hide();
                   };
                 `}"
               >
@@ -911,7 +911,7 @@ application.server?.push({
                       content: "Copied",
                     }).show();
                     await utilities.sleep(1000);
-                    this.tooltip.hide();
+                    this.tippy.hide();
                   };
                 `}"
               >
@@ -920,20 +920,21 @@ application.server?.push({
             </div>
           </div>
         </div>
-        <p><a href="/">← Create Another Feed</a></p>
+        <p><a href="/">← Create another feed</a></p>
         <hr />
-        <div>
-          <h2>Settings</h2>
-          <form
-            key="feeds/patch"
-            method="PATCH"
-            action="/feeds/${request.state.feed.externalId}"
-            css="${css`
-              display: flex;
-              flex-direction: column;
-              gap: var(--space--2);
-            `}"
-          >
+        <form
+          key="feeds/patch"
+          method="PATCH"
+          action="/feeds/${request.state.feed.externalId}"
+          novalidate
+          css="${css`
+            display: flex;
+            flex-direction: column;
+            gap: var(--space--4);
+          `}"
+        >
+          <div>
+            <h2>Feed settings</h2>
             <label>
               <div><small>Title</small></div>
               <input
@@ -947,53 +948,33 @@ application.server?.push({
                 `}"
               />
             </label>
-            <label>
-              <div><small>Icon</small></div>
-              <input
-                type="text"
-                name="icon"
-                value="${request.state.feed.icon ?? ""}"
-                placeholder="https://example.com/favicon.ico"
-                maxlength="200"
-                css="${css`
-                  width: 100%;
-                `}"
-                javascript="${javascript`
-                  this.onvalidate = () => {
-                    try {
-                      new URL(this.value);
-                    }
-                    catch {
-                      throw new javascript.ValidationError("Invalid URL.");
-                    }
-                  };
-                `}"
-              />
-            </label>
-            <div><button>Update feed settings</button></div>
-          </form>
-        </div>
+          </div>
+          <label>
+            <div><small>Icon</small></div>
+            <input
+              type="text"
+              name="icon"
+              value="${request.state.feed.icon ?? ""}"
+              placeholder="https://example.com/favicon.ico"
+              maxlength="200"
+              css="${css`
+                width: 100%;
+              `}"
+              javascript="${javascript`
+                this.onvalidate = () => {
+                  try {
+                    new URL(this.value);
+                  }
+                  catch {
+                    throw new javascript.ValidationError("Invalid URL.");
+                  }
+                };
+              `}"
+            />
+          </label>
+          <div><button>Update feed settings</button></div>
+        </form>
         <hr />
-        <div>
-          <h2>Delete feed</h2>
-          <p
-            css="${css`
-              color: light-dark(var(--color--red--500), var(--color--red--500));
-            `}"
-          >
-            <i class="bi bi-exclamation-triangle-fill"></i> This action is
-            irreversible! Your feed and all its entries will be lost!
-          </p>
-        </div>
-        <p>
-          Before you proceed, we recommend that you unsubscribe from the
-          publisher (typically you do that by following a link in a feed entry)
-          and unsubscribe from the feed on the feed reader.
-        </p>
-        <p>
-          To delete the feed, please confirm the feed title:
-          “${request.state.feed.title}”
-        </p>
         <form
           key="feeds/delete"
           method="DELETE"
@@ -1001,27 +982,47 @@ application.server?.push({
           novalidate
           css="${css`
             display: flex;
-            gap: var(--space--2);
-            @media (max-width: 400px) {
-              flex-direction: column;
-            }
+            flex-direction: column;
+            gap: var(--space--4);
           `}"
         >
-          <input
-            type="text"
-            placeholder="${request.state.feed.title}"
-            required
-            css="${css`
-              flex: 1;
-            `}"
-            javascript="${javascript`
-              this.onvalidate = () => {
-                if (this.value !== ${request.state.feed.title})
-                  throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
-              };
-            `}"
-          />
-          <button>Delete feed</button>
+          <div>
+            <h2>Delete feed</h2>
+            <p
+              css="${css`
+                color: light-dark(
+                  var(--color--red--500),
+                  var(--color--red--500)
+                );
+              `}"
+            >
+              <i class="bi bi-exclamation-triangle-fill"></i> This action is
+              irreversible! Your feed and all its entries will be lost!
+            </p>
+          </div>
+          <p>
+            Before you proceed, we recommend that you unsubscribe from the
+            publisher (typically you do that by following a link in a feed
+            entry) and unsubscribe from the feed on the feed reader.
+          </p>
+          <label>
+            <div><small>Feed title confirmation</small></div>
+            <input
+              type="text"
+              placeholder="${request.state.feed.title}"
+              required
+              css="${css`
+                width: 100%;
+              `}"
+              javascript="${javascript`
+                this.onvalidate = () => {
+                  if (this.value !== ${request.state.feed.title})
+                    throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
+                };
+              `}"
+            />
+          </label>
+          <div><button>Delete feed</button></div>
         </form>
       `),
     );
@@ -1077,7 +1078,7 @@ application.server?.push({
     response.end(
       application.layout(html`
         <p>Feed deleted successfully.</p>
-        <p><a href="/">← Create a New Feed</a></p>
+        <p><a href="/">← Create a new feed</a></p>
       `),
     );
   },
