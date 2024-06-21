@@ -1083,7 +1083,7 @@ application.server?.push({
                 javascript="${javascript`
                   this.onvalidate = () => {
                     if (this.value !== ${request.state.feed.title})
-                      throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
+                      throw new javascript.ValidationError(${`Incorrect feed title confirmation: “${request.state.feed.title}”`});
                   };
                 `}"
               />
@@ -1184,6 +1184,7 @@ application.server?.push({
         `,
       );
     });
+    response.setFlash(html`Feed deleted successfully.`);
     response.redirect("/");
   },
 });
