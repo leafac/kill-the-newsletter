@@ -55,7 +55,17 @@ export type Application = {
   };
   database: Database;
   server: undefined | ReturnType<typeof server>;
-  layout: (body: HTML) => HTML;
+  layout: ({
+    request,
+    response,
+    head,
+    body,
+  }: {
+    request: serverTypes.Request<{}, {}, {}, {}, {}>;
+    response: serverTypes.Response;
+    head: HTML;
+    body: HTML;
+  }) => HTML;
   partials: {
     feed: ({
       feed,
@@ -315,7 +325,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     );
   });
 
-application.layout = (body) => {
+application.layout = ({ request, response, head, body }) => {
   css`
     @import "@radically-straightforward/javascript/static/index.css";
     @import "@fontsource-variable/public-sans";
@@ -420,11 +430,6 @@ application.layout = (body) => {
       `}"
     >
       <head>
-        <title>Kill the Newsletter!</title>
-        <meta
-          name="description"
-          content="Convert email newsletters into Atom feeds"
-        />
         <meta name="version" content="${application.version}" />
         <link rel="stylesheet" href="/${caddy.staticFiles["index.css"]}" />
         <script src="/${caddy.staticFiles["index.mjs"]}"></script>
@@ -432,6 +437,11 @@ application.layout = (body) => {
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1"
         />
+        <meta
+          name="description"
+          content="Convert email newsletters into Atom feeds"
+        />
+        $${head}
       </head>
       <body
         css="${css`
@@ -597,139 +607,148 @@ application.server?.push({
   pathname: "/",
   handler: (request, response) => {
     response.end(
-      application.layout(html`
-        <form
-          key="feeds/post"
-          method="POST"
-          action="/feeds"
-          novalidate
-          css="${css`
-            display: flex;
-            gap: var(--space--2);
-            @media (max-width: 400px) {
-              flex-direction: column;
-            }
-          `}"
-        >
-          <input
-            type="text"
-            name="title"
-            placeholder="Feed title…"
-            required
-            maxlength="200"
-            autofocus
+      application.layout({
+        request,
+        response,
+        head: html`<title>Kill the Newsletter!</title>`,
+        body: html`
+          <form
+            key="feeds/post"
+            method="POST"
+            action="/feeds"
+            novalidate
             css="${css`
-              flex: 1;
+              display: flex;
+              gap: var(--space--2);
+              @media (max-width: 400px) {
+                flex-direction: column;
+              }
             `}"
-          />
-          <div><button>Create feed</button></div>
-        </form>
-        <p>
-          <small>
-            <a href="https://leafac.com">By Leandro Facchinetti</a> |
-            <a href="https://github.com/leafac/kill-the-newsletter">Source</a> |
-            <a href="mailto:kill-the-newsletter@leafac.com">Report Issue</a> |
-            <a href="https://patreon.com/leafac">Patreon</a> ·
-            <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a> ·
-            <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
-          </small>
-        </p>
-        <hr />
-        <div>
-          <h2>How does Kill the Newsletter! work?</h2>
+          >
+            <input
+              type="text"
+              name="title"
+              placeholder="Feed title…"
+              required
+              maxlength="200"
+              autofocus
+              css="${css`
+                flex: 1;
+              `}"
+            />
+            <div><button>Create feed</button></div>
+          </form>
           <p>
-            Create a feed with the form above and Kill the Newsletter! provides
-            you with an email address and an Atom feed. Emails that are received
-            at that address are turned into entries in that feed. Sign up to a
-            newsletter with that address and use your feed reader to subscribe
-            to that feed.
+            <small>
+              <a href="https://leafac.com">By Leandro Facchinetti</a> |
+              <a href="https://github.com/leafac/kill-the-newsletter">Source</a
+              > |
+              <a href="mailto:kill-the-newsletter@leafac.com">Report Issue</a> |
+              <a href="https://patreon.com/leafac">Patreon</a> ·
+              <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a> ·
+              <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
+            </small>
           </p>
-        </div>
-        <div>
-          <h2>How do I confirm my newsletter subscription?</h2>
-          <p>
-            In most cases when you subscribe to a newsletter the newsletter
-            publisher sends you an email with a confirmation link. Kill the
-            Newsletter! converts that email into a feed entry as usual, so it
-            appears in your feed reader and you may follow the confirmation link
-            from there. Some newsletter publishers want you to reply to an email
-            using the address that subscribed to the newsletter. Unfortunately
-            Kill the Newsletter! doesn’t support this scenario, but you may
-            contact the newsletter publisher and ask them to verify you
-            manually. As a workaround, some people have had success with signing
-            up for the newsletter using their regular email address and setting
-            up a filter to forward the emails to Kill the Newsletter!
-          </p>
-        </div>
-        <div>
-          <h2>
-            Why can’t I subscribe to a newsletter with my Kill the Newsletter!
-            email?
-          </h2>
-          <p>
-            Some newsletter publishers block Kill the Newsletter!. You may
-            contact them to explain why using Kill the Newsletter! is important
-            to you and ask them to reconsider their decision, but ultimately
-            it’s their content and their choice of who has access to it and by
-            what means. As a workaround, some people have had success with
-            signing up for the newsletter using their regular email address and
-            setting up a filter to forward the emails to Kill the Newsletter!
-          </p>
-        </div>
-        <div>
-          <h2>How do I share a Kill the Newsletter! feed?</h2>
-          <p>
-            You don’t. The feed includes the identifier for the email address
-            and anyone who has access to it may unsubscribe you from your
-            newsletters, send you spam, and so forth. Instead of sharing a feed,
-            you may share Kill the Newsletter! itself and let people create
-            their own Kill the Newsletter! feeds. Kill the Newsletter! has been
-            designed this way because it plays better with newsletter
-            publishers, who may, for example, get statistics on the number of
-            subscribers who use Kill the Newsletter!. Note that Kill the
-            Newsletter! itself doesn’t track users in any way.
-          </p>
-        </div>
-        <div>
-          <h2>Why are old entries disappearing?</h2>
-          <p>
-            When Kill the Newsletter! receives an email it may delete old
-            entries to keep the feed under a size limit, because some feed
-            readers don’t support feeds that are too big.
-          </p>
-        </div>
-        <div>
-          <h2>Why isn’t my feed updating?</h2>
-          <p>
-            Send an email to the address that corresponds to your Kill the
-            Newsletter! feed and wait a few minutes. If the email shows up on
-            your feed reader, then the issue must be with the newsletter
-            publisher and you should contact them. Otherwise, please
-            <a href="mailto:kill-the-newsletter@leafac.com"
-              >report the issue us</a
-            >.
-          </p>
-        </div>
-        <div>
-          <h2>How do I delete my Kill the Newsletter! feed?</h2>
-          <p>
-            At the end of each feed entry there’s a link to manage the Kill the
-            Newsletter! feed settings, including deleting it.
-          </p>
-        </div>
-        <div>
-          <h2>
-            I’m a newsletter publisher and I saw some people subscribing with
-            Kill the Newsletter!. What is this?
-          </h2>
-          <p>
-            Think of Kill the Newsletter! as an email provider like Gmail, but
-            the emails get delivered through Atom feeds for people who prefer to
-            read with feed readers instead of email. Also, consider providing
-            your content through an Atom feed—your readers will appreciate it.
-          </p>
-        </div>
-      `),
+          <hr />
+          <div>
+            <h2>How does Kill the Newsletter! work?</h2>
+            <p>
+              Create a feed with the form above and Kill the Newsletter!
+              provides you with an email address and an Atom feed. Emails that
+              are received at that address are turned into entries in that feed.
+              Sign up to a newsletter with that address and use your feed reader
+              to subscribe to that feed.
+            </p>
+          </div>
+          <div>
+            <h2>How do I confirm my newsletter subscription?</h2>
+            <p>
+              In most cases when you subscribe to a newsletter the newsletter
+              publisher sends you an email with a confirmation link. Kill the
+              Newsletter! converts that email into a feed entry as usual, so it
+              appears in your feed reader and you may follow the confirmation
+              link from there. Some newsletter publishers want you to reply to
+              an email using the address that subscribed to the newsletter.
+              Unfortunately Kill the Newsletter! doesn’t support this scenario,
+              but you may contact the newsletter publisher and ask them to
+              verify you manually. As a workaround, some people have had success
+              with signing up for the newsletter using their regular email
+              address and setting up a filter to forward the emails to Kill the
+              Newsletter!
+            </p>
+          </div>
+          <div>
+            <h2>
+              Why can’t I subscribe to a newsletter with my Kill the Newsletter!
+              email?
+            </h2>
+            <p>
+              Some newsletter publishers block Kill the Newsletter!. You may
+              contact them to explain why using Kill the Newsletter! is
+              important to you and ask them to reconsider their decision, but
+              ultimately it’s their content and their choice of who has access
+              to it and by what means. As a workaround, some people have had
+              success with signing up for the newsletter using their regular
+              email address and setting up a filter to forward the emails to
+              Kill the Newsletter!
+            </p>
+          </div>
+          <div>
+            <h2>How do I share a Kill the Newsletter! feed?</h2>
+            <p>
+              You don’t. The feed includes the identifier for the email address
+              and anyone who has access to it may unsubscribe you from your
+              newsletters, send you spam, and so forth. Instead of sharing a
+              feed, you may share Kill the Newsletter! itself and let people
+              create their own Kill the Newsletter! feeds. Kill the Newsletter!
+              has been designed this way because it plays better with newsletter
+              publishers, who may, for example, get statistics on the number of
+              subscribers who use Kill the Newsletter!. Note that Kill the
+              Newsletter! itself doesn’t track users in any way.
+            </p>
+          </div>
+          <div>
+            <h2>Why are old entries disappearing?</h2>
+            <p>
+              When Kill the Newsletter! receives an email it may delete old
+              entries to keep the feed under a size limit, because some feed
+              readers don’t support feeds that are too big.
+            </p>
+          </div>
+          <div>
+            <h2>Why isn’t my feed updating?</h2>
+            <p>
+              Send an email to the address that corresponds to your Kill the
+              Newsletter! feed and wait a few minutes. If the email shows up on
+              your feed reader, then the issue must be with the newsletter
+              publisher and you should contact them. Otherwise, please
+              <a href="mailto:kill-the-newsletter@leafac.com"
+                >report the issue us</a
+              >.
+            </p>
+          </div>
+          <div>
+            <h2>How do I delete my Kill the Newsletter! feed?</h2>
+            <p>
+              At the end of each feed entry there’s a link to manage the Kill
+              the Newsletter! feed settings, including deleting it.
+            </p>
+          </div>
+          <div>
+            <h2>
+              I’m a newsletter publisher and I saw some people subscribing with
+              Kill the Newsletter!. What is this?
+            </h2>
+            <p>
+              Think of Kill the Newsletter! as an email provider like Gmail, but
+              the emails get delivered through Atom feeds for people who prefer
+              to read with feed readers instead of email. Also, consider
+              providing your content through an Atom feed—your readers will
+              appreciate it.
+            </p>
+          </div>
+        `,
+      }),
     );
   },
 });
@@ -826,205 +845,212 @@ application.server?.push({
   ) => {
     if (request.state.feed === undefined) return;
     response.end(
-      application.layout(html`
-        <div>
-          <h2>${request.state.feed.title}</h2>
-          <p>Subscribe to a newsletter with the following email address:</p>
-          <div
-            css="${css`
-              display: flex;
-              gap: var(--space--2);
-              @media (max-width: 400px) {
-                flex-direction: column;
-              }
-            `}"
-          >
-            <input
-              type="text"
-              value="${request.state.feed.externalId}@${application
-                .configuration.hostname}"
-              readonly
-              css="${css`
-                flex: 1;
-              `}"
-              javascript="${javascript`
-                this.onclick = () => {
-                  this.select();
-                };
-              `}"
-            />
-            <div>
-              <button
-                javascript="${javascript`
-                  this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`${request.state.feed.externalId}@${application.configuration.hostname}`});
-                    javascript.tippy({
-                      element: this,
-                      trigger: "manual",
-                      content: "Copied",
-                    }).show();
-                    await utilities.sleep(1000);
-                    this.tippy.hide();
-                  };
-                `}"
-              >
-                <i class="bi bi-copy"></i>  Copy
-              </button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <p>Subscribe on your feed reader to the following Atom feed:</p>
-          <div
-            css="${css`
-              display: flex;
-              gap: var(--space--2);
-              @media (max-width: 400px) {
-                flex-direction: column;
-              }
-            `}"
-          >
-            <input
-              type="text"
-              value="https://${application.configuration
-                .hostname}/feeds/${request.state.feed.externalId}.xml"
-              readonly
-              css="${css`
-                flex: 1;
-              `}"
-              javascript="${javascript`
-                this.onclick = () => {
-                  this.select();
-                };
-              `}"
-            />
-            <div>
-              <button
-                javascript="${javascript`
-                  this.onclick = async () => {
-                    await navigator.clipboard.writeText(${`https://${
-                      application.configuration.hostname
-                    }/feeds/${request.state.feed.externalId}.xml`});
-                    javascript.tippy({
-                      element: this,
-                      trigger: "manual",
-                      content: "Copied",
-                    }).show();
-                    await utilities.sleep(1000);
-                    this.tippy.hide();
-                  };
-                `}"
-              >
-                <i class="bi bi-copy"></i>  Copy
-              </button>
-            </div>
-          </div>
-        </div>
-        <p><a href="/">← Create another feed</a></p>
-        <hr />
-        <form
-          key="feeds/patch"
-          method="PATCH"
-          action="/feeds/${request.state.feed.externalId}"
-          novalidate
-          css="${css`
-            display: flex;
-            flex-direction: column;
-            gap: var(--space--4);
-          `}"
-        >
+      application.layout({
+        request,
+        response,
+        head: html`
+          <title>${request.state.feed.title} · Kill the Newsletter!</title>
+        `,
+        body: html`
           <div>
-            <h2>Feed settings</h2>
-            <label>
-              <div><small>Title</small></div>
+            <h2>${request.state.feed.title}</h2>
+            <p>Subscribe to a newsletter with the following email address:</p>
+            <div
+              css="${css`
+                display: flex;
+                gap: var(--space--2);
+                @media (max-width: 400px) {
+                  flex-direction: column;
+                }
+              `}"
+            >
               <input
                 type="text"
-                name="title"
-                value="${request.state.feed.title}"
-                required
+                value="${request.state.feed.externalId}@${application
+                  .configuration.hostname}"
+                readonly
+                css="${css`
+                  flex: 1;
+                `}"
+                javascript="${javascript`
+                  this.onclick = () => {
+                    this.select();
+                  };
+                `}"
+              />
+              <div>
+                <button
+                  javascript="${javascript`
+                    this.onclick = async () => {
+                      await navigator.clipboard.writeText(${`${request.state.feed.externalId}@${application.configuration.hostname}`});
+                      javascript.tippy({
+                        element: this,
+                        trigger: "manual",
+                        content: "Copied",
+                      }).show();
+                      await utilities.sleep(1000);
+                      this.tippy.hide();
+                    };
+                  `}"
+                >
+                  <i class="bi bi-copy"></i>  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p>Subscribe on your feed reader to the following Atom feed:</p>
+            <div
+              css="${css`
+                display: flex;
+                gap: var(--space--2);
+                @media (max-width: 400px) {
+                  flex-direction: column;
+                }
+              `}"
+            >
+              <input
+                type="text"
+                value="https://${application.configuration
+                  .hostname}/feeds/${request.state.feed.externalId}.xml"
+                readonly
+                css="${css`
+                  flex: 1;
+                `}"
+                javascript="${javascript`
+                  this.onclick = () => {
+                    this.select();
+                  };
+                `}"
+              />
+              <div>
+                <button
+                  javascript="${javascript`
+                    this.onclick = async () => {
+                      await navigator.clipboard.writeText(${`https://${
+                        application.configuration.hostname
+                      }/feeds/${request.state.feed.externalId}.xml`});
+                      javascript.tippy({
+                        element: this,
+                        trigger: "manual",
+                        content: "Copied",
+                      }).show();
+                      await utilities.sleep(1000);
+                      this.tippy.hide();
+                    };
+                  `}"
+                >
+                  <i class="bi bi-copy"></i>  Copy
+                </button>
+              </div>
+            </div>
+          </div>
+          <p><a href="/">← Create another feed</a></p>
+          <hr />
+          <form
+            key="feeds/patch"
+            method="PATCH"
+            action="/feeds/${request.state.feed.externalId}"
+            novalidate
+            css="${css`
+              display: flex;
+              flex-direction: column;
+              gap: var(--space--4);
+            `}"
+          >
+            <div>
+              <h2>Feed settings</h2>
+              <label>
+                <div><small>Title</small></div>
+                <input
+                  type="text"
+                  name="title"
+                  value="${request.state.feed.title}"
+                  required
+                  maxlength="200"
+                  css="${css`
+                    width: 100%;
+                  `}"
+                />
+              </label>
+            </div>
+            <label>
+              <div><small>Icon</small></div>
+              <input
+                type="text"
+                name="icon"
+                value="${request.state.feed.icon ?? ""}"
+                placeholder="https://example.com/favicon.ico"
                 maxlength="200"
                 css="${css`
                   width: 100%;
                 `}"
+                javascript="${javascript`
+                  this.onvalidate = () => {
+                    try {
+                      new URL(this.value);
+                    }
+                    catch {
+                      throw new javascript.ValidationError("Invalid URL.");
+                    }
+                  };
+                `}"
               />
             </label>
-          </div>
-          <label>
-            <div><small>Icon</small></div>
-            <input
-              type="text"
-              name="icon"
-              value="${request.state.feed.icon ?? ""}"
-              placeholder="https://example.com/favicon.ico"
-              maxlength="200"
-              css="${css`
-                width: 100%;
-              `}"
-              javascript="${javascript`
-                this.onvalidate = () => {
-                  try {
-                    new URL(this.value);
-                  }
-                  catch {
-                    throw new javascript.ValidationError("Invalid URL.");
-                  }
-                };
-              `}"
-            />
-          </label>
-          <div><button>Update feed settings</button></div>
-        </form>
-        <hr />
-        <form
-          key="feeds/delete"
-          method="DELETE"
-          action="/feeds/${request.state.feed.externalId}"
-          novalidate
-          css="${css`
-            display: flex;
-            flex-direction: column;
-            gap: var(--space--4);
-          `}"
-        >
-          <div>
-            <h2>Delete feed</h2>
-            <p
-              css="${css`
-                color: light-dark(
-                  var(--color--red--500),
-                  var(--color--red--500)
-                );
-              `}"
-            >
-              <i class="bi bi-exclamation-triangle-fill"></i> This action is
-              irreversible! Your feed and all its entries will be lost!
+            <div><button>Update feed settings</button></div>
+          </form>
+          <hr />
+          <form
+            key="feeds/delete"
+            method="DELETE"
+            action="/feeds/${request.state.feed.externalId}"
+            novalidate
+            css="${css`
+              display: flex;
+              flex-direction: column;
+              gap: var(--space--4);
+            `}"
+          >
+            <div>
+              <h2>Delete feed</h2>
+              <p
+                css="${css`
+                  color: light-dark(
+                    var(--color--red--500),
+                    var(--color--red--500)
+                  );
+                `}"
+              >
+                <i class="bi bi-exclamation-triangle-fill"></i> This action is
+                irreversible! Your feed and all its entries will be lost!
+              </p>
+            </div>
+            <p>
+              Before you proceed, we recommend that you unsubscribe from the
+              publisher (typically you do that by following a link in a feed
+              entry) and unsubscribe from the feed on the feed reader.
             </p>
-          </div>
-          <p>
-            Before you proceed, we recommend that you unsubscribe from the
-            publisher (typically you do that by following a link in a feed
-            entry) and unsubscribe from the feed on the feed reader.
-          </p>
-          <label>
-            <div><small>Feed title confirmation</small></div>
-            <input
-              type="text"
-              placeholder="${request.state.feed.title}"
-              required
-              css="${css`
-                width: 100%;
-              `}"
-              javascript="${javascript`
-                this.onvalidate = () => {
-                  if (this.value !== ${request.state.feed.title})
-                    throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
-                };
-              `}"
-            />
-          </label>
-          <div><button>Delete feed</button></div>
-        </form>
-      `),
+            <label>
+              <div><small>Feed title confirmation</small></div>
+              <input
+                type="text"
+                placeholder="${request.state.feed.title}"
+                required
+                css="${css`
+                  width: 100%;
+                `}"
+                javascript="${javascript`
+                  this.onvalidate = () => {
+                    if (this.value !== ${request.state.feed.title})
+                      throw new javascript.ValidationError(${`Incorrect feed title: “${request.state.feed.title}”`});
+                  };
+                `}"
+              />
+            </label>
+            <div><button>Delete feed</button></div>
+          </form>
+        `,
+      }),
     );
   },
 });
@@ -1146,12 +1172,17 @@ application.server?.push({
     ) {
       response.statusCode = 429;
       response.end(
-        application.layout(html`
-          <p>
-            Rate limit. This feed was visualized too often. Please return in one
-            hour.
-          </p>
-        `),
+        application.layout({
+          request,
+          response,
+          head: html`<title>Rate limit · Kill the Newsletter!</title>`,
+          body: html`
+            <h2>Rate limit</h2>
+            <p>
+              This feed was visualized too often. Please return in one hour.
+            </p>
+          `,
+        }),
       );
       return;
     }
@@ -1428,14 +1459,19 @@ application.server?.push({
   handler: (request, response) => {
     response.statusCode = 404;
     response.end(
-      application.layout(html`
-        <p>Not found.</p>
-        <p>
-          If you expected to see the web version of a newsletter entry, you may
-          be interested in the answer to the question
-          <a href="/">“Why are old entries disappearing?”</a>.
-        </p>
-      `),
+      application.layout({
+        request,
+        response,
+        head: html`<title>Not found · Kill the Newsletter!</title>`,
+        body: html`
+          <h2>Not found</h2>
+          <p>
+            If you expected to see the web version of a newsletter entry, you
+            may be interested in the answer to the question
+            <a href="/">“Why are old entries disappearing?”</a>.
+          </p>
+        `,
+      }),
     );
   },
 });
@@ -1443,15 +1479,20 @@ application.server?.push({
   error: true,
   handler: (request, response) => {
     response.end(
-      application.layout(html`
-        <p>Something went wrong.</p>
-        <p>
-          Please report this issue to
-          <a href="mailto:kill-the-newsletter@leafac.com"
-            >kill-the-newsletter@leafac.com</a
-          >.
-        </p>
-      `),
+      application.layout({
+        request,
+        response,
+        head: html`<title>Server error · Kill the Newsletter!</title>`,
+        body: html`
+          <h2>Server error.</h2>
+          <p>
+            Please report this issue to
+            <a href="mailto:kill-the-newsletter@leafac.com"
+              >kill-the-newsletter@leafac.com</a
+            >.
+          </p>
+        `,
+      }),
     );
   },
 });
