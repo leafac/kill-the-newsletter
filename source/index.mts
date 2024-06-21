@@ -503,6 +503,47 @@ application.layout = ({ request, response, head, body }) => {
           </div>
           $${body}
         </div>
+        $${(() => {
+          const flash = request.getFlash();
+          return typeof flash === "string"
+            ? html`
+                <div
+                  css="${css`
+                    text-align: center;
+                    color: light-dark(
+                      var(--color--green--800),
+                      var(--color--green--200)
+                    );
+                    background-color: light-dark(
+                      var(--color--green--50),
+                      var(--color--green--950)
+                    );
+                    max-width: var(--space--96);
+                    padding: var(--space--1) var(--space--2);
+                    border: var(--border-width--1) solid
+                      light-dark(
+                        var(--color--green--400),
+                        var(--color--green--600)
+                      );
+                    border-radius: var(--border-radius--1);
+                    box-shadow: var(--box-shadow--4);
+                    margin: var(--space--0) auto;
+                    position: fixed;
+                    top: var(--space--8);
+                    left: var(--space--2);
+                    right: var(--space--2);
+                  `}"
+                  javascript="${javascript`
+                    setTimeout(() => {
+                      this.remove();
+                    }, 3 * 1000);
+                  `}"
+                >
+                  $${flash}
+                </div>
+              `
+            : html``;
+        })()}
       </body>
     </html>
   `;
@@ -1092,6 +1133,7 @@ application.server?.push({
         where "id" = ${request.state.feed.id};
       `,
     );
+    response.setFlash(html`Feed settings updated successfully.`);
     response.redirect();
   },
 });
