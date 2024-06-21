@@ -1177,10 +1177,12 @@ application.server?.push({
           response,
           head: html`<title>Rate limit · Kill the Newsletter!</title>`,
           body: html`
-            <h2>Rate limit</h2>
-            <p>
-              This feed was visualized too often. Please return in one hour.
-            </p>
+            <div>
+              <h2>Rate limit</h2>
+              <p>
+                This feed was visualized too often. Please return in one hour.
+              </p>
+            </div>
           `,
         }),
       );
@@ -1464,12 +1466,14 @@ application.server?.push({
         response,
         head: html`<title>Not found · Kill the Newsletter!</title>`,
         body: html`
-          <h2>Not found</h2>
-          <p>
-            If you expected to see the web version of a newsletter entry, you
-            may be interested in the answer to the question
-            <a href="/">“Why are old entries disappearing?”</a>.
-          </p>
+          <div>
+            <h2>Not found</h2>
+            <p>
+              If you expected to see the web version of a newsletter entry, you
+              may be interested in the answer to the question
+              <a href="/">“Why are old entries disappearing?”</a>.
+            </p>
+          </div>
         `,
       }),
     );
@@ -1484,13 +1488,15 @@ application.server?.push({
         response,
         head: html`<title>Server error · Kill the Newsletter!</title>`,
         body: html`
-          <h2>Server error.</h2>
-          <p>
-            Please report this issue to
-            <a href="mailto:kill-the-newsletter@leafac.com"
-              >kill-the-newsletter@leafac.com</a
-            >.
-          </p>
+          <div>
+            <h2>Server error.</h2>
+            <p>
+              Please report this issue to
+              <a href="mailto:kill-the-newsletter@leafac.com"
+                >kill-the-newsletter@leafac.com</a
+              >.
+            </p>
+          </div>
         `,
       }),
     );
