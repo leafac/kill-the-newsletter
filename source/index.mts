@@ -457,6 +457,7 @@ application.layout = ({ request, response, head, body }) => {
         `}"
       >
         <div
+          key="${request.URL.pathname}"
           css="${css`
             max-width: var(--space--144);
             margin: var(--space--0) auto;
@@ -508,6 +509,7 @@ application.layout = ({ request, response, head, body }) => {
           return typeof flash === "string"
             ? html`
                 <div
+                  key="flash"
                   css="${css`
                     text-align: center;
                     color: light-dark(
