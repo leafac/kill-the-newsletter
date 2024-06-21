@@ -1,8 +1,9 @@
 # Changelog
 
-## 2.0.7 · 2024-06-20
+## 2.0.7 · 2024-06-21
 
-- WebSub background jobs not being worked on fast enough https://github.com/leafac/kill-the-newsletter/issues/68
+- Added a “feed settings” page, which allows for adding a custom icon to a feed (https://github.com/leafac/kill-the-newsletter/issues/92)
+- Added more background job workers to WebSub jobs (https://github.com/leafac/kill-the-newsletter/issues/68).
 - Changed the route of feed creation via API from `/` to `/feeds`, for example:
 
   ```console
@@ -10,7 +11,6 @@
   ```
 
   Also, now that API endpoint responds with `Content-Type: application/json`.
-- Set icons manually: https://github.com/leafac/kill-the-newsletter/issues/92
 
 ## 2.0.6 · 2024-06-06
 
