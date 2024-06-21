@@ -90,7 +90,7 @@ export type Application = {
   email: undefined | SMTPServer;
 };
 const application = {} as Application;
-application.version = "2.0.6";
+application.version = "2.0.7";
 application.commandLineArguments = util.parseArgs({
   options: {
     type: { type: "string" },
