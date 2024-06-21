@@ -10,6 +10,7 @@
   ```
 
   Also, now that API endpoint responds with `Content-Type: application/json`.
+- Set icons manually: https://github.com/leafac/kill-the-newsletter/issues/92
 
 ## 2.0.6 · 2024-06-06
 
