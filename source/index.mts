@@ -1406,7 +1406,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     backgroundJobIndex++
   )
     application.database.backgroundJob(
-      { type: "feedWebSubSubscriptions.verify" },
+      { type: "feedWebSubSubscriptions.verify", timeout: 5 * 1000, retries: 0 },
       async (job: {
         feedId: number;
         "hub.mode": "subscribe" | "unsubscribe";
@@ -1806,7 +1806,11 @@ if (application.commandLineArguments.values.type === "email") {
 if (application.commandLineArguments.values.type === "backgroundJob")
   for (let backgroundJobIndex = 0; backgroundJobIndex < 8; backgroundJobIndex++)
     application.database.backgroundJob(
-      { type: "feedWebSubSubscriptions.dispatch" },
+      {
+        type: "feedWebSubSubscriptions.dispatch",
+        timeout: 5 * 1000,
+        retries: 0,
+      },
       async (job: {
         feedId: number;
         feedEntryId: number;
