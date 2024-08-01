@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.8 · 2024-08-01
+
+- Changed the feed size limit from `2 ** 20` to `2 ** 19` to try and reduce server costs 💀
+
 ## 2.0.7 · 2024-06-21
 
 - Added a “feed settings” page, which allows for adding a custom icon to a feed (https://github.com/leafac/kill-the-newsletter/issues/92)

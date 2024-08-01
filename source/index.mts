@@ -1552,7 +1552,7 @@ application.server?.push({
 if (application.commandLineArguments.values.type === "email") {
   application.email = new SMTPServer({
     name: application.configuration.hostname,
-    size: 2 ** 20,
+    size: 2 ** 19,
     disabledCommands: ["AUTH"],
     key: await fs.readFile(application.configuration.tls.key, "utf-8"),
     cert: await fs.readFile(application.configuration.tls.certificate, "utf-8"),
@@ -1713,7 +1713,7 @@ if (application.commandLineArguments.values.type === "email") {
             while (deletedFeedEntries.length > 0) {
               const feedEntry = deletedFeedEntries.pop()!;
               feedLength += feedEntry.title.length + feedEntry.content.length;
-              if (feedLength > 2 ** 20) break;
+              if (feedLength > 2 ** 19) break;
             }
             for (const deletedFeedEntry of deletedFeedEntries) {
               application.database.run(
