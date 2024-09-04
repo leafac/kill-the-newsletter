@@ -4,3 +4,4 @@
 - Reduce bandwidth
   - Enable cache HTTP header.
   - Setup Cloudflare.
+- Document that you need to setup a MX record in the DNS to receive email.
