@@ -51,7 +51,6 @@ export type Application = {
     hstsPreload: boolean;
     extraCaddyfile: string;
     tunnel: boolean;
-    ports: number[];
   };
   database: Database;
   server: undefined | ReturnType<typeof server>;
@@ -106,10 +105,6 @@ await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
 application.configuration.environment ??= "production";
 application.configuration.hstsPreload ??= false;
 application.configuration.extraCaddyfile ??= caddyfile``;
-application.configuration.ports = Array.from(
-  { length: os.availableParallelism() },
-  (value, index) => 18000 + index,
-);
 if (application.commandLineArguments.values.type === "server")
   application.server = server({
     port: Number(application.commandLineArguments.values.port),
@@ -303,7 +298,8 @@ if (application.commandLineArguments.values.type === "backgroundJob")
       await fs.rm(
         path.join(
           application.configuration.dataDirectory,
-          `files/${feedEntryEnclosure.externalId}`,
+          "files",
+          feedEntryEnclosure.externalId,
         ),
         { recursive: true, force: true },
       );
@@ -1630,14 +1626,17 @@ if (application.commandLineArguments.values.type === "email") {
           await fs.mkdir(
             path.join(
               application.configuration.dataDirectory,
-              `files/${feedEntryEnclosure.externalId}`,
+              "files",
+              feedEntryEnclosure.externalId,
             ),
             { recursive: true },
           );
           await fs.writeFile(
             path.join(
               application.configuration.dataDirectory,
-              `files/${feedEntryEnclosure.externalId}/${feedEntryEnclosure.name}`,
+              "files",
+              feedEntryEnclosure.externalId,
+              feedEntryEnclosure.name,
             ),
             attachment.content,
           );
@@ -1896,7 +1895,10 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     );
 
 if (application.commandLineArguments.values.type === undefined) {
-  for (const port of application.configuration.ports) {
+  for (const port of Array.from(
+    { length: os.availableParallelism() },
+    (value, index) => 18000 + index,
+  )) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.argv[0],
@@ -1959,7 +1961,7 @@ if (application.commandLineArguments.values.type === undefined) {
   caddy.start({
     ...application.configuration,
     untrustedStaticFilesRoots: [
-      `/files/* "${path.join(process.cwd(), "data")}"`,
+      `/files/* "${application.configuration.dataDirectory}"`,
     ],
   });
 }
