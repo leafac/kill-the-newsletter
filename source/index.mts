@@ -14,7 +14,6 @@ import css from "@radically-straightforward/css";
 import javascript from "@radically-straightforward/javascript";
 import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
-import caddyfile from "@radically-straightforward/caddy";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
 import { SMTPServer, SMTPServerAddress } from "smtp-server";
@@ -44,13 +43,13 @@ export type Application = {
   };
   configuration: {
     hostname: string;
-    systemAdministratorEmail: string;
+    systemAdministratorEmail: string | undefined;
     tls: { key: string; certificate: string };
     dataDirectory: string;
     environment: "production" | "development";
-    hstsPreload: boolean;
-    extraCaddyfile: string;
-    tunnel: boolean;
+    hstsPreload?: boolean;
+    extraCaddyfile?: string;
+    tunnel?: boolean;
   };
   internalConfiguration: {
     ports: number[];
@@ -106,8 +105,6 @@ application.configuration = (
 application.configuration.dataDirectory ??= path.resolve("./data/");
 await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
 application.configuration.environment ??= "production";
-application.configuration.hstsPreload ??= false;
-application.configuration.extraCaddyfile ??= caddyfile``;
 application.internalConfiguration.ports = Array.from(
   { length: os.availableParallelism() },
   (value, index) => 18000 + index,
