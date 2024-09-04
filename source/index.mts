@@ -52,6 +52,9 @@ export type Application = {
     extraCaddyfile: string;
     tunnel: boolean;
   };
+  internalConfiguration: {
+    ports: number[];
+  };
   database: Database;
   server: undefined | ReturnType<typeof server>;
   layout: ({
@@ -105,6 +108,10 @@ await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
 application.configuration.environment ??= "production";
 application.configuration.hstsPreload ??= false;
 application.configuration.extraCaddyfile ??= caddyfile``;
+application.internalConfiguration.ports = Array.from(
+  { length: os.availableParallelism() },
+  (value, index) => 18000 + index,
+);
 if (application.commandLineArguments.values.type === "server")
   application.server = server({
     port: Number(application.commandLineArguments.values.port),
@@ -1895,10 +1902,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     );
 
 if (application.commandLineArguments.values.type === undefined) {
-  for (const port of Array.from(
-    { length: os.availableParallelism() },
-    (value, index) => 18000 + index,
-  )) {
+  for (const port of application.internalConfiguration.ports) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.argv[0],
