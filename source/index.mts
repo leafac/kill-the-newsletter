@@ -105,6 +105,7 @@ application.configuration = (
 application.configuration.dataDirectory ??= path.resolve("./data/");
 await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
 application.configuration.environment ??= "production";
+application.internalConfiguration = {} as Application["internalConfiguration"];
 application.internalConfiguration.ports = Array.from(
   { length: os.availableParallelism() },
   (value, index) => 18000 + index,
@@ -116,7 +117,7 @@ if (application.commandLineArguments.values.type === "server")
       "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/websub$",
     ),
   });
-application.partials = {} as any;
+application.partials = {} as Application["partials"];
 
 utilities.log(
   "KILL THE NEWSLETTER!",
@@ -1961,6 +1962,7 @@ if (application.commandLineArguments.values.type === undefined) {
   );
   caddy.start({
     ...application.configuration,
+    ...application.internalConfiguration,
     untrustedStaticFilesRoots: [
       `/files/* "${application.configuration.dataDirectory}"`,
     ],
