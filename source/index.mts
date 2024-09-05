@@ -48,8 +48,8 @@ export type Application = {
     dataDirectory: string;
     environment: "production" | "development";
     hstsPreload?: boolean;
-    extraCaddyfile?: string;
     tunnel?: boolean;
+    extraCaddyfile?: string;
   };
   internalConfiguration: {
     ports: number[];
