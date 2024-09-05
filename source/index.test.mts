@@ -1,5 +1,5 @@
 import os from "node:os";
-import url from "node:url";
+import path from "node:path";
 import nodemailer from "nodemailer";
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -15,10 +15,6 @@ await nodemailer
     subject: "Example of a Newsletter Entry",
     html: "<p>Hello <strong>World</strong></p>".repeat(2 ** 0 /* 13 */),
     attachments: [
-      {
-        path: url.fileURLToPath(
-          new URL("../static/favicon.ico", import.meta.url),
-        ),
-      },
+      { path: path.join(import.meta.dirname, "../static/favicon.ico") },
     ],
   });
