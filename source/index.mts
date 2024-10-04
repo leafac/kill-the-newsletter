@@ -1905,6 +1905,7 @@ if (application.commandLineArguments.values.type === undefined) {
       childProcess.spawn(
         process.argv[0],
         [
+          "--enable-source-maps",
           process.argv[1],
           ...application.commandLineArguments.positionals,
           "--type",
@@ -1925,6 +1926,7 @@ if (application.commandLineArguments.values.type === undefined) {
       childProcess.spawn(
         process.argv[0],
         [
+          "--enable-source-maps",
           process.argv[1],
           ...application.commandLineArguments.positionals,
           "--type",
@@ -1946,6 +1948,7 @@ if (application.commandLineArguments.values.type === undefined) {
     childProcess.spawn(
       process.argv[0],
       [
+        "--enable-source-maps",
         process.argv[1],
         ...application.commandLineArguments.positionals,
         "--type",
