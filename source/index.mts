@@ -25,7 +25,7 @@ export type Application = {
       Feed: {
         feed: {
           id: number;
-          externalId: string;
+          publicId: string;
           title: string;
           icon: string | null;
           emailIcon: string | null;
@@ -73,14 +73,14 @@ export type Application = {
       feedEntries,
     }: {
       feed: {
-        externalId: string;
+        publicId: string;
         title: string;
         icon: string | null;
         emailIcon: string | null;
       };
       feedEntries: {
         id: number;
-        externalId: string;
+        publicId: string;
         createdAt: string;
         author: string | null;
         title: string;
@@ -114,7 +114,7 @@ if (application.commandLineArguments.values.type === "server")
   application.server = server({
     port: Number(application.commandLineArguments.values.port),
     csrfProtectionExceptionPathname: new RegExp(
-      "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/websub$",
+      "^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/websub$",
     ),
   });
 application.partials = {} as Application["partials"];
@@ -317,12 +317,12 @@ if (application.commandLineArguments.values.type === "backgroundJob")
   node.backgroundJob({ interval: 60 * 60 * 1000 }, async () => {
     for (const feedEntryEnclosure of application.database.all<{
       id: number;
-      externalId: string;
+      publicId: string;
     }>(
       sql`
         select
           "feedEntryEnclosures"."id" as "id",
-          "feedEntryEnclosures"."externalId" as "externalId"
+          "feedEntryEnclosures"."publicId" as "publicId"
         from "feedEntryEnclosures"
         left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
         where "feedEntryEnclosureLinks"."id" is null;
@@ -332,7 +332,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
         path.join(
           application.configuration.dataDirectory,
           "files",
-          feedEntryEnclosure.externalId,
+          feedEntryEnclosure.publicId,
         ),
         { recursive: true, force: true },
       );
@@ -583,16 +583,16 @@ application.layout = ({ request, response, head, body }) => {
 application.partials.feed = ({ feed, feedEntries }) =>
   html`<?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
-      <id>urn:kill-the-newsletter:${feed.externalId}</id>
+      <id>urn:kill-the-newsletter:${feed.publicId}</id>
       <link
         rel="self"
         href="https://${application.configuration
-          .hostname}/feeds/${feed.externalId}.xml"
+          .hostname}/feeds/${feed.publicId}.xml"
       />
       <link
         rel="hub"
         href="https://${application.configuration
-          .hostname}/feeds/${feed.externalId}/websub"
+          .hostname}/feeds/${feed.publicId}/websub"
       />
       $${typeof feed.icon === "string" || typeof feed.emailIcon === "string"
         ? html`<icon
@@ -610,23 +610,23 @@ application.partials.feed = ({ feed, feedEntries }) =>
       $${feedEntries.map(
         (feedEntry) => html`
           <entry>
-            <id>urn:kill-the-newsletter:${feedEntry.externalId}</id>
+            <id>urn:kill-the-newsletter:${feedEntry.publicId}</id>
             <link
               rel="alternate"
               type="text/html"
               href="https://${application.configuration
-                .hostname}/feeds/${feed.externalId}/entries/${feedEntry.externalId}.html"
+                .hostname}/feeds/${feed.publicId}/entries/${feedEntry.publicId}.html"
             />
             $${application.database
               .all<{
-                externalId: string;
+                publicId: string;
                 type: string;
                 length: number;
                 name: string;
               }>(
                 sql`
                   select
-                    "feedEntryEnclosures"."externalId" as "externalId",
+                    "feedEntryEnclosures"."publicId" as "publicId",
                     "feedEntryEnclosures"."type" as "type",
                     "feedEntryEnclosures"."length" as "length",
                     "feedEntryEnclosures"."name" as "name"
@@ -643,7 +643,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
                     type="${feedEntryEnclosure.type}"
                     length="${String(feedEntryEnclosure.length)}"
                     href="https://${application.configuration
-                      .hostname}/files/${feedEntryEnclosure.externalId}/${feedEntryEnclosure.name}"
+                      .hostname}/files/${feedEntryEnclosure.publicId}/${feedEntryEnclosure.name}"
                   />
                 `,
               )}
@@ -664,7 +664,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
                   <small>
                     <a
                       href="https://${application.configuration
-                        .hostname}/feeds/${feed.externalId}"
+                        .hostname}/feeds/${feed.publicId}"
                       >Kill the Newsletter! feed settings</a
                     >
                   </small>
@@ -839,13 +839,13 @@ application.server?.push({
     )
       throw "validation";
     const feed = application.database.get<{
-      externalId: string;
+      publicId: string;
     }>(
       sql`
         select * from "feeds" where "id" = ${
           application.database.run(
             sql`
-              insert into "feeds" ("externalId", "title")
+              insert into "feeds" ("publicId", "title")
               values (
                 ${cryptoRandomString({
                   length: 20,
@@ -861,23 +861,21 @@ application.server?.push({
     if (request.headers.accept === "application/json")
       response.setHeader("Content-Type", "application/json").end(
         JSON.stringify({
-          feedId: feed.externalId,
-          email: `${feed.externalId}@${application.configuration.hostname}`,
+          feedId: feed.publicId,
+          email: `${feed.publicId}@${application.configuration.hostname}`,
           feed: `https://${
             application.configuration.hostname
-          }/feeds/${feed.externalId}.xml`,
+          }/feeds/${feed.publicId}.xml`,
         }),
       );
-    else response.redirect(`/feeds/${feed.externalId}`);
+    else response.redirect(`/feeds/${feed.publicId}`);
   },
 });
 application.server?.push({
-  pathname: new RegExp(
-    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)(?:$|/|\\.xml$)",
-  ),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)(?:$|/|\\.xml$)"),
   handler: (
     request: serverTypes.Request<
-      { feedExternalId: string },
+      { feedPublicId: string },
       {},
       {},
       {},
@@ -885,18 +883,18 @@ application.server?.push({
     >,
     response,
   ) => {
-    if (typeof request.pathname.feedExternalId !== "string") return;
+    if (typeof request.pathname.feedPublicId !== "string") return;
     request.state.feed = application.database.get<{
       id: number;
-      externalId: string;
+      publicId: string;
       title: string;
       icon: string | null;
       emailIcon: string | null;
     }>(
       sql`
-        select "id", "externalId", "title", "icon", "emailIcon"
+        select "id", "publicId", "title", "icon", "emailIcon"
         from "feeds"
-        where "externalId" = ${request.pathname.feedExternalId};
+        where "publicId" = ${request.pathname.feedPublicId};
       `,
     );
     if (request.state.feed === undefined) return;
@@ -905,7 +903,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "GET",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
     request: serverTypes.Request<
       {},
@@ -939,7 +937,7 @@ application.server?.push({
             >
               <input
                 type="text"
-                value="${request.state.feed.externalId}@${application
+                value="${request.state.feed.publicId}@${application
                   .configuration.hostname}"
                 readonly
                 css="${css`
@@ -955,7 +953,7 @@ application.server?.push({
                 <button
                   javascript="${javascript`
                     this.onclick = async () => {
-                      await navigator.clipboard.writeText(${`${request.state.feed.externalId}@${application.configuration.hostname}`});
+                      await navigator.clipboard.writeText(${`${request.state.feed.publicId}@${application.configuration.hostname}`});
                       javascript.tippy({
                         element: this,
                         trigger: "manual",
@@ -985,7 +983,7 @@ application.server?.push({
               <input
                 type="text"
                 value="https://${application.configuration
-                  .hostname}/feeds/${request.state.feed.externalId}.xml"
+                  .hostname}/feeds/${request.state.feed.publicId}.xml"
                 readonly
                 css="${css`
                   flex: 1;
@@ -1002,7 +1000,7 @@ application.server?.push({
                     this.onclick = async () => {
                       await navigator.clipboard.writeText(${`https://${
                         application.configuration.hostname
-                      }/feeds/${request.state.feed.externalId}.xml`});
+                      }/feeds/${request.state.feed.publicId}.xml`});
                       javascript.tippy({
                         element: this,
                         trigger: "manual",
@@ -1023,7 +1021,7 @@ application.server?.push({
           <form
             key="feeds/patch"
             method="PATCH"
-            action="/feeds/${request.state.feed.externalId}"
+            action="/feeds/${request.state.feed.publicId}"
             novalidate
             css="${css`
               display: flex;
@@ -1076,7 +1074,7 @@ application.server?.push({
           <form
             key="feeds/delete"
             method="DELETE"
-            action="/feeds/${request.state.feed.externalId}"
+            action="/feeds/${request.state.feed.publicId}"
             novalidate
             css="${css`
               display: flex;
@@ -1129,7 +1127,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "PATCH",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
     request: serverTypes.Request<
       {},
@@ -1171,7 +1169,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "DELETE",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)$"),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
     request: serverTypes.Request<
       {},
@@ -1222,7 +1220,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "GET",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)\\.xml$"),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)\\.xml$"),
   handler: (
     request: serverTypes.Request<
       {},
@@ -1271,14 +1269,14 @@ application.server?.push({
     );
     const feedEntries = application.database.all<{
       id: number;
-      externalId: string;
+      publicId: string;
       createdAt: string;
       author: string | null;
       title: string;
       content: string;
     }>(
       sql`
-        select "id", "externalId", "createdAt", "author", "title", "content"
+        select "id", "publicId", "createdAt", "author", "title", "content"
         from "feedEntries"
         where "feed" = ${request.state.feed.id}
         order by "id" desc;
@@ -1294,11 +1292,11 @@ application.server?.push({
 application.server?.push({
   method: "GET",
   pathname: new RegExp(
-    "^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/entries/(?<feedEntryExternalId>[A-Za-z0-9]+)\\.html$",
+    "^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/entries/(?<feedEntryPublicId>[A-Za-z0-9]+)\\.html$",
   ),
   handler: (
     request: serverTypes.Request<
-      { feedEntryExternalId: string },
+      { feedEntryPublicId: string },
       {},
       {},
       {},
@@ -1308,7 +1306,7 @@ application.server?.push({
   ) => {
     if (
       request.state.feed === undefined ||
-      typeof request.pathname.feedEntryExternalId !== "string"
+      typeof request.pathname.feedEntryPublicId !== "string"
     )
       return;
     const feedEntry = application.database.get<{
@@ -1319,7 +1317,7 @@ application.server?.push({
         from "feedEntries"
         where
           "feedEntries"."feed" = ${request.state.feed.id} and
-          "feedEntries"."externalId" = ${request.pathname.feedEntryExternalId};
+          "feedEntries"."publicId" = ${request.pathname.feedEntryPublicId};
       `,
     );
     if (feedEntry === undefined) return;
@@ -1334,7 +1332,7 @@ application.server?.push({
 });
 application.server?.push({
   method: "POST",
-  pathname: new RegExp("^/feeds/(?<feedExternalId>[A-Za-z0-9]+)/websub$"),
+  pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/websub$"),
   handler: async (
     request: serverTypes.Request<
       {},
@@ -1359,7 +1357,7 @@ application.server?.push({
       request.body["hub.topic"] !==
         `https://${
           application.configuration.hostname
-        }/feeds/${request.state.feed.externalId}.xml` ||
+        }/feeds/${request.state.feed.publicId}.xml` ||
       typeof request.body["hub.callback"] !== "string" ||
       (() => {
         try {
@@ -1604,14 +1602,14 @@ if (application.commandLineArguments.values.type === "email") {
             address.match(utilities.emailRegExp) === null
           )
             return [];
-          const [feedExternalId, hostname] = address.split("@");
+          const [feedPublicId, hostname] = address.split("@");
           if (hostname !== application.configuration.hostname) return [];
           const feed = application.database.get<{
             id: number;
-            externalId: string;
+            publicId: string;
           }>(
             sql`
-              select "id", "externalId" from "feeds" where "externalId" = ${feedExternalId};
+              select "id", "publicId" from "feeds" where "publicId" = ${feedPublicId};
             `,
           );
           if (feed === undefined) return [];
@@ -1624,7 +1622,7 @@ if (application.commandLineArguments.values.type === "email") {
         for (const attachment of email.attachments) {
           const feedEntryEnclosure = application.database.get<{
             id: number;
-            externalId: string;
+            publicId: string;
             name: string;
           }>(
             sql`
@@ -1632,7 +1630,7 @@ if (application.commandLineArguments.values.type === "email") {
                 application.database.run(
                   sql`
                     insert into "feedEntryEnclosures" (
-                      "externalId",
+                      "publicId",
                       "type",
                       "length",
                       "name"
@@ -1660,7 +1658,7 @@ if (application.commandLineArguments.values.type === "email") {
             path.join(
               application.configuration.dataDirectory,
               "files",
-              feedEntryEnclosure.externalId,
+              feedEntryEnclosure.publicId,
             ),
             { recursive: true },
           );
@@ -1668,7 +1666,7 @@ if (application.commandLineArguments.values.type === "email") {
             path.join(
               application.configuration.dataDirectory,
               "files",
-              feedEntryEnclosure.externalId,
+              feedEntryEnclosure.publicId,
               feedEntryEnclosure.name,
             ),
             attachment.content,
@@ -1686,14 +1684,14 @@ if (application.commandLineArguments.values.type === "email") {
             );
             const feedEntry = application.database.get<{
               id: number;
-              externalId: string;
+              publicId: string;
             }>(
               sql`
                 select * from "feedEntries" where "id" = ${
                   application.database.run(
                     sql`
                       insert into "feedEntries" (
-                        "externalId",
+                        "publicId",
                         "feed",
                         "createdAt",
                         "author",
@@ -1730,12 +1728,12 @@ if (application.commandLineArguments.values.type === "email") {
               );
             const deletedFeedEntries = application.database.all<{
               id: number;
-              externalId: string;
+              publicId: string;
               title: string;
               content: string;
             }>(
               sql`
-                select "id", "externalId", "title", "content"
+                select "id", "publicId", "title", "content"
                 from "feedEntries"
                 where "feed" = ${feed.id}
                 order by "id" asc;
@@ -1792,16 +1790,16 @@ if (application.commandLineArguments.values.type === "email") {
               "EMAIL",
               "SUCCESS",
               "FEED",
-              String(feed.externalId),
+              String(feed.publicId),
               "ENTRY",
-              feedEntry.externalId,
+              feedEntry.publicId,
               session.envelope.mailFrom === false
                 ? ""
                 : session.envelope.mailFrom.address,
               "DELETED ENTRIES",
               JSON.stringify(
                 deletedFeedEntries.map(
-                  (deletedFeedEntry) => deletedFeedEntry.externalId,
+                  (deletedFeedEntry) => deletedFeedEntry.publicId,
                 ),
               ),
             );
@@ -1850,13 +1848,13 @@ if (application.commandLineArguments.values.type === "backgroundJob")
         feedWebSubSubscriptionId: number;
       }) => {
         const feed = application.database.get<{
-          externalId: string;
+          publicId: string;
           title: string;
           icon: string | null;
           emailIcon: string | null;
         }>(
           sql`
-            select "externalId", "title", "icon", "emailIcon"
+            select "publicId", "title", "icon", "emailIcon"
             from "feeds"
             where "id" = ${job.feedId};
           `,
@@ -1864,14 +1862,14 @@ if (application.commandLineArguments.values.type === "backgroundJob")
         if (feed === undefined) return;
         const feedEntry = application.database.get<{
           id: number;
-          externalId: string;
+          publicId: string;
           createdAt: string;
           author: string | null;
           title: string;
           content: string;
         }>(
           sql`
-            select "id", "externalId", "createdAt", "author", "title", "content"
+            select "id", "publicId", "createdAt", "author", "title", "content"
             from "feedEntries"
             where "id" = ${job.feedEntryId};
           `,
@@ -1900,9 +1898,9 @@ if (application.commandLineArguments.values.type === "backgroundJob")
             "Content-Type": "application/atom+xml; charset=utf-8",
             Link: `<https://${
               application.configuration.hostname
-            }/feeds/${feed.externalId}.xml>; rel="self", <https://${
+            }/feeds/${feed.publicId}.xml>; rel="self", <https://${
               application.configuration.hostname
-            }/feeds/${feed.externalId}/websub>; rel="hub"`,
+            }/feeds/${feed.publicId}/websub>; rel="hub"`,
             ...(typeof feedWebSubSubscription.secret === "string"
               ? {
                   "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
