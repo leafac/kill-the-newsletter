@@ -51,7 +51,7 @@ export type Application = {
     tunnel?: boolean;
     extraCaddyfile?: string;
   };
-  internalConfiguration: {
+  privateConfiguration: {
     ports: number[];
   };
   database: Database;
@@ -105,8 +105,8 @@ application.configuration = (
 application.configuration.dataDirectory ??= path.resolve("./data/");
 await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
 application.configuration.environment ??= "production";
-application.internalConfiguration = {} as Application["internalConfiguration"];
-application.internalConfiguration.ports = Array.from(
+application.privateConfiguration = {} as Application["privateConfiguration"];
+application.privateConfiguration.ports = Array.from(
   { length: os.availableParallelism() },
   (value, index) => 18000 + index,
 );
@@ -1900,7 +1900,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
     );
 
 if (application.commandLineArguments.values.type === undefined) {
-  for (const port of application.internalConfiguration.ports) {
+  for (const port of application.privateConfiguration.ports) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.argv[0],
@@ -1965,7 +1965,7 @@ if (application.commandLineArguments.values.type === undefined) {
   );
   caddy.start({
     ...application.configuration,
-    ...application.internalConfiguration,
+    ...application.privateConfiguration,
     untrustedStaticFilesRoots: [
       `/files/* "${application.configuration.dataDirectory}"`,
     ],
