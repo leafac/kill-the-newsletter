@@ -283,6 +283,34 @@ application.database = await new Database(
     alter table "feeds" rename column "icon" to "emailIcon";
     alter table "feeds" add column "icon" text null;
   `,
+
+  sql`
+    alter table "feeds" rename column "externalId" to "publicId";
+    alter table "feedEntries" rename column "externalId" to "publicId";
+    alter table "feedEntryEnclosures" rename column "externalId" to "publicId";
+
+    drop index "feeds_externalId";
+    drop index "feedEntries_externalId";
+    drop index "feedEntries_feed";
+    drop index "feedVisualizations_feed";
+    drop index "feedVisualizations_createdAt";
+    drop index "feedWebSubSubscriptions_feed";
+    drop index "feedWebSubSubscriptions_createdAt";
+    drop index "feedWebSubSubscriptions_callback";
+    drop index "feedEntryEnclosureLinks_feedEntry";
+    drop index "feedEntryEnclosureLinks_feedEntryEnclosure";
+
+    create index "index_feeds_publicId" on "feeds" ("publicId");
+    create index "index_feedEntries_publicId" on "feedEntries" ("publicId");
+    create index "index_feedEntries_feed" on "feedEntries" ("feed");
+    create index "index_feedVisualizations_feed" on "feedVisualizations" ("feed");
+    create index "index_feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
+    create index "index_feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
+    create index "index_feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
+    create index "index_feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
+    create index "index_feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
+    create index "index_feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+  `,
 );
 
 if (application.commandLineArguments.values.type === "backgroundJob")
