@@ -7,11 +7,11 @@ export default {
   tls: {
     key: path.join(
       caddy.dataDirectory(),
-      "certificates/local/localhost/localhost.key",
+      `certificates/local/${os.hostname()}/${os.hostname()}.key`,
     ),
     certificate: path.join(
       caddy.dataDirectory(),
-      "certificates/local/localhost/localhost.crt",
+      `certificates/local/${os.hostname()}/${os.hostname()}.crt`,
     ),
   },
   environment: "development",
