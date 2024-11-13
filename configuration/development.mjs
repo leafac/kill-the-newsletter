@@ -1,4 +1,3 @@
-import os from "node:os";
 import path from "node:path";
 import * as caddy from "@radically-straightforward/caddy";
 
