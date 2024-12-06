@@ -357,7 +357,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
 application.layout = ({ request, response, head, body }) => {
   css`
     @import "@radically-straightforward/javascript/static/index.css";
-    @import "@fontsource-variable/public-sans";
+    @import "@fontsource-variable/roboto-flex/slnt.css";
     @import "bootstrap-icons/font/bootstrap-icons.css";
 
     input[type="text"],
@@ -448,7 +448,7 @@ application.layout = ({ request, response, head, body }) => {
       </head>
       <body
         css="${css`
-          font-family: "Public Sans Variable", var(--font-family--sans-serif);
+          font-family: "Roboto Flex Variable", var(--font-family--sans-serif);
           font-size: var(--font-size--3-5);
           line-height: var(--font-size--3-5--line-height);
           color: light-dark(var(--color--black), var(--color--white));
