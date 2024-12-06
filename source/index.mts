@@ -421,10 +421,12 @@ application.layout = ({ request, response, head, body }) => {
       color: light-dark(var(--color--slate--500), var(--color--slate--500));
     }
   `;
+
   javascript`
     import * as javascript from "@radically-straightforward/javascript/static/index.mjs";
     import * as utilities from "@radically-straightforward/utilities";
   `;
+
   return html`
     <!doctype html>
     <html
@@ -433,16 +435,16 @@ application.layout = ({ request, response, head, body }) => {
       `}"
     >
       <head>
+        <meta
+          name="description"
+          content="Convert email newsletters into Atom feeds"
+        />
         <meta name="version" content="${application.version}" />
         <link rel="stylesheet" href="/${caddy.staticFiles["index.css"]}" />
         <script src="/${caddy.staticFiles["index.mjs"]}"></script>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=1"
-        />
-        <meta
-          name="description"
-          content="Convert email newsletters into Atom feeds"
         />
         $${head}
       </head>
@@ -459,6 +461,52 @@ application.layout = ({ request, response, head, body }) => {
           padding: var(--space--4) var(--space--4);
         `}"
       >
+        $${(() => {
+          const flash = request.getFlash();
+          return typeof flash === "string"
+            ? html`
+                <div
+                  key="flash"
+                  css="${css`
+                    color: light-dark(
+                      var(--color--green--800),
+                      var(--color--green--200)
+                    );
+                    background-color: light-dark(
+                      var(--color--green--50),
+                      var(--color--green--950)
+                    );
+                    width: max-content;
+                    max-width: min(
+                      calc(100% - var(--space--8)),
+                      var(--space--96)
+                    );
+                    padding: var(--space--1) var(--space--2);
+                    border: var(--border-width--1) solid
+                      light-dark(
+                        var(--color--green--400),
+                        var(--color--green--600)
+                      );
+                    border-radius: var(--border-radius--1);
+                    margin: var(--space--0) auto;
+                    box-shadow: var(--box-shadow--4);
+                    position: fixed;
+                    top: var(--space--8);
+                    left: var(--space--2);
+                    right: var(--space--2);
+                    z-index: 1500;
+                  `}"
+                  javascript="${javascript`
+                    setTimeout(() => {
+                      this.remove();
+                    }, 3 * 1000);
+                  `}"
+                >
+                  $${flash}
+                </div>
+              `
+            : html``;
+        })()}
         <div
           key="${request.URL.pathname}"
           css="${css`
@@ -470,10 +518,10 @@ application.layout = ({ request, response, head, body }) => {
           `}"
         >
           <div>
-            <h1
+            <div
               css="${css`
                 font-size: var(--font-size--4-5);
-                line-height: var(--font-size--4-5--line-height);
+                line-height: var(--font-size--3-5--line-height);
                 font-weight: 700;
               `}"
             >
@@ -496,59 +544,13 @@ application.layout = ({ request, response, head, body }) => {
                 </div>
                 <div>Kill the Newsletter!</div>
               </a>
-            </h1>
-            <p
-              css="${css`
-                margin-top: var(--space---1);
-              `}"
-            >
+            </div>
+            <div>
               <small>Convert email newsletters into Atom feeds</small>
-            </p>
+            </div>
           </div>
           $${body}
         </div>
-        $${(() => {
-          const flash = request.getFlash();
-          return typeof flash === "string"
-            ? html`
-                <div
-                  key="flash"
-                  css="${css`
-                    text-align: center;
-                    color: light-dark(
-                      var(--color--green--800),
-                      var(--color--green--200)
-                    );
-                    background-color: light-dark(
-                      var(--color--green--50),
-                      var(--color--green--950)
-                    );
-                    max-width: var(--space--96);
-                    padding: var(--space--1) var(--space--2);
-                    border: var(--border-width--1) solid
-                      light-dark(
-                        var(--color--green--400),
-                        var(--color--green--600)
-                      );
-                    border-radius: var(--border-radius--1);
-                    box-shadow: var(--box-shadow--4);
-                    margin: var(--space--0) auto;
-                    position: fixed;
-                    top: var(--space--8);
-                    left: var(--space--2);
-                    right: var(--space--2);
-                  `}"
-                  javascript="${javascript`
-                    setTimeout(() => {
-                      this.remove();
-                    }, 3 * 1000);
-                  `}"
-                >
-                  $${flash}
-                </div>
-              `
-            : html``;
-        })()}
       </body>
     </html>
   `;
