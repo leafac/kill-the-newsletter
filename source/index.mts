@@ -927,20 +927,18 @@ application.server?.push({
               <div>
                 <button
                   javascript="${javascript`
+                    const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
                       await navigator.clipboard.writeText(${`${request.state.feed.publicId}@${application.configuration.hostname}`});
-                      javascript.tippy({
-                        element: this,
-                        trigger: "manual",
-                        content: "Copied",
-                      }).show();
+                      popover.showPopover();
                       await utilities.sleep(1000);
-                      this.tippy.hide();
+                      popover.hidePopover();
                     };
                   `}"
                 >
                   <i class="bi bi-copy"></i>  Copy
                 </button>
+                <div class="popover">Copied</div>
               </div>
             </div>
           </div>
@@ -972,22 +970,20 @@ application.server?.push({
               <div>
                 <button
                   javascript="${javascript`
+                    const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
                       await navigator.clipboard.writeText(${`https://${
                         application.configuration.hostname
                       }/feeds/${request.state.feed.publicId}.xml`});
-                      javascript.tippy({
-                        element: this,
-                        trigger: "manual",
-                        content: "Copied",
-                      }).show();
+                      popover.showPopover();
                       await utilities.sleep(1000);
-                      this.tippy.hide();
+                      popover.hidePopover();
                     };
                   `}"
                 >
                   <i class="bi bi-copy"></i>  Copy
                 </button>
+                <div class="popover">Copied</div>
               </div>
             </div>
           </div>
