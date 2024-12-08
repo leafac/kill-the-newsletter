@@ -660,11 +660,11 @@ application.server?.push({
         response,
         head: html`<title>Kill the Newsletter!</title>`,
         body: html`
-          <form
+          <div
             key="feeds/post"
+            type="form"
             method="POST"
             action="/feeds"
-            novalidate
             css="${css`
               display: flex;
               gap: var(--space--2);
@@ -685,7 +685,7 @@ application.server?.push({
               `}"
             />
             <div><button type="submit">Create feed</button></div>
-          </form>
+          </div>
           <p>
             <small>
               <a href="https://leafac.com">By Leandro Facchinetti</a> |
@@ -991,11 +991,11 @@ application.server?.push({
           </div>
           <p><a href="/">← Create another feed</a></p>
           <hr />
-          <form
+          <div
             key="feeds/patch"
+            type="form"
             method="PATCH"
             action="/feeds/${request.state.feed.publicId}"
-            novalidate
             css="${css`
               display: flex;
               flex-direction: column;
@@ -1042,13 +1042,13 @@ application.server?.push({
               />
             </label>
             <div><button type="submit">Update feed settings</button></div>
-          </form>
+          </div>
           <hr />
-          <form
+          <div
             key="feeds/delete"
+            type="form"
             method="DELETE"
             action="/feeds/${request.state.feed.publicId}"
-            novalidate
             css="${css`
               display: flex;
               flex-direction: column;
@@ -1092,7 +1092,7 @@ application.server?.push({
               />
             </label>
             <div><button type="submit">Delete feed</button></div>
-          </form>
+          </div>
         `,
       }),
     );
