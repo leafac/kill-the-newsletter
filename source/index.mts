@@ -1463,44 +1463,41 @@ if (application.commandLineArguments.values.type === "backgroundJob")
           (await verificationResponse.text()) !== verificationChallenge
         )
           return;
-        switch (job["hub.mode"]) {
-          case "subscribe":
-            if (feedWebSubSubscription === undefined)
-              application.database.run(
-                sql`
-                  insert into "feedWebSubSubscriptions" (
-                    "feed",
-                    "createdAt",
-                    "callback",
-                    "secret"
-                  )
-                  values (
-                    ${feed.id},
-                    ${new Date().toISOString()},
-                    ${job["hub.callback"]},
-                    ${job["hub.secret"]}
-                  );
-                `,
-              );
-            else
-              application.database.run(
-                sql`
-                  update "feedWebSubSubscriptions"
-                  set
-                    "createdAt" = ${new Date().toISOString()},
-                    "secret" = ${job["hub.secret"]}
-                  where "id" = ${feedWebSubSubscription.id};
-                `,
-              );
-            break;
-          case "unsubscribe":
+        if (job["hub.mode"] === "subscribe") {
+          if (feedWebSubSubscription === undefined)
             application.database.run(
               sql`
-                delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
+                insert into "feedWebSubSubscriptions" (
+                  "feed",
+                  "createdAt",
+                  "callback",
+                  "secret"
+                )
+                values (
+                  ${feed.id},
+                  ${new Date().toISOString()},
+                  ${job["hub.callback"]},
+                  ${job["hub.secret"]}
+                );
               `,
             );
-            break;
-        }
+          else
+            application.database.run(
+              sql`
+                update "feedWebSubSubscriptions"
+                set
+                  "createdAt" = ${new Date().toISOString()},
+                  "secret" = ${job["hub.secret"]}
+                where "id" = ${feedWebSubSubscription.id};
+              `,
+            );
+        } else if (job["hub.mode"] === "unsubscribe")
+          application.database.run(
+            sql`
+              delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
+            `,
+          );
+        else throw new Error();
       },
     );
 application.server?.push({
