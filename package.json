@@ -2,7 +2,7 @@
   "scripts": {
     "prepare": "tsc && build",
     "start": "nodemon --watch \"./package.json\" --watch \"./tsconfig.json\" --watch \"./source/\" --watch \"./static/\" --watch \"./configuration/\" --ext \"*\" --exec \"npm run prepare && node ./build/index.mjs ./configuration/development.mjs\"",
-    "test": "npm run prepare && prettier --check \"./README.md\" --check \"./CHANGELOG.md\" --check \"./package.json\" --check \"./tsconfig.json\" --check \"./source/\" --check \"./configuration/\"",
+    "test": "npm run prepare && prettier --check \"./README.md\" \"./CHANGELOG.md\" \"./package.json\" \"./tsconfig.json\" \"./source/\" \"./configuration/\"",
     "backup": "rsync -av --delete --progress root@kill-the-newsletter.com:kill-the-newsletter/data/ /Volumes/leafac--external-storage/Backups/kill-the-newsletter/"
   },
   "dependencies": {
