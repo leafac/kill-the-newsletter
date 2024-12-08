@@ -684,7 +684,7 @@ application.server?.push({
                 flex: 1;
               `}"
             />
-            <div><button>Create feed</button></div>
+            <div><button type="submit">Create feed</button></div>
           </form>
           <p>
             <small>
@@ -926,6 +926,7 @@ application.server?.push({
               />
               <div>
                 <button
+                  type="button"
                   javascript="${javascript`
                     const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
@@ -969,6 +970,7 @@ application.server?.push({
               />
               <div>
                 <button
+                  type="button"
                   javascript="${javascript`
                     const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
@@ -1039,7 +1041,7 @@ application.server?.push({
                 `}"
               />
             </label>
-            <div><button>Update feed settings</button></div>
+            <div><button type="submit">Update feed settings</button></div>
           </form>
           <hr />
           <form
@@ -1089,7 +1091,7 @@ application.server?.push({
                 `}"
               />
             </label>
-            <div><button>Delete feed</button></div>
+            <div><button type="submit">Delete feed</button></div>
           </form>
         `,
       }),
