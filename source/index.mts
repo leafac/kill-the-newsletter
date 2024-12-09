@@ -939,7 +939,7 @@ application.server?.push({
                 >
                   <i class="bi bi-copy"></i>  Copy
                 </button>
-                <div class="popover">Copied</div>
+                <div type="popover">Copied</div>
               </div>
             </div>
           </div>
@@ -985,7 +985,7 @@ application.server?.push({
                 >
                   <i class="bi bi-copy"></i>  Copy
                 </button>
-                <div class="popover">Copied</div>
+                <div type="popover">Copied</div>
               </div>
             </div>
           </div>
