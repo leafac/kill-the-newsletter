@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@fontsource-variable/roboto-flex": "^5.1.0",
-    "@radically-straightforward/development": "^1.0.33",
+    "@radically-straightforward/development": "^1.0.35",
     "@types/mailparser": "^3.4.5",
     "@types/node": "^22.10.1",
     "@types/nodemailer": "^6.4.17",
