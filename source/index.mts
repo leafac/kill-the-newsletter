@@ -809,7 +809,7 @@ application.server?.push({
   ) => {
     if (
       typeof request.body.title !== "string" ||
-      request.body.title === "" ||
+      request.body.title.trim() === "" ||
       request.body.title.length > 200
     )
       throw "validation";
@@ -1115,16 +1115,18 @@ application.server?.push({
     if (
       typeof request.body.title !== "string" ||
       request.body.title.trim() === "" ||
+      request.body.title.length > 200 ||
       typeof request.body.icon !== "string" ||
       (request.body.icon.trim() !== "" &&
-        (() => {
-          try {
-            new URL(request.body.icon);
-            return false;
-          } catch {
-            return true;
-          }
-        })())
+        (request.body.icon.length > 200 ||
+          (() => {
+            try {
+              new URL(request.body.icon);
+              return false;
+            } catch {
+              return true;
+            }
+          })()))
     )
       throw "validation";
     application.database.run(
