@@ -771,7 +771,7 @@ application.server?.push({
               your feed reader, then the issue must be with the newsletter
               publisher and you should contact them. Otherwise, please
               <a href="mailto:kill-the-newsletter@leafac.com"
-                >report the issue us</a
+                >report the issue to us</a
               >.
             </p>
           </div>
