@@ -1023,8 +1023,8 @@ application.server?.push({
               <input
                 type="text"
                 name="icon"
-                value="${request.state.feed.icon ?? ""}"
                 placeholder="https://example.com/favicon.ico"
+                value="${request.state.feed.icon ?? ""}"
                 maxlength="200"
                 css="${css`
                   width: 100%;
