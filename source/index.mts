@@ -496,7 +496,7 @@ application.layout = ({ request, response, head, body }) => {
                     z-index: 1500;
                   `}"
                   javascript="${javascript`
-                    setTimeout(() => {
+                    window.setTimeout(() => {
                       this.remove();
                     }, 3 * 1000);
                   `}"
