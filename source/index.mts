@@ -365,7 +365,7 @@ application.layout = ({ request, response, head, body }) => {
         var(--color--slate--50),
         var(--color--slate--950)
       );
-      padding: var(--space--1) var(--space--2);
+      padding: var(--size--1) var(--size--2);
       border: var(--border-width--1) solid
         light-dark(var(--color--slate--400), var(--color--slate--600));
       border-radius: var(--border-radius--1);
@@ -457,7 +457,7 @@ application.layout = ({ request, response, head, body }) => {
             var(--color--white),
             var(--color--black)
           );
-          padding: var(--space--4) var(--space--4);
+          padding: var(--size--4) var(--size--4);
         `}"
       >
         $${(() => {
@@ -477,22 +477,22 @@ application.layout = ({ request, response, head, body }) => {
                     );
                     width: max-content;
                     max-width: min(
-                      calc(100% - var(--space--8)),
-                      var(--space--96)
+                      calc(100% - var(--size--8)),
+                      var(--size--96)
                     );
-                    padding: var(--space--1) var(--space--2);
+                    padding: var(--size--1) var(--size--2);
                     border: var(--border-width--1) solid
                       light-dark(
                         var(--color--green--400),
                         var(--color--green--600)
                       );
                     border-radius: var(--border-radius--1);
-                    margin: var(--space--0) auto;
+                    margin: var(--size--0) auto;
                     box-shadow: var(--box-shadow--4);
                     position: fixed;
-                    top: var(--space--8);
-                    left: var(--space--2);
-                    right: var(--space--2);
+                    top: var(--size--8);
+                    left: var(--size--2);
+                    right: var(--size--2);
                     z-index: 1500;
                   `}"
                   javascript="${javascript`
@@ -509,11 +509,11 @@ application.layout = ({ request, response, head, body }) => {
         <div
           key="${request.URL.pathname}"
           css="${css`
-            max-width: var(--space--144);
-            margin: var(--space--0) auto;
+            max-width: var(--size--144);
+            margin: var(--size--0) auto;
             display: flex;
             flex-direction: column;
-            gap: var(--space--4);
+            gap: var(--size--4);
           `}"
         >
           <div>
@@ -532,7 +532,7 @@ application.layout = ({ request, response, head, body }) => {
                     color: light-dark(var(--color--black), var(--color--white));
                   }
                   display: inline-flex;
-                  gap: var(--space--2);
+                  gap: var(--size--2);
                 `}"
               >
                 <div>
@@ -666,7 +666,7 @@ application.server?.push({
             action="/feeds"
             css="${css`
               display: flex;
-              gap: var(--space--2);
+              gap: var(--size--2);
               @media (max-width: 400px) {
                 flex-direction: column;
               }
@@ -903,7 +903,7 @@ application.server?.push({
             <div
               css="${css`
                 display: flex;
-                gap: var(--space--2);
+                gap: var(--size--2);
                 @media (max-width: 400px) {
                   flex-direction: column;
                 }
@@ -947,7 +947,7 @@ application.server?.push({
             <div
               css="${css`
                 display: flex;
-                gap: var(--space--2);
+                gap: var(--size--2);
                 @media (max-width: 400px) {
                   flex-direction: column;
                 }
@@ -998,7 +998,7 @@ application.server?.push({
             css="${css`
               display: flex;
               flex-direction: column;
-              gap: var(--space--4);
+              gap: var(--size--4);
             `}"
           >
             <div>
@@ -1051,7 +1051,7 @@ application.server?.push({
             css="${css`
               display: flex;
               flex-direction: column;
-              gap: var(--space--4);
+              gap: var(--size--4);
             `}"
           >
             <div>
