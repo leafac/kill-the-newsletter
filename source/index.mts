@@ -690,8 +690,17 @@ application.server?.push({
               <a href="https://leafac.com">By Leandro Facchinetti</a> |
               <a href="https://github.com/leafac/kill-the-newsletter">Source</a
               > |
-              <a href="mailto:kill-the-newsletter@leafac.com">Report Issue</a> |
-              <a href="https://patreon.com/leafac">Patreon</a> ·
+              <a
+                href="mailto:kill-the-newsletter@leafac.com?${new URLSearchParams(
+                  {
+                    subject: "Report issue",
+                    body: "Please describe the circumstances under which you reached the issue, including any information that may be relevant, for example, browser version, operating system version, and so forth:",
+                  },
+                )
+                  .toString()
+                  .replaceAll("+", "%20")}"
+                >Report Issue</a
+              > | <a href="https://patreon.com/leafac">Patreon</a> ·
               <a href="https://paypal.me/LeandroFacchinettiEU">PayPal</a> ·
               <a href="https://github.com/sponsors/leafac">GitHub Sponsors</a>
             </small>
@@ -769,7 +778,15 @@ application.server?.push({
               Newsletter! feed and wait a few minutes. If the email shows up on
               your feed reader, then the issue must be with the newsletter
               publisher and you should contact them. Otherwise, please
-              <a href="mailto:kill-the-newsletter@leafac.com"
+              <a
+                href="mailto:kill-the-newsletter@leafac.com?${new URLSearchParams(
+                  {
+                    subject: "Feed isn’t updating",
+                    body: "Have you tried sending an email to the address that corresponds to your Kill the Newsletter! feed and waited a few minutes then checked your feed reader? If the email showed up, then the issue is somewhere else (for example, email forwarding filters) and you don’t need to report this issue to Kill the Newsletter! If the email didn’t show up, then please report the issue, preferably including the address to the inbox in question:",
+                  },
+                )
+                  .toString()
+                  .replaceAll("+", "%20")}"
                 >report the issue to us</a
               >.
             </p>
@@ -1536,7 +1553,15 @@ application.server?.push({
             <h2>Server error.</h2>
             <p>
               Please report this issue to
-              <a href="mailto:kill-the-newsletter@leafac.com"
+              <a
+                href="mailto:kill-the-newsletter@leafac.com?${new URLSearchParams(
+                  {
+                    subject: "Report issue",
+                    body: "Please describe the circumstances under which you reached the issue, including any information that may be relevant, for example, browser version, operating system version, and so forth:",
+                  },
+                )
+                  .toString()
+                  .replaceAll("+", "%20")}"
                 >kill-the-newsletter@leafac.com</a
               >.
             </p>
