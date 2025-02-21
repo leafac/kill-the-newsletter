@@ -1,8 +1,6 @@
 import path from "node:path";
 import nodemailer from "nodemailer";
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
 await nodemailer
   .createTransport({
     host: "localhost",
