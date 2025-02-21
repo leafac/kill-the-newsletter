@@ -409,7 +409,7 @@ application.layout = ({ request, response, head, body }) => {
     }
 
     hr {
-      border-top: var(--border-width--1) solid
+      border-bottom: var(--border-width--1) solid
         light-dark(var(--color--slate--200), var(--color--slate--800));
     }
 
