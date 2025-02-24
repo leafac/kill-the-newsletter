@@ -41,21 +41,21 @@ jobs:
           EOF
           rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
           ssh root@kill-the-newsletter.com << "EOF"
-            mkdir -p /root/kill-the-newsletter/
-            rm -rf /root/kill-the-newsletter--deploy/
-            mkdir /root/kill-the-newsletter--deploy/
-            mv /root/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz /root/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
-            cd /root/kill-the-newsletter--deploy/
+            mkdir -p /mnt/kill-the-newsletter/kill-the-newsletter/
+            rm -rf /mnt/kill-the-newsletter/kill-the-newsletter--deploy/
+            mkdir /mnt/kill-the-newsletter/kill-the-newsletter--deploy/
+            mv /mnt/kill-the-newsletter/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz /mnt/kill-the-newsletter/kill-the-newsletter--deploy/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+            cd /mnt/kill-the-newsletter/kill-the-newsletter--deploy/
             tar -xzf ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
-            cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.com.mjs /root/kill-the-newsletter/configuration.mjs
-            cp /root/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.service /etc/systemd/system/kill-the-newsletter.service
+            cp /mnt/kill-the-newsletter/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.com.mjs /mnt/kill-the-newsletter/kill-the-newsletter/configuration.mjs
+            cp /mnt/kill-the-newsletter/kill-the-newsletter--deploy/kill-the-newsletter/_/configuration/kill-the-newsletter.service /etc/systemd/system/kill-the-newsletter.service
             systemctl daemon-reload
             systemctl stop kill-the-newsletter
-            mv /root/kill-the-newsletter/kill-the-newsletter/ /root/kill-the-newsletter--deploy/kill-the-newsletter--old/ || true
-            mv /root/kill-the-newsletter--deploy/kill-the-newsletter/ /root/kill-the-newsletter/kill-the-newsletter/
+            mv /mnt/kill-the-newsletter/kill-the-newsletter/kill-the-newsletter/ /mnt/kill-the-newsletter/kill-the-newsletter--deploy/kill-the-newsletter--old/ || true
+            mv /mnt/kill-the-newsletter/kill-the-newsletter--deploy/kill-the-newsletter/ /mnt/kill-the-newsletter/kill-the-newsletter/kill-the-newsletter/
             systemctl start kill-the-newsletter
             systemctl enable kill-the-newsletter
-            rm -rf /root/kill-the-newsletter--deploy/
+            rm -rf /mnt/kill-the-newsletter/kill-the-newsletter--deploy/
           EOF
 
   release:

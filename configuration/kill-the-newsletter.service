@@ -3,8 +3,8 @@ Description=Kill the Newsletter!
 After=network.target
 
 [Service]
-WorkingDirectory=/root/kill-the-newsletter/
-ExecStart=/root/kill-the-newsletter/kill-the-newsletter/kill-the-newsletter /root/kill-the-newsletter/configuration.mjs
+WorkingDirectory=/mnt/kill-the-newsletter/kill-the-newsletter/
+ExecStart=/mnt/kill-the-newsletter/kill-the-newsletter/kill-the-newsletter/kill-the-newsletter /mnt/kill-the-newsletter/kill-the-newsletter/configuration.mjs
 User=root
 Restart=always
 
