@@ -29,15 +29,15 @@ jobs:
       - if: ${{ matrix.os == 'ubuntu' && startsWith(github.ref, 'refs/tags/v') }}
         run: |
           cat >> ~/.ssh/known_hosts << "EOF"
-            # $ ssh-keyscan kill-the-newsletter.com
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
-            kill-the-newsletter.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDSx09epSENSE5QAUVe3fWEmMsBMUasFBYqXJMdcpakmt0dlaKgSLrgwXpks0yelHLnYqPv+PfKxIffR4t2tOa3HNAQSY7NHLyHbLW0RVAyEOkRflqUjNdpC8iv1lvF31ZwFtbLKQZ7iOZLkpLZjkfOfLZnBX8Kp+agLbX++BIWtsTEuLMQVzrUOch4EjoIWw2/+fKI4fkXvgPREaUsKEIA8vmyrym+A2pUu2+WFQe6FomhD6hlOUhutOKGOlEamWhQydV/6AIuyLI+k7rm2V7lhyRVSxRhMEjHMkKiDFVtMf2IpMBjEoSFdoWqqM3eDHVJTd9VRAtsD4cm7QoMm6bbZeNRRZppckvldQNTVZGxKpf3So1phf+O71WVRwRAzSkX8ywb6GbjQ0QtCBEVLRn2cbHv1TDaXlvDGCl2wpneO865b7XwCdMQ6/8q3k+zrPHWe/xxdNCoNTJKoxBWa/Ae5t7YW8GzIF1e5X12V8ePT2h/njEZLVLi0ckFn1ndPBs=
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
-            kill-the-newsletter.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHME/qZBfCgIM4kgEG+o4m8kbykc8jq0wX95YiclHA6lAEtp/mnjhYRcL4SFFWdSdtlA4Xd5pxp9QIB8rrU9yHQ=
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
-            kill-the-newsletter.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAT36G3KwKsiCaZujOaNYBJ8YWQbt9gt8tf3COVwn5ki
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13
+            $ ssh-keyscan 159.69.13.122
+            # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
+            159.69.13.122 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCvUeZIIcFYMFzJAxqen3pWi0E4LP/V1vhaqs926jCxn4YqXAdBLdBaJ6cS6pq7cER0UrHqPXdGONQd0gyH3sFh3EJ/FJGaMvmhrWsfjM03vBDUWm84h7DId57TGgZCGClWdb2Mbhvxpl2Rw87Iiq+Wp//DDPfIl6QPTTwPF8b4V8Wx0Qv2pAXIZrO7eRrJpMaQPSUqaj2A94Hui1hVdl9jvfa/iYwvOguP8e4L9wI3b05ItHjg+v70GYbDCuSw045UAu5wfjlOHlJXi+h93gUSU2XmylTxssDW77agGpkIYDLeuxYxjhWAWJNbyGDiBYTjT1lNbFT4RWrJs9fURw0bc7zQCf74UUxkAinnfXllCgAroVlniJxSz9/87dWDvlRsIncz6SryX2g/lTSM8Yd290AqM2q2fvpCGJ0h6om71yNxsH1P5BaIZwJ74XhZwUVy1OK3th+OoZPLFMYwoi309188kdgWJ1CiJLkWQnoKjjiG7CD4rEaREWRThWPqb9k=
+            # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
+            159.69.13.122 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFMYkjNwmcUiRukJuoAA7JYtTF1xG3HPEa/QzIdGY0pb
+            # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
+            159.69.13.122 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBL8H/sc/goyCkg77Vj7Dr/Mf89yUUazhunpjiWGUzuLJclWt9R/JFWmRM7o1lQjVaFxE53CCbD8pLQCO4etApSs=
+            # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
+            # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
           EOF
           rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
           ssh root@kill-the-newsletter.com << "EOF"
