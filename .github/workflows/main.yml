@@ -39,7 +39,7 @@ jobs:
             # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
             # 159.69.13.122:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
           EOF
-          rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
+          rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:/mnt/kill-the-newsletter/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
           ssh root@kill-the-newsletter.com << "EOF"
             mkdir -p /mnt/kill-the-newsletter/kill-the-newsletter/
             rm -rf /mnt/kill-the-newsletter/kill-the-newsletter--deploy/
