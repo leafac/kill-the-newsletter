@@ -498,7 +498,7 @@ application.layout = ({ request, response, head, body }) => {
                   javascript="${javascript`
                     window.setTimeout(() => {
                       this.remove();
-                    }, 3 * 1000);
+                    }, 5 * 1000);
                   `}"
                 >
                   $${flash}
