@@ -1681,6 +1681,12 @@ if (application.commandLineArguments.values.type === "email") {
                 where "id" = ${feed.id};
               `,
             );
+            const entrySender = feed.params.includes("showsender")
+              ? email.from?.value[0].name || email.from?.value[0].address
+              : null;
+            const entryTitle =
+              (entrySender ? entrySender + ": " : "") +
+              (email.subject ?? "Untitled");
             const feedEntry = application.database.get<{
               id: number;
               publicId: string;
@@ -1705,7 +1711,7 @@ if (application.commandLineArguments.values.type === "email") {
                         ${feed.id},
                         ${new Date().toISOString()},
                         ${(session.envelope.mailFrom as SMTPServerAddress).address},
-                        ${email.subject ?? "Untitled"},
+                        ${entryTitle},
                         ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
                       );
                     `,
@@ -1795,6 +1801,7 @@ if (application.commandLineArguments.values.type === "email") {
               session.envelope.mailFrom === false
                 ? ""
                 : session.envelope.mailFrom.address,
+              entryTitle,
               "DELETED ENTRIES",
               JSON.stringify(
                 deletedFeedEntries.map(
