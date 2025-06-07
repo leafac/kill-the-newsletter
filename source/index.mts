@@ -1598,17 +1598,20 @@ if (application.commandLineArguments.values.type === "email") {
             address.match(utilities.emailRegExp) === null
           )
             return [];
-          const [feedPublicId, hostname] = address.split("@");
+          const [feedAddress, hostname] = address.split("@");
+          const [feedPublicId, ...feedParams] = feedAddress.split("+");
           if (hostname !== application.configuration.hostname) return [];
           const feed = application.database.get<{
             id: number;
             publicId: string;
+            params: string[];
           }>(
             sql`
               select "id", "publicId" from "feeds" where "publicId" = ${feedPublicId};
             `,
           );
           if (feed === undefined) return [];
+          feed.params = feedParams;
           return [feed];
         });
         if (feeds.length === 0) throw new Error("No valid recipients.");
