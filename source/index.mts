@@ -1081,8 +1081,8 @@ application.server?.push({
                   );
                 `}"
               >
-                <i class="bi bi-exclamation-triangle-fill"></i> This action is
-                irreversible! Your feed and all its entries will be lost!
+                <i class="bi bi-exclamation-triangle-fill"></i> This action
+                cannot be reverted! Your feed and all its entries will be lost!
               </p>
             </div>
             <p>
