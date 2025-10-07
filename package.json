@@ -19,7 +19,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/smtp-server": "^3.5.10",
     "bootstrap-icons": "^1.11.3",
-    "nodemailer": "^6.10.0",
+    "nodemailer": "^7.0.7",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
