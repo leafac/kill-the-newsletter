@@ -653,7 +653,7 @@ application.server?.push({
   method: "GET",
   pathname: "/",
   handler: (request, response) => {
-    response.end(
+    response.send(
       application.layout({
         request,
         response,
@@ -850,7 +850,7 @@ application.server?.push({
       `,
     )!;
     if (request.headers.accept === "application/json")
-      response.setHeader("Content-Type", "application/json").end(
+      response.setHeader("Content-Type", "application/json").send(
         JSON.stringify({
           feedId: feed.publicId,
           email: `${feed.publicId}@${application.configuration.hostname}`,
@@ -906,7 +906,7 @@ application.server?.push({
     response,
   ) => {
     if (request.state.feed === undefined) return;
-    response.end(
+    response.send(
       application.layout({
         request,
         response,
@@ -1235,7 +1235,7 @@ application.server?.push({
       )!.count > 10
     ) {
       response.statusCode = 429;
-      response.end(
+      response.send(
         application.layout({
           request,
           response,
@@ -1275,7 +1275,7 @@ application.server?.push({
     );
     response
       .setHeader("Content-Type", "application/atom+xml; charset=utf-8")
-      .end(
+      .send(
         application.partials.feed({ feed: request.state.feed, feedEntries }),
       );
   },
@@ -1318,7 +1318,7 @@ application.server?.push({
         "default-src 'self'; img-src *; style-src 'self' 'unsafe-inline'; frame-src 'none'; object-src 'none'; form-action 'self'; frame-ancestors 'none'",
       )
       .setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
-      .end(feedEntry.content);
+      .send(feedEntry.content);
   },
 });
 application.server?.push({
@@ -1415,7 +1415,7 @@ application.server?.push({
       `,
     );
     response.statusCode = 202;
-    response.end();
+    response.send();
   },
 });
 if (application.commandLineArguments.values.type === "backgroundJob")
@@ -1521,7 +1521,7 @@ if (application.commandLineArguments.values.type === "backgroundJob")
 application.server?.push({
   handler: (request, response) => {
     response.statusCode = 404;
-    response.end(
+    response.send(
       application.layout({
         request,
         response,
@@ -1543,7 +1543,7 @@ application.server?.push({
 application.server?.push({
   error: true,
   handler: (request, response) => {
-    response.end(
+    response.send(
       application.layout({
         request,
         response,
