@@ -6,16 +6,16 @@
     "backup": "rsync -av --delete --progress root@kill-the-newsletter.com:/mnt/kill-the-newsletter/kill-the-newsletter/data/ /Volumes/leafac--hd/backups/kill-the-newsletter/"
   },
   "dependencies": {
-    "@radically-straightforward/production": "^1.0.68",
+    "@radically-straightforward/production": "^1.0.69",
     "crypto-random-string": "^5.0.0",
-    "mailparser": "^3.9.12",
-    "smtp-server": "^3.19.1"
+    "mailparser": "^3.9.14",
+    "smtp-server": "^3.19.2"
   },
   "devDependencies": {
     "@fontsource-variable/roboto-flex": "^5.2.8",
     "@radically-straightforward/development": "^1.0.82",
     "@types/mailparser": "^3.4.6",
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.1",
     "@types/nodemailer": "^8.0.1",
     "@types/smtp-server": "^3.5.13",
     "bootstrap-icons": "^1.13.1",
