@@ -578,12 +578,12 @@ application.partials.feed = ({ feed, feedEntries }) =>
         typeof feed.icon === "string" || typeof feed.emailIcon === "string"
           ? html`<icon
               >${
-              feed.icon ??
-              feed.emailIcon ??
-              (() => {
-                throw new Error();
-              })()
-            }</icon
+                feed.icon ??
+                feed.emailIcon ??
+                (() => {
+                  throw new Error();
+                })()
+              }</icon
             >`
           : html``
       }
@@ -1409,26 +1409,16 @@ application.server?.push({
       feedWebSubSubscription === undefined
     )
       return;
-    application.database.run(
-      sql`
-        insert into "_backgroundJobs" (
-          "type",
-          "startAt",
-          "parameters"
-        )
-        values (
-          ${"feedWebSubSubscriptions.verify"},
-          ${new Date().toISOString()},
-          ${JSON.stringify({
-            feedId: request.state.feed.id,
-            "hub.mode": request.body["hub.mode"],
-            "hub.topic": request.body["hub.topic"],
-            "hub.callback": request.body["hub.callback"],
-            "hub.secret": request.body["hub.secret"],
-          })}
-        );
-      `,
-    );
+    application.database.backgroundJob({
+      type: "feedWebSubSubscriptions.verify",
+      parameters: {
+        feedId: request.state.feed.id,
+        "hub.mode": request.body["hub.mode"],
+        "hub.topic": request.body["hub.topic"],
+        "hub.callback": request.body["hub.callback"],
+        "hub.secret": request.body["hub.secret"],
+      },
+    });
     response.statusCode = 202;
     response.send();
   },
@@ -1779,24 +1769,14 @@ if (application.commandLineArguments.values.type === "email") {
                   ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt";
               `,
             ))
-              application.database.run(
-                sql`
-                  insert into "_backgroundJobs" (
-                    "type",
-                    "startAt",
-                    "parameters"
-                  )
-                  values (
-                    ${"feedWebSubSubscriptions.dispatch"},
-                    ${new Date().toISOString()},
-                    ${JSON.stringify({
-                      feedId: feed.id,
-                      feedEntryId: feedEntry.id,
-                      feedWebSubSubscriptionId: feedWebSubSubscription.id,
-                    })}
-                  );
-                `,
-              );
+              application.database.backgroundJob({
+                type: "feedWebSubSubscriptions.dispatch",
+                parameters: {
+                  feedId: feed.id,
+                  feedEntryId: feedEntry.id,
+                  feedWebSubSubscriptionId: feedWebSubSubscription.id,
+                },
+              });
             utilities.log(
               "EMAIL",
               "SUCCESS",
