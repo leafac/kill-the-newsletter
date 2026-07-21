@@ -28,7 +28,7 @@ export type Application = {
     };
     positionals: string[];
   };
-  configuration: {
+  userConfiguration: {
     hostname: string;
     systemAdministratorEmail: string | undefined;
     tls: { key: string; certificate: string };
@@ -37,7 +37,7 @@ export type Application = {
     hstsPreload?: boolean;
     extraCaddyfile?: string;
   };
-  privateConfiguration: {
+  applicationConfiguration: {
     ports: number[];
   };
   database: Database;
@@ -98,17 +98,20 @@ application.commandLineArguments = util.parseArgs({
   },
   allowPositionals: true,
 }) as Application["commandLineArguments"];
-application.configuration = (
+application.userConfiguration = (
   await import(path.resolve(application.commandLineArguments.positionals[0]))
 ).default;
-application.configuration.dataDirectory ??= path.resolve("./data/");
-await fs.mkdir(application.configuration.dataDirectory, { recursive: true });
-application.configuration.environment ??= "production";
-application.privateConfiguration = {} as Application["privateConfiguration"];
-application.privateConfiguration.ports = Array.from(
+application.userConfiguration.dataDirectory ??= path.resolve("./data/");
+await fs.mkdir(application.userConfiguration.dataDirectory, {
+  recursive: true,
+});
+application.userConfiguration.environment ??= "production";
+application.applicationConfiguration =
+  {} as Application["applicationConfiguration"];
+application.applicationConfiguration.ports = Array.from(
   {
     length:
-      application.configuration.environment === "development"
+      application.userConfiguration.environment === "development"
         ? 1
         : os.availableParallelism(),
   },
@@ -128,7 +131,7 @@ utilities.log(
   application.version,
   "START",
   application.commandLineArguments.values.type ??
-    `https://${application.configuration.hostname}`,
+    `https://${application.userConfiguration.hostname}`,
   application.commandLineArguments.values.port ?? "",
 );
 process.once("beforeExit", () => {
@@ -136,13 +139,16 @@ process.once("beforeExit", () => {
     "KILL THE NEWSLETTER!",
     "STOP",
     application.commandLineArguments.values.type ??
-      `https://${application.configuration.hostname}`,
+      `https://${application.userConfiguration.hostname}`,
     application.commandLineArguments.values.port ?? "",
   );
 });
 
 application.database = await new Database(
-  path.join(application.configuration.dataDirectory, "kill-the-newsletter.db"),
+  path.join(
+    application.userConfiguration.dataDirectory,
+    "kill-the-newsletter.db",
+  ),
 ).migrate(
   sql`
     CREATE TABLE "feeds" (
@@ -196,7 +202,7 @@ application.database = await new Database(
       `,
     );
 
-    if (application.configuration.environment === "development") {
+    if (application.userConfiguration.environment === "development") {
       const feed = database.get<{ id: number }>(
         sql`
           select * from "feeds" where "id" = ${
@@ -333,7 +339,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
     )) {
       await fs.rm(
         path.join(
-          application.configuration.dataDirectory,
+          application.userConfiguration.dataDirectory,
           "files",
           feedEntryEnclosure.publicId,
         ),
@@ -565,13 +571,13 @@ application.partials.feed = ({ feed, feedEntries }) =>
       <link
         rel="self"
         href="https://${
-          application.configuration.hostname
+          application.userConfiguration.hostname
         }/feeds/${feed.publicId}.xml"
       />
       <link
         rel="hub"
         href="https://${
-          application.configuration.hostname
+          application.userConfiguration.hostname
         }/feeds/${feed.publicId}/websub"
       />
       $${
@@ -599,7 +605,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
               rel="alternate"
               type="text/html"
               href="https://${
-                application.configuration.hostname
+                application.userConfiguration.hostname
               }/feeds/${feed.publicId}/entries/${feedEntry.publicId}.html"
             />
             $${application.database
@@ -628,7 +634,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
                     type="${feedEntryEnclosure.type}"
                     length="${String(feedEntryEnclosure.length)}"
                     href="https://${
-                      application.configuration.hostname
+                      application.userConfiguration.hostname
                     }/files/${feedEntryEnclosure.publicId}/${feedEntryEnclosure.name}"
                   />
                 `,
@@ -650,7 +656,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
                   <small>
                     <a
                       href="https://${
-                        application.configuration.hostname
+                        application.userConfiguration.hostname
                       }/feeds/${feed.publicId}"
                       >Kill the Newsletter! feed settings</a
                     >
@@ -866,9 +872,9 @@ application.server?.push({
       response.setHeader("Content-Type", "application/json").send(
         JSON.stringify({
           feedId: feed.publicId,
-          email: `${feed.publicId}@${application.configuration.hostname}`,
+          email: `${feed.publicId}@${application.userConfiguration.hostname}`,
           feed: `https://${
-            application.configuration.hostname
+            application.userConfiguration.hostname
           }/feeds/${feed.publicId}.xml`,
         }),
       );
@@ -942,7 +948,7 @@ application.server?.push({
               <input
                 type="text"
                 value="${request.state.feed.publicId}@${
-                  application.configuration.hostname
+                  application.userConfiguration.hostname
                 }"
                 readonly
                 css="${css`
@@ -960,7 +966,7 @@ application.server?.push({
                   javascript="${javascript`
                     const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
-                      await navigator.clipboard.writeText(${`${request.state.feed.publicId}@${application.configuration.hostname}`});
+                      await navigator.clipboard.writeText(${`${request.state.feed.publicId}@${application.userConfiguration.hostname}`});
                       popover.showPopover();
                       await utilities.sleep(1000);
                       popover.hidePopover();
@@ -987,7 +993,7 @@ application.server?.push({
               <input
                 type="text"
                 value="https://${
-                  application.configuration.hostname
+                  application.userConfiguration.hostname
                 }/feeds/${request.state.feed.publicId}.xml"
                 readonly
                 css="${css`
@@ -1006,7 +1012,7 @@ application.server?.push({
                     const popover = javascript.popover({ element: this, trigger: "none" });
                     this.onclick = async () => {
                       await navigator.clipboard.writeText(${`https://${
-                        application.configuration.hostname
+                        application.userConfiguration.hostname
                       }/feeds/${request.state.feed.publicId}.xml`});
                       popover.showPopover();
                       await utilities.sleep(1000);
@@ -1362,7 +1368,7 @@ application.server?.push({
         request.body["hub.mode"] !== "unsubscribe") ||
       request.body["hub.topic"] !==
         `https://${
-          application.configuration.hostname
+          application.userConfiguration.hostname
         }/feeds/${request.state.feed.publicId}.xml` ||
       typeof request.body["hub.callback"] !== "string" ||
       (() => {
@@ -1375,7 +1381,7 @@ application.server?.push({
       (new URL(request.body["hub.callback"]).protocol !== "https:" &&
         new URL(request.body["hub.callback"]).protocol !== "http:") ||
       new URL(request.body["hub.callback"]).hostname ===
-        application.configuration.hostname ||
+        application.userConfiguration.hostname ||
       new URL(request.body["hub.callback"]).hostname === "localhost" ||
       new URL(request.body["hub.callback"]).hostname === "127.0.0.1" ||
       (request.body["hub.secret"] !== undefined &&
@@ -1579,11 +1585,14 @@ application.server?.push({
 
 if (application.commandLineArguments.values.type === "email") {
   application.email = new SMTPServer({
-    name: application.configuration.hostname,
+    name: application.userConfiguration.hostname,
     size: 2 ** 19,
     disabledCommands: ["AUTH"],
-    key: await fs.readFile(application.configuration.tls.key, "utf-8"),
-    cert: await fs.readFile(application.configuration.tls.certificate, "utf-8"),
+    key: await fs.readFile(application.userConfiguration.tls.key, "utf-8"),
+    cert: await fs.readFile(
+      application.userConfiguration.tls.certificate,
+      "utf-8",
+    ),
     onData: async (emailStream, session, callback) => {
       try {
         if (
@@ -1599,12 +1608,12 @@ if (application.commandLineArguments.values.type === "email") {
           throw new Error("Invalid ‘mailFrom’.");
         const feeds = session.envelope.rcptTo.flatMap(({ address }) => {
           if (
-            application.configuration.environment !== "development" &&
+            application.userConfiguration.environment !== "development" &&
             address.match(utilities.emailRegExp) === null
           )
             return [];
           const [feedPublicId, hostname] = address.split("@");
-          if (hostname !== application.configuration.hostname) return [];
+          if (hostname !== application.userConfiguration.hostname) return [];
           const feed = application.database.get<{
             id: number;
             publicId: string;
@@ -1657,7 +1666,7 @@ if (application.commandLineArguments.values.type === "email") {
           )!;
           await fs.mkdir(
             path.join(
-              application.configuration.dataDirectory,
+              application.userConfiguration.dataDirectory,
               "files",
               feedEntryEnclosure.publicId,
             ),
@@ -1665,7 +1674,7 @@ if (application.commandLineArguments.values.type === "email") {
           );
           await fs.writeFile(
             path.join(
-              application.configuration.dataDirectory,
+              application.userConfiguration.dataDirectory,
               "files",
               feedEntryEnclosure.publicId,
               feedEntryEnclosure.name,
@@ -1816,8 +1825,8 @@ if (application.commandLineArguments.values.type === "email") {
     application.email!.close();
   });
   for (const file of [
-    application.configuration.tls.key,
-    application.configuration.tls.certificate,
+    application.userConfiguration.tls.key,
+    application.userConfiguration.tls.certificate,
   ])
     fsSync
       .watchFile(file, () => {
@@ -1888,9 +1897,9 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
           headers: {
             "Content-Type": "application/atom+xml; charset=utf-8",
             Link: `<https://${
-              application.configuration.hostname
+              application.userConfiguration.hostname
             }/feeds/${feed.publicId}.xml>; rel="self", <https://${
-              application.configuration.hostname
+              application.userConfiguration.hostname
             }/feeds/${feed.publicId}/websub>; rel="hub"`,
             ...(typeof feedWebSubSubscription.secret === "string"
               ? {
@@ -1917,7 +1926,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
     );
 
 if (application.commandLineArguments.values.type === undefined) {
-  for (const port of application.privateConfiguration.ports) {
+  for (const port of application.applicationConfiguration.ports) {
     node.childProcessKeepAlive(() =>
       childProcess.spawn(
         process.argv[0],
@@ -1933,7 +1942,7 @@ if (application.commandLineArguments.values.type === undefined) {
         {
           env: {
             ...process.env,
-            NODE_ENV: application.configuration.environment,
+            NODE_ENV: application.userConfiguration.environment,
           },
           stdio: "inherit",
         },
@@ -1954,7 +1963,7 @@ if (application.commandLineArguments.values.type === undefined) {
         {
           env: {
             ...process.env,
-            NODE_ENV: application.configuration.environment,
+            NODE_ENV: application.userConfiguration.environment,
           },
           stdio: "inherit",
         },
@@ -1974,17 +1983,17 @@ if (application.commandLineArguments.values.type === undefined) {
       {
         env: {
           ...process.env,
-          NODE_ENV: application.configuration.environment,
+          NODE_ENV: application.userConfiguration.environment,
         },
         stdio: "inherit",
       },
     ),
   );
   caddy.start({
-    ...application.configuration,
-    ...application.privateConfiguration,
+    ...application.userConfiguration,
+    ...application.applicationConfiguration,
     untrustedStaticFilesRoots: [
-      `/files/* "${application.configuration.dataDirectory}"`,
+      `/files/* "${application.userConfiguration.dataDirectory}"`,
     ],
   });
 }
