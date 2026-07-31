@@ -29,8 +29,7 @@
     "@radically-straightforward/typescript@1.0.5": true,
     "esbuild@0.28.1": true,
     "xxhash-addon@2.1.0": true,
-    "@radically-straightforward/caddy@2.0.12": true,
-    "better-sqlite3@12.11.1": true
+    "@radically-straightforward/caddy@2.0.12": true
   },
   "prettier": {}
 }
