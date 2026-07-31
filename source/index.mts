@@ -1193,7 +1193,7 @@ application.server?.push({
     response,
   ) => {
     if (request.state.feed === undefined) return;
-    application.database.executeTransaction(() => {
+    application.database.transaction(() => {
       application.database.run(
         sql`
           delete from "feedWebSubSubscriptions" where "feed" = ${request.state.feed!.id};
@@ -1684,7 +1684,7 @@ if (application.commandLineArguments.values.type === "email") {
           feedEntryEnclosures.push(feedEntryEnclosure);
         }
         for (const feed of feeds)
-          application.database.executeTransaction(() => {
+          application.database.transaction(() => {
             application.database.run(
               sql`
                 update "feeds"
