@@ -2,7 +2,7 @@ import util from "node:util";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
-import fsSync from "node:fs";
+import fsCallback from "node:fs";
 import childProcess from "node:child_process";
 import stream from "node:stream/promises";
 import crypto from "node:crypto";
@@ -1828,7 +1828,7 @@ if (application.commandLineArguments.values.type === "email") {
     application.userConfiguration.tls.key,
     application.userConfiguration.tls.certificate,
   ])
-    fsSync
+    fsCallback
       .watchFile(file, () => {
         node.exit();
       })
