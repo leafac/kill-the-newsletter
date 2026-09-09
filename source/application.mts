@@ -410,7 +410,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
                   from "feedEntryEnclosures"
                   join "feedEntryEnclosureLinks" on
                     "feedEntryEnclosureLinks"."feedEntry" = ${feedEntry.id} and
-                    "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+                    "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure";
                 `,
               )
               .map(
