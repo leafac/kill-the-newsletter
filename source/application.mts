@@ -1188,119 +1188,114 @@ application.webServer?.push({
 });
 
 if (application.commandLineArguments.values.type === "backgroundJobWorker")
-  setTimeout(() => {
-    for (
-      let backgroundJobIndex = 0;
-      backgroundJobIndex < 32;
-      backgroundJobIndex++
-    )
-      application.database.backgroundJobWorker<{
-        feedId: number;
-        "hub.mode": "subscribe" | "unsubscribe";
-        "hub.topic": string;
-        "hub.callback": string;
-        "hub.secret": string;
-      }>(
-        {
-          type: "feedWebSubSubscriptions.verify",
-          timeout: 5 * 1000,
-          retries: 0,
-        },
-        async (parameters) => {
-          const feed = application.database.get<{
-            id: number;
-          }>(
-            sql`
-              select "id"
-              from "feeds"
-              where "id" = ${parameters.feedId};
-            `,
-          );
-          if (feed === undefined) return;
-          const feedWebSubSubscription = application.database.get<{
-            id: number;
-          }>(
-            sql`
-              select "id"
-              from "feedWebSubSubscriptions"
-              where
-                "feed" = ${feed.id} and
-                "callback" = ${parameters["hub.callback"]};
-            `,
-          );
-          if (
-            parameters["hub.mode"] === "unsubscribe" &&
-            feedWebSubSubscription === undefined
-          )
-            return;
-          const verificationChallenge = cryptoRandomString({
-            length: 100,
-            characters: "abcdefghijklmnopqrstuvwxyz0123456789",
-          });
-          const verificationURL = new URL(parameters["hub.callback"]);
+  for (
+    let backgroundJobIndex = 0;
+    backgroundJobIndex < 32;
+    backgroundJobIndex++
+  )
+    application.database.backgroundJobWorker<{
+      feedId: number;
+      "hub.mode": "subscribe" | "unsubscribe";
+      "hub.topic": string;
+      "hub.callback": string;
+      "hub.secret": string;
+    }>(
+      {
+        type: "feedWebSubSubscriptions.verify",
+        timeout: 5 * 1000,
+        retries: 0,
+      },
+      async (parameters) => {
+        const feed = application.database.get<{
+          id: number;
+        }>(
+          sql`
+            select "id"
+            from "feeds"
+            where "id" = ${parameters.feedId};
+          `,
+        );
+        if (feed === undefined) return;
+        const feedWebSubSubscription = application.database.get<{
+          id: number;
+        }>(
+          sql`
+            select "id"
+            from "feedWebSubSubscriptions"
+            where
+              "feed" = ${feed.id} and
+              "callback" = ${parameters["hub.callback"]};
+          `,
+        );
+        if (
+          parameters["hub.mode"] === "unsubscribe" &&
+          feedWebSubSubscription === undefined
+        )
+          return;
+        const verificationChallenge = cryptoRandomString({
+          length: 100,
+          characters: "abcdefghijklmnopqrstuvwxyz0123456789",
+        });
+        const verificationURL = new URL(parameters["hub.callback"]);
+        verificationURL.searchParams.append("hub.mode", parameters["hub.mode"]);
+        verificationURL.searchParams.append(
+          "hub.topic",
+          parameters["hub.topic"],
+        );
+        verificationURL.searchParams.append(
+          "hub.challenge",
+          verificationChallenge,
+        );
+        if (parameters["hub.mode"] === "subscribe")
           verificationURL.searchParams.append(
-            "hub.mode",
-            parameters["hub.mode"],
+            "hub.lease_seconds",
+            String(24 * 60 * 60),
           );
-          verificationURL.searchParams.append(
-            "hub.topic",
-            parameters["hub.topic"],
-          );
-          verificationURL.searchParams.append(
-            "hub.challenge",
-            verificationChallenge,
-          );
-          if (parameters["hub.mode"] === "subscribe")
-            verificationURL.searchParams.append(
-              "hub.lease_seconds",
-              String(24 * 60 * 60),
-            );
-          const verificationResponse = await fetch(verificationURL, {
-            redirect: "manual",
-          });
-          if (
-            !verificationResponse.ok ||
-            (await verificationResponse.text()) !== verificationChallenge
-          )
-            return;
-          if (parameters["hub.mode"] === "subscribe") {
-            if (feedWebSubSubscription === undefined)
-              application.database.run(
-                sql`
-                  insert into "feedWebSubSubscriptions" (
-                    "feed",
-                    "createdAt",
-                    "callback",
-                    "secret"
-                  )
-                  values (
-                    ${feed.id},
-                    ${new Date().toISOString()},
-                    ${parameters["hub.callback"]},
-                    ${parameters["hub.secret"]}
-                  );
-                `,
-              );
-            else
-              application.database.run(
-                sql`
-                  update "feedWebSubSubscriptions"
-                  set
-                    "createdAt" = ${new Date().toISOString()},
-                    "secret" = ${parameters["hub.secret"]}
-                  where "id" = ${feedWebSubSubscription.id};
-                `,
-              );
-          } else if (parameters["hub.mode"] === "unsubscribe")
+        const verificationResponse = await fetch(verificationURL, {
+          redirect: "manual",
+        });
+        if (
+          !verificationResponse.ok ||
+          (await verificationResponse.text()) !== verificationChallenge
+        )
+          return;
+        if (parameters["hub.mode"] === "subscribe") {
+          if (feedWebSubSubscription === undefined)
             application.database.run(
               sql`
-                delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
+                insert into "feedWebSubSubscriptions" (
+                  "feed",
+                  "createdAt",
+                  "callback",
+                  "secret"
+                )
+                values (
+                  ${feed.id},
+                  ${new Date().toISOString()},
+                  ${parameters["hub.callback"]},
+                  ${parameters["hub.secret"]}
+                );
               `,
             );
-          else throw new Error();
-        },
-      );
-  });
+          else
+            application.database.run(
+              sql`
+                update "feedWebSubSubscriptions"
+                set
+                  "createdAt" = ${new Date().toISOString()},
+                  "secret" = ${parameters["hub.secret"]}
+                where "id" = ${feedWebSubSubscription.id};
+              `,
+            );
+        } else if (parameters["hub.mode"] === "unsubscribe")
+          application.database.run(
+            sql`
+              delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
+            `,
+          );
+        else throw new Error();
+      },
+    );
 
 application.webServer?.push({
   handler: (request, response) => {
@@ -1667,102 +1662,95 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
     );
   });
 
-  setTimeout(() => {
-    for (
-      let backgroundJobIndex = 0;
-      backgroundJobIndex < 8;
-      backgroundJobIndex++
-    )
-      application.database.backgroundJobWorker<{
-        feedId: number;
-        feedEntryId: number;
-        feedWebSubSubscriptionId: number;
-      }>(
-        {
-          type: "feedWebSubSubscriptions.dispatch",
-          timeout: 5 * 1000,
-          retries: 0,
-        },
-        async (parameters) => {
-          const feed = application.database.get<{
-            publicId: string;
-            title: string;
-            icon: string | null;
-            emailIcon: string | null;
-          }>(
+  for (let backgroundJobIndex = 0; backgroundJobIndex < 8; backgroundJobIndex++)
+    application.database.backgroundJobWorker<{
+      feedId: number;
+      feedEntryId: number;
+      feedWebSubSubscriptionId: number;
+    }>(
+      {
+        type: "feedWebSubSubscriptions.dispatch",
+        timeout: 5 * 1000,
+        retries: 0,
+      },
+      async (parameters) => {
+        const feed = application.database.get<{
+          publicId: string;
+          title: string;
+          icon: string | null;
+          emailIcon: string | null;
+        }>(
+          sql`
+            select "publicId", "title", "icon", "emailIcon"
+            from "feeds"
+            where "id" = ${parameters.feedId};
+          `,
+        );
+        if (feed === undefined) return;
+        const feedEntry = application.database.get<{
+          id: number;
+          publicId: string;
+          createdAt: string;
+          author: string | null;
+          title: string;
+          content: string;
+        }>(
+          sql`
+            select "id", "publicId", "createdAt", "author", "title", "content"
+            from "feedEntries"
+            where "id" = ${parameters.feedEntryId};
+          `,
+        );
+        if (feedEntry === undefined) return;
+        const feedWebSubSubscription = application.database.get<{
+          id: number;
+          callback: string;
+          secret: string | null;
+        }>(
+          sql`
+            select "id", "callback", "secret"
+            from "feedWebSubSubscriptions"
+            where "id" = ${parameters.feedWebSubSubscriptionId};
+          `,
+        );
+        if (feedWebSubSubscription === undefined) return;
+        const body = application.partials.feed({
+          feed,
+          feedEntries: [feedEntry],
+        });
+        const response = await fetch(feedWebSubSubscription.callback, {
+          redirect: "manual",
+          method: "POST",
+          headers: {
+            "Content-Type": "application/atom+xml; charset=utf-8",
+            Link: `<https://${
+              application.userConfiguration.hostname
+            }/feeds/${feed.publicId}.xml>; rel="self", <https://${
+              application.userConfiguration.hostname
+            }/feeds/${feed.publicId}/websub>; rel="hub"`,
+            ...(typeof feedWebSubSubscription.secret === "string"
+              ? {
+                  "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
+                }
+              : {}),
+          },
+          body,
+        });
+        if (response.status === 410)
+          application.database.run(
             sql`
-              select "publicId", "title", "icon", "emailIcon"
-              from "feeds"
-              where "id" = ${parameters.feedId};
+              delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription.id};
             `,
           );
-          if (feed === undefined) return;
-          const feedEntry = application.database.get<{
-            id: number;
-            publicId: string;
-            createdAt: string;
-            author: string | null;
-            title: string;
-            content: string;
-          }>(
-            sql`
-              select "id", "publicId", "createdAt", "author", "title", "content"
-              from "feedEntries"
-              where "id" = ${parameters.feedEntryId};
-            `,
+        else if (String(response.status).startsWith("4"))
+          utilities.log(
+            "feedWebSubSubscriptions.dispatch",
+            "REQUEST ERROR",
+            String(response),
           );
-          if (feedEntry === undefined) return;
-          const feedWebSubSubscription = application.database.get<{
-            id: number;
-            callback: string;
-            secret: string | null;
-          }>(
-            sql`
-              select "id", "callback", "secret"
-              from "feedWebSubSubscriptions"
-              where "id" = ${parameters.feedWebSubSubscriptionId};
-            `,
-          );
-          if (feedWebSubSubscription === undefined) return;
-          const body = application.partials.feed({
-            feed,
-            feedEntries: [feedEntry],
-          });
-          const response = await fetch(feedWebSubSubscription.callback, {
-            redirect: "manual",
-            method: "POST",
-            headers: {
-              "Content-Type": "application/atom+xml; charset=utf-8",
-              Link: `<https://${
-                application.userConfiguration.hostname
-              }/feeds/${feed.publicId}.xml>; rel="self", <https://${
-                application.userConfiguration.hostname
-              }/feeds/${feed.publicId}/websub>; rel="hub"`,
-              ...(typeof feedWebSubSubscription.secret === "string"
-                ? {
-                    "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
-                  }
-                : {}),
-            },
-            body,
-          });
-          if (response.status === 410)
-            application.database.run(
-              sql`
-                delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription.id};
-              `,
-            );
-          else if (String(response.status).startsWith("4"))
-            utilities.log(
-              "feedWebSubSubscriptions.dispatch",
-              "REQUEST ERROR",
-              String(response),
-            );
-          else if (!response.ok)
-            throw new Error(`Response: ${String(response)}`);
-        },
-      );
-  });
+        else if (!response.ok) throw new Error(`Response: ${String(response)}`);
+      },
+    );
 }
 
 application.database = new Database(
