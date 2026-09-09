@@ -1605,6 +1605,27 @@ if (application.commandLineArguments.values.type === "emailServer") {
 
 if (application.commandLineArguments.values.type === "backgroundJobWorker") {
   node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
+    for (const feedEntry of application.database.all<{
+      id: number;
+    }>(
+      sql`
+        select "id"
+        from "feedEntries"
+        where "createdAt" < ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()};
+      `,
+    )) {
+      application.database.run(
+        sql`
+          delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+        `,
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntries" where "id" = ${feedEntry.id};
+        `,
+      );
+    }
+
     for (const feedEntryEnclosure of application.database.all<{
       id: number;
       publicId: string;
@@ -1632,6 +1653,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
         `,
       );
     }
+
     application.database.run(
       sql`
         delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
