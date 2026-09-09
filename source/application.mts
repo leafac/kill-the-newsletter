@@ -1194,26 +1194,26 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
       backgroundJobIndex < 32;
       backgroundJobIndex++
     )
-      application.database.backgroundJobWorker(
+      application.database.backgroundJobWorker<{
+        feedId: number;
+        "hub.mode": "subscribe" | "unsubscribe";
+        "hub.topic": string;
+        "hub.callback": string;
+        "hub.secret": string;
+      }>(
         {
           type: "feedWebSubSubscriptions.verify",
           timeout: 5 * 1000,
           retries: 0,
         },
-        async (job: {
-          feedId: number;
-          "hub.mode": "subscribe" | "unsubscribe";
-          "hub.topic": string;
-          "hub.callback": string;
-          "hub.secret": string;
-        }) => {
+        async (parameters) => {
           const feed = application.database.get<{
             id: number;
           }>(
             sql`
               select "id"
               from "feeds"
-              where "id" = ${job.feedId};
+              where "id" = ${parameters.feedId};
             `,
           );
           if (feed === undefined) return;
@@ -1225,11 +1225,11 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
               from "feedWebSubSubscriptions"
               where
                 "feed" = ${feed.id} and
-                "callback" = ${job["hub.callback"]};
+                "callback" = ${parameters["hub.callback"]};
             `,
           );
           if (
-            job["hub.mode"] === "unsubscribe" &&
+            parameters["hub.mode"] === "unsubscribe" &&
             feedWebSubSubscription === undefined
           )
             return;
@@ -1237,14 +1237,20 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
             length: 100,
             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
           });
-          const verificationURL = new URL(job["hub.callback"]);
-          verificationURL.searchParams.append("hub.mode", job["hub.mode"]);
-          verificationURL.searchParams.append("hub.topic", job["hub.topic"]);
+          const verificationURL = new URL(parameters["hub.callback"]);
+          verificationURL.searchParams.append(
+            "hub.mode",
+            parameters["hub.mode"],
+          );
+          verificationURL.searchParams.append(
+            "hub.topic",
+            parameters["hub.topic"],
+          );
           verificationURL.searchParams.append(
             "hub.challenge",
             verificationChallenge,
           );
-          if (job["hub.mode"] === "subscribe")
+          if (parameters["hub.mode"] === "subscribe")
             verificationURL.searchParams.append(
               "hub.lease_seconds",
               String(24 * 60 * 60),
@@ -1257,7 +1263,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
             (await verificationResponse.text()) !== verificationChallenge
           )
             return;
-          if (job["hub.mode"] === "subscribe") {
+          if (parameters["hub.mode"] === "subscribe") {
             if (feedWebSubSubscription === undefined)
               application.database.run(
                 sql`
@@ -1270,8 +1276,8 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                   values (
                     ${feed.id},
                     ${new Date().toISOString()},
-                    ${job["hub.callback"]},
-                    ${job["hub.secret"]}
+                    ${parameters["hub.callback"]},
+                    ${parameters["hub.secret"]}
                   );
                 `,
               );
@@ -1281,11 +1287,11 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                   update "feedWebSubSubscriptions"
                   set
                     "createdAt" = ${new Date().toISOString()},
-                    "secret" = ${job["hub.secret"]}
+                    "secret" = ${parameters["hub.secret"]}
                   where "id" = ${feedWebSubSubscription.id};
                 `,
               );
-          } else if (job["hub.mode"] === "unsubscribe")
+          } else if (parameters["hub.mode"] === "unsubscribe")
             application.database.run(
               sql`
                 delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription!.id};
@@ -1667,17 +1673,17 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
       backgroundJobIndex < 8;
       backgroundJobIndex++
     )
-      application.database.backgroundJobWorker(
+      application.database.backgroundJobWorker<{
+        feedId: number;
+        feedEntryId: number;
+        feedWebSubSubscriptionId: number;
+      }>(
         {
           type: "feedWebSubSubscriptions.dispatch",
           timeout: 5 * 1000,
           retries: 0,
         },
-        async (job: {
-          feedId: number;
-          feedEntryId: number;
-          feedWebSubSubscriptionId: number;
-        }) => {
+        async (parameters) => {
           const feed = application.database.get<{
             publicId: string;
             title: string;
@@ -1687,7 +1693,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
             sql`
               select "publicId", "title", "icon", "emailIcon"
               from "feeds"
-              where "id" = ${job.feedId};
+              where "id" = ${parameters.feedId};
             `,
           );
           if (feed === undefined) return;
@@ -1702,7 +1708,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
             sql`
               select "id", "publicId", "createdAt", "author", "title", "content"
               from "feedEntries"
-              where "id" = ${job.feedEntryId};
+              where "id" = ${parameters.feedEntryId};
             `,
           );
           if (feedEntry === undefined) return;
@@ -1714,7 +1720,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
             sql`
               select "id", "callback", "secret"
               from "feedWebSubSubscriptions"
-              where "id" = ${job.feedWebSubSubscriptionId};
+              where "id" = ${parameters.feedWebSubSubscriptionId};
             `,
           );
           if (feedWebSubSubscription === undefined) return;
