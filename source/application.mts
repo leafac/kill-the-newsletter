@@ -40,6 +40,7 @@ export type Application = {
   applicationConfiguration: {
     ports: number[];
   };
+  database: Database;
   webServer: undefined | ReturnType<typeof server>;
   layout: ({
     request,
@@ -87,7 +88,6 @@ export type Application = {
     };
   };
   emailServer: undefined | SMTPServer;
-  database: Database;
 };
 
 const application = {} as Application;
@@ -121,6 +121,12 @@ application.applicationConfiguration.ports = Array.from(
         : os.availableParallelism(),
   },
   (value, index) => 18000 + index,
+);
+application.database = new Database(
+  path.join(
+    application.userConfiguration.dataDirectory,
+    "kill-the-newsletter.db",
+  ),
 );
 if (application.commandLineArguments.values.type === "webServer")
   application.webServer = server({
@@ -1752,13 +1758,6 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
       },
     );
 }
-
-application.database = new Database(
-  path.join(
-    application.userConfiguration.dataDirectory,
-    "kill-the-newsletter.db",
-  ),
-);
 
 if (application.commandLineArguments.values.type === "initialize") {
   await application.database.migrate(
