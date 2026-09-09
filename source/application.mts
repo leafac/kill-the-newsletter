@@ -22,7 +22,7 @@ export type Application = {
   version: string;
   commandLineArguments: {
     values: {
-      type: undefined | "server" | "email" | "backgroundJobWorker";
+      type: "initialize" | "server" | "email" | "backgroundJobWorker";
       port: undefined | string;
     };
     positionals: string[];
