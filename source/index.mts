@@ -13,10 +13,6 @@ const applicationJSON = childProcess.spawnSync(
     "initialize",
   ],
   {
-    env: {
-      ...process.env,
-      DOTENV_CONFIG_QUIET: "true",
-    },
     stdio: ["inherit", "inherit", "inherit", "pipe"],
     encoding: "utf-8",
   },
@@ -42,7 +38,6 @@ for (const port of application.applicationConfiguration.ports)
         env: {
           ...process.env,
           NODE_ENV: application.userConfiguration.environment,
-          DOTENV_CONFIG_QUIET: "true",
         },
         stdio: "inherit",
       },
@@ -63,7 +58,26 @@ node.childProcessKeepAlive(() =>
       env: {
         ...process.env,
         NODE_ENV: application.userConfiguration.environment,
-        DOTENV_CONFIG_QUIET: "true",
+      },
+      stdio: "inherit",
+    },
+  ),
+);
+
+node.childProcessKeepAlive(() =>
+  childProcess.spawn(
+    process.argv[0],
+    [
+      "--enable-source-maps",
+      path.join(import.meta.dirname, "application.mjs"),
+      ...process.argv.slice(2),
+      "--type",
+      "email",
+    ],
+    {
+      env: {
+        ...process.env,
+        NODE_ENV: application.userConfiguration.environment,
       },
       stdio: "inherit",
     },
