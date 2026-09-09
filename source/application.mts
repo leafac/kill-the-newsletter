@@ -148,225 +148,6 @@ process.once("beforeExit", () => {
   );
 });
 
-application.database = await new Database(
-  path.join(
-    application.userConfiguration.dataDirectory,
-    "kill-the-newsletter.db",
-  ),
-).migrate(
-  sql`
-    CREATE TABLE "feeds" (
-      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "reference" TEXT NOT NULL UNIQUE,
-      "title" TEXT NOT NULL
-    ) STRICT;
-    CREATE INDEX "feedsReference" ON "feeds" ("reference");
-    CREATE TABLE "entries" (
-      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-      "reference" TEXT NOT NULL UNIQUE,
-      "createdAt" TEXT NOT NULL,
-      "feed" INTEGER NOT NULL REFERENCES "feeds" ON DELETE CASCADE,
-      "title" TEXT NOT NULL,
-      "content" TEXT NOT NULL
-    ) STRICT;
-    CREATE INDEX "entriesReference" ON "entries" ("reference");
-    CREATE INDEX "entriesFeed" ON "entries" ("feed");
-  `,
-
-  (database) => {
-    database.execute(
-      sql`
-        alter table "feeds" rename to "old_feeds";
-        alter table "entries" rename to "old_entries";
-
-        create table "feeds" (
-          "id" integer primary key autoincrement,
-          "externalId" text not null unique,
-          "title" text not null
-        ) strict;
-        create index "feeds_externalId" on "feeds" ("externalId");
-        create table "feedEntries" (
-          "id" integer primary key autoincrement,
-          "externalId" text not null unique,
-          "feed" integer not null references "feeds",
-          "createdAt" text not null,
-          "title" text not null,
-          "content" text not null
-        ) strict;
-        create index "feedEntries_externalId" on "feedEntries" ("externalId");
-        create index "feedEntries_feed" on "feedEntries" ("feed");
-
-        insert into "feeds" ("id", "externalId", "title")
-        select "id", "reference", "title" from "old_feeds" order by "id" asc;
-        insert into "feedEntries" ("id", "externalId", "feed", "createdAt", "title", "content")
-        select "id", "reference", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
-
-        drop table "old_feeds";
-        drop table "old_entries";
-      `,
-    );
-
-    if (application.userConfiguration.environment === "development") {
-      const feed = database.get<{ id: number }>(
-        sql`
-          select * from "feeds" where "id" = ${
-            database.run(
-              sql`
-                insert into "feeds" ("externalId", "title")
-                values (${"r5bsqg3w6gqrsv7m59f1"}, ${"Example of a feed"});
-              `,
-            ).lastInsertRowid
-          };
-        `,
-      )!;
-      database.run(
-        sql`
-          insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
-          values (
-            ${"fjdkqejwpk22"},
-            ${feed.id},
-            ${new Date().toISOString()},
-            ${"Example of a feed entry"},
-            ${html`<p>Hello <strong>World</strong> <img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg" /></p>`}
-          );
-        `,
-      );
-      database.run(
-        sql`
-          insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
-          values (
-            ${"fjrl1k4j234"},
-            ${feed.id},
-            ${new Date().toISOString()},
-            ${"Another example of a feed entry"},
-            ${html`<p>Hello <strong>World</strong></p>`}
-          );
-        `,
-      );
-    }
-  },
-
-  sql`
-    create table "feedVisualizations" (
-      "id" integer primary key autoincrement,
-      "feed" integer not null references "feeds",
-      "createdAt" text not null
-    ) strict;
-    create index "feedVisualizations_feed" on "feedVisualizations" ("feed");
-    create index "feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
-  `,
-
-  sql`
-    create table "feedWebSubSubscriptions" (
-      "id" integer primary key autoincrement,
-      "feed" integer not null references "feeds",
-      "createdAt" text not null,
-      "callback" text not null,
-      "secret" text null,
-      unique ("feed", "callback")
-    ) strict;
-    create index "feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
-    create index "feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
-    create index "feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
-  `,
-
-  sql`
-    create table "feedEntryEnclosures" (
-      "id" integer primary key autoincrement,
-      "externalId" text not null unique,
-      "type" text not null,
-      "length" integer not null,
-      "name" text not null
-    ) strict;
-
-    create table "feedEntryEnclosureLinks" (
-      "id" integer primary key autoincrement,
-      "feedEntry" integer not null references "feedEntries",
-      "feedEntryEnclosure" integer not null references "feedEntryEnclosures"
-    ) strict;
-    create index "feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
-    create index "feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
-  `,
-
-  sql`
-    alter table "feeds" add column "icon" text null;
-    alter table "feedEntries" add column "author" text null;
-  `,
-
-  sql`
-    alter table "feeds" rename column "icon" to "emailIcon";
-    alter table "feeds" add column "icon" text null;
-  `,
-
-  sql`
-    alter table "feeds" rename column "externalId" to "publicId";
-    alter table "feedEntries" rename column "externalId" to "publicId";
-    alter table "feedEntryEnclosures" rename column "externalId" to "publicId";
-
-    drop index "feeds_externalId";
-    drop index "feedEntries_externalId";
-    drop index "feedEntries_feed";
-    drop index "feedVisualizations_feed";
-    drop index "feedVisualizations_createdAt";
-    drop index "feedWebSubSubscriptions_feed";
-    drop index "feedWebSubSubscriptions_createdAt";
-    drop index "feedWebSubSubscriptions_callback";
-    drop index "feedEntryEnclosureLinks_feedEntry";
-    drop index "feedEntryEnclosureLinks_feedEntryEnclosure";
-
-    create index "index_feeds_publicId" on "feeds" ("publicId");
-    create index "index_feedEntries_publicId" on "feedEntries" ("publicId");
-    create index "index_feedEntries_feed" on "feedEntries" ("feed");
-    create index "index_feedVisualizations_feed" on "feedVisualizations" ("feed");
-    create index "index_feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
-    create index "index_feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
-    create index "index_feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
-    create index "index_feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
-    create index "index_feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
-    create index "index_feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
-  `,
-);
-if (application.commandLineArguments.values.type === "backgroundJobWorker")
-  node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
-    for (const feedEntryEnclosure of application.database.all<{
-      id: number;
-      publicId: string;
-    }>(
-      sql`
-        select
-          "feedEntryEnclosures"."id" as "id",
-          "feedEntryEnclosures"."publicId" as "publicId"
-        from "feedEntryEnclosures"
-        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
-        where "feedEntryEnclosureLinks"."id" is null;
-      `,
-    )) {
-      await fs.rm(
-        path.join(
-          application.userConfiguration.dataDirectory,
-          "files",
-          feedEntryEnclosure.publicId,
-        ),
-        { recursive: true, force: true },
-      );
-      application.database.run(
-        sql`
-          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
-        `,
-      );
-    }
-    application.database.run(
-      sql`
-        delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
-      `,
-    );
-    application.database.run(
-      sql`
-        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
-      `,
-    );
-  });
-
 application.layout = ({ request, response, head, body }) => {
   css`
     @import "@radically-straightforward/javascript/static/index.css";
@@ -1587,7 +1368,230 @@ application.webServer?.push({
   },
 });
 
-if (application.commandLineArguments.values.type === "email") {
+application.database = new Database(
+  path.join(
+    application.userConfiguration.dataDirectory,
+    "kill-the-newsletter.db",
+  ),
+);
+
+if (application.commandLineArguments.values.type === "initialize") {
+  await application.database.migrate(
+    sql`
+      CREATE TABLE "feeds" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "reference" TEXT NOT NULL UNIQUE,
+        "title" TEXT NOT NULL
+      ) STRICT;
+      CREATE INDEX "feedsReference" ON "feeds" ("reference");
+      CREATE TABLE "entries" (
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "reference" TEXT NOT NULL UNIQUE,
+        "createdAt" TEXT NOT NULL,
+        "feed" INTEGER NOT NULL REFERENCES "feeds" ON DELETE CASCADE,
+        "title" TEXT NOT NULL,
+        "content" TEXT NOT NULL
+      ) STRICT;
+      CREATE INDEX "entriesReference" ON "entries" ("reference");
+      CREATE INDEX "entriesFeed" ON "entries" ("feed");
+    `,
+
+    (database) => {
+      database.execute(
+        sql`
+          alter table "feeds" rename to "old_feeds";
+          alter table "entries" rename to "old_entries";
+
+          create table "feeds" (
+            "id" integer primary key autoincrement,
+            "externalId" text not null unique,
+            "title" text not null
+          ) strict;
+          create index "feeds_externalId" on "feeds" ("externalId");
+          create table "feedEntries" (
+            "id" integer primary key autoincrement,
+            "externalId" text not null unique,
+            "feed" integer not null references "feeds",
+            "createdAt" text not null,
+            "title" text not null,
+            "content" text not null
+          ) strict;
+          create index "feedEntries_externalId" on "feedEntries" ("externalId");
+          create index "feedEntries_feed" on "feedEntries" ("feed");
+
+          insert into "feeds" ("id", "externalId", "title")
+          select "id", "reference", "title" from "old_feeds" order by "id" asc;
+          insert into "feedEntries" ("id", "externalId", "feed", "createdAt", "title", "content")
+          select "id", "reference", "feed", "createdAt", "title", "content" from "old_entries" order by "id" asc;
+
+          drop table "old_feeds";
+          drop table "old_entries";
+        `,
+      );
+
+      if (application.userConfiguration.environment === "development") {
+        const feed = database.get<{ id: number }>(
+          sql`
+            select * from "feeds" where "id" = ${
+              database.run(
+                sql`
+                  insert into "feeds" ("externalId", "title")
+                  values (${"r5bsqg3w6gqrsv7m59f1"}, ${"Example of a feed"});
+                `,
+              ).lastInsertRowid
+            };
+          `,
+        )!;
+        database.run(
+          sql`
+            insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
+            values (
+              ${"fjdkqejwpk22"},
+              ${feed.id},
+              ${new Date().toISOString()},
+              ${"Example of a feed entry"},
+              ${html`<p>Hello <strong>World</strong> <img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg" /></p>`}
+            );
+          `,
+        );
+        database.run(
+          sql`
+            insert into "feedEntries" ("externalId", "feed", "createdAt", "title", "content")
+            values (
+              ${"fjrl1k4j234"},
+              ${feed.id},
+              ${new Date().toISOString()},
+              ${"Another example of a feed entry"},
+              ${html`<p>Hello <strong>World</strong></p>`}
+            );
+          `,
+        );
+      }
+    },
+
+    sql`
+      create table "feedVisualizations" (
+        "id" integer primary key autoincrement,
+        "feed" integer not null references "feeds",
+        "createdAt" text not null
+      ) strict;
+      create index "feedVisualizations_feed" on "feedVisualizations" ("feed");
+      create index "feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
+    `,
+
+    sql`
+      create table "feedWebSubSubscriptions" (
+        "id" integer primary key autoincrement,
+        "feed" integer not null references "feeds",
+        "createdAt" text not null,
+        "callback" text not null,
+        "secret" text null,
+        unique ("feed", "callback")
+      ) strict;
+      create index "feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
+      create index "feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
+      create index "feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
+    `,
+
+    sql`
+      create table "feedEntryEnclosures" (
+        "id" integer primary key autoincrement,
+        "externalId" text not null unique,
+        "type" text not null,
+        "length" integer not null,
+        "name" text not null
+      ) strict;
+
+      create table "feedEntryEnclosureLinks" (
+        "id" integer primary key autoincrement,
+        "feedEntry" integer not null references "feedEntries",
+        "feedEntryEnclosure" integer not null references "feedEntryEnclosures"
+      ) strict;
+      create index "feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
+      create index "feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+    `,
+
+    sql`
+      alter table "feeds" add column "icon" text null;
+      alter table "feedEntries" add column "author" text null;
+    `,
+
+    sql`
+      alter table "feeds" rename column "icon" to "emailIcon";
+      alter table "feeds" add column "icon" text null;
+    `,
+
+    sql`
+      alter table "feeds" rename column "externalId" to "publicId";
+      alter table "feedEntries" rename column "externalId" to "publicId";
+      alter table "feedEntryEnclosures" rename column "externalId" to "publicId";
+
+      drop index "feeds_externalId";
+      drop index "feedEntries_externalId";
+      drop index "feedEntries_feed";
+      drop index "feedVisualizations_feed";
+      drop index "feedVisualizations_createdAt";
+      drop index "feedWebSubSubscriptions_feed";
+      drop index "feedWebSubSubscriptions_createdAt";
+      drop index "feedWebSubSubscriptions_callback";
+      drop index "feedEntryEnclosureLinks_feedEntry";
+      drop index "feedEntryEnclosureLinks_feedEntryEnclosure";
+
+      create index "index_feeds_publicId" on "feeds" ("publicId");
+      create index "index_feedEntries_publicId" on "feedEntries" ("publicId");
+      create index "index_feedEntries_feed" on "feedEntries" ("feed");
+      create index "index_feedVisualizations_feed" on "feedVisualizations" ("feed");
+      create index "index_feedVisualizations_createdAt" on "feedVisualizations" ("createdAt");
+      create index "index_feedWebSubSubscriptions_feed" on "feedWebSubSubscriptions" ("feed");
+      create index "index_feedWebSubSubscriptions_createdAt" on "feedWebSubSubscriptions" ("createdAt");
+      create index "index_feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
+      create index "index_feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
+      create index "index_feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+    `,
+  );
+  fsCallback.writeSync(3, JSON.stringify(application));
+}
+if (application.commandLineArguments.values.type === "backgroundJobWorker")
+  node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
+    for (const feedEntryEnclosure of application.database.all<{
+      id: number;
+      publicId: string;
+    }>(
+      sql`
+        select
+          "feedEntryEnclosures"."id" as "id",
+          "feedEntryEnclosures"."publicId" as "publicId"
+        from "feedEntryEnclosures"
+        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+        where "feedEntryEnclosureLinks"."id" is null;
+      `,
+    )) {
+      await fs.rm(
+        path.join(
+          application.userConfiguration.dataDirectory,
+          "files",
+          feedEntryEnclosure.publicId,
+        ),
+        { recursive: true, force: true },
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
+        `,
+      );
+    }
+    application.database.run(
+      sql`
+        delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
+      `,
+    );
+    application.database.run(
+      sql`
+        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
+      `,
+    );
+  });
+else if (application.commandLineArguments.values.type === "email") {
   application.emailServer = new SMTPServer({
     name: application.userConfiguration.hostname,
     size: 2 ** 19,
@@ -1837,8 +1841,9 @@ if (application.commandLineArguments.values.type === "email") {
         node.exit();
       })
       .unref();
-}
-if (application.commandLineArguments.values.type === "backgroundJobWorker")
+} else if (
+  application.commandLineArguments.values.type === "backgroundJobWorker"
+)
   for (let backgroundJobIndex = 0; backgroundJobIndex < 8; backgroundJobIndex++)
     application.database.backgroundJobWorker(
       {
