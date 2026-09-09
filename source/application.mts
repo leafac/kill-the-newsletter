@@ -1154,13 +1154,13 @@ application.webServer?.push({
       (request.body["hub.mode"] === "subscribe" &&
         application.database.get<{ count: number }>(
           sql`
-          select count(*) as "count"
-          from "feedWebSubSubscriptions"
-          where
-            "feed" = ${request.state.feed.id} and
-            ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt" and
-            "callback" != ${request.body["hub.callback"]};
-        `,
+            select count(*) as "count"
+            from "feedWebSubSubscriptions"
+            where
+              "feed" = ${request.state.feed.id} and
+              ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt" and
+              "callback" != ${request.body["hub.callback"]};
+          `,
         )!.count > 10)
     )
       throw "validation";
