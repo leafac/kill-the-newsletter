@@ -1,6 +1,7 @@
 import util from "node:util";
 import path from "node:path";
 import os from "node:os";
+import url from "node:url";
 import fs from "node:fs/promises";
 import fsCallback from "node:fs";
 import stream from "node:stream/promises";
@@ -89,7 +90,7 @@ export type Application = {
   emailServer: undefined | SMTPServer;
 };
 const application = {} as Application;
-application.version = "2.0.9";
+application.version = "2.1.0";
 application.commandLineArguments = util.parseArgs({
   options: {
     type: { type: "string" },
@@ -98,7 +99,11 @@ application.commandLineArguments = util.parseArgs({
   allowPositionals: true,
 }) as Application["commandLineArguments"];
 application.userConfiguration = (
-  await import(path.resolve(application.commandLineArguments.positionals[0]))
+  await import(
+    url.pathToFileURL(
+      path.resolve(application.commandLineArguments.positionals[0]),
+    ).href
+  )
 ).default;
 application.userConfiguration.dataDirectory ??= path.resolve("./data/");
 await fs.mkdir(application.userConfiguration.dataDirectory, {
@@ -127,18 +132,18 @@ application.partials = {} as Application["partials"];
 
 utilities.log(
   "KILL THE NEWSLETTER!",
-  application.version,
   "START",
-  application.commandLineArguments.values.type ??
-    `https://${application.userConfiguration.hostname}`,
+  application.commandLineArguments.values.type,
+  ...(application.commandLineArguments.values.type === "initialize"
+    ? [application.version, `https://${application.userConfiguration.hostname}`]
+    : []),
   application.commandLineArguments.values.port ?? "",
 );
 process.once("beforeExit", () => {
   utilities.log(
     "KILL THE NEWSLETTER!",
     "STOP",
-    application.commandLineArguments.values.type ??
-      `https://${application.userConfiguration.hostname}`,
+    application.commandLineArguments.values.type,
     application.commandLineArguments.values.port ?? "",
   );
 });
