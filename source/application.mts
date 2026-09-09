@@ -89,6 +89,7 @@ export type Application = {
   emailServer: undefined | SMTPServer;
   database: Database;
 };
+
 const application = {} as Application;
 application.version = "2.1.0";
 application.commandLineArguments = util.parseArgs({
@@ -454,6 +455,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
         `,
       )}
     </feed>`;
+
 application.webServer?.push({
   method: "GET",
   pathname: "/",
@@ -622,6 +624,7 @@ application.webServer?.push({
     );
   },
 });
+
 application.webServer?.push({
   method: "POST",
   pathname: "/feeds",
@@ -668,6 +671,7 @@ application.webServer?.push({
     else response.redirect!(`/feeds/${feed.publicId}`);
   },
 });
+
 application.webServer?.push({
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)(?:$|/|\\.xml$)"),
   handler: (
@@ -698,6 +702,7 @@ application.webServer?.push({
     response.setHeader("X-Robots-Tag", "none");
   },
 });
+
 application.webServer?.push({
   method: "GET",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
@@ -922,6 +927,7 @@ application.webServer?.push({
     );
   },
 });
+
 application.webServer?.push({
   method: "PATCH",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
@@ -966,6 +972,7 @@ application.webServer?.push({
     response.redirect!();
   },
 });
+
 application.webServer?.push({
   method: "DELETE",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
@@ -1012,6 +1019,7 @@ application.webServer?.push({
     response.redirect!("/");
   },
 });
+
 application.webServer?.push({
   method: "GET",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)\\.xml$"),
@@ -1048,6 +1056,7 @@ application.webServer?.push({
       );
   },
 });
+
 application.webServer?.push({
   method: "GET",
   pathname: new RegExp(
@@ -1089,6 +1098,7 @@ application.webServer?.push({
       .send(feedEntry.content);
   },
 });
+
 application.webServer?.push({
   method: "POST",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/websub$"),
@@ -1176,6 +1186,7 @@ application.webServer?.push({
     response.send();
   },
 });
+
 if (application.commandLineArguments.values.type === "backgroundJobWorker")
   setTimeout(() => {
     for (
@@ -1284,6 +1295,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
         },
       );
   });
+
 application.webServer?.push({
   handler: (request, response) => {
     response.statusCode = 404;
@@ -1306,6 +1318,7 @@ application.webServer?.push({
     );
   },
 });
+
 application.webServer?.push({
   error: true,
   handler: (request, response) => {
@@ -1588,9 +1601,9 @@ if (application.commandLineArguments.values.type === "email") {
         node.exit();
       })
       .unref();
-} else if (
-  application.commandLineArguments.values.type === "backgroundJobWorker"
-) {
+}
+
+if (application.commandLineArguments.values.type === "backgroundJobWorker") {
   node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
     for (const feedEntryEnclosure of application.database.all<{
       id: number;
@@ -1730,6 +1743,7 @@ application.database = new Database(
     "kill-the-newsletter.db",
   ),
 );
+
 if (application.commandLineArguments.values.type === "initialize") {
   await application.database.migrate(
     sql`
