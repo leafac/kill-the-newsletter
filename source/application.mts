@@ -1611,63 +1611,6 @@ if (application.commandLineArguments.values.type === "emailServer") {
 }
 
 if (application.commandLineArguments.values.type === "backgroundJobWorker") {
-  node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
-    for (const feedEntry of application.database.all<{
-      id: number;
-    }>(
-      sql`
-        select "id"
-        from "feedEntries"
-        where "createdAt" < ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()};
-      `,
-    )) {
-      application.database.run(
-        sql`
-          delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
-        `,
-      );
-      application.database.run(
-        sql`
-          delete from "feedEntries" where "id" = ${feedEntry.id};
-        `,
-      );
-    }
-
-    for (const feedEntryEnclosure of application.database.all<{
-      id: number;
-      publicId: string;
-    }>(
-      sql`
-        select
-          "feedEntryEnclosures"."id" as "id",
-          "feedEntryEnclosures"."publicId" as "publicId"
-        from "feedEntryEnclosures"
-        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
-        where "feedEntryEnclosureLinks"."id" is null;
-      `,
-    )) {
-      await fs.rm(
-        path.join(
-          application.userConfiguration.dataDirectory,
-          "files",
-          feedEntryEnclosure.publicId,
-        ),
-        { recursive: true, force: true },
-      );
-      application.database.run(
-        sql`
-          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
-        `,
-      );
-    }
-
-    application.database.run(
-      sql`
-        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
-      `,
-    );
-  });
-
   for (let backgroundJobIndex = 0; backgroundJobIndex < 8; backgroundJobIndex++)
     application.database.backgroundJobWorker<{
       feedId: number;
@@ -1757,6 +1700,63 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
         else if (!response.ok) throw new Error(`Response: ${String(response)}`);
       },
     );
+
+  node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
+    for (const feedEntry of application.database.all<{
+      id: number;
+    }>(
+      sql`
+        select "id"
+        from "feedEntries"
+        where "createdAt" < ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()};
+      `,
+    )) {
+      application.database.run(
+        sql`
+          delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+        `,
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntries" where "id" = ${feedEntry.id};
+        `,
+      );
+    }
+
+    for (const feedEntryEnclosure of application.database.all<{
+      id: number;
+      publicId: string;
+    }>(
+      sql`
+        select
+          "feedEntryEnclosures"."id" as "id",
+          "feedEntryEnclosures"."publicId" as "publicId"
+        from "feedEntryEnclosures"
+        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+        where "feedEntryEnclosureLinks"."id" is null;
+      `,
+    )) {
+      await fs.rm(
+        path.join(
+          application.userConfiguration.dataDirectory,
+          "files",
+          feedEntryEnclosure.publicId,
+        ),
+        { recursive: true, force: true },
+      );
+      application.database.run(
+        sql`
+          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
+        `,
+      );
+    }
+
+    application.database.run(
+      sql`
+        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
+      `,
+    );
+  });
 }
 
 if (application.commandLineArguments.values.type === "initialize") {
