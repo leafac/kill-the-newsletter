@@ -571,7 +571,8 @@ application.webServer?.push({
           <div>
             <h2>Why are old entries disappearing?</h2>
             <p>
-              When Kill the Newsletter! receives an email it may delete old
+              Entries older than one month are deleted. In addition to that,
+              when Kill the Newsletter! receives an email it may delete older
               entries to keep the feed under a size limit, because some feed
               readers don’t support feeds that are too big.
             </p>
