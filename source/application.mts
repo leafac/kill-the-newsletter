@@ -1204,7 +1204,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
       "hub.mode": "subscribe" | "unsubscribe";
       "hub.topic": string;
       "hub.callback": string;
-      "hub.secret": string;
+      "hub.secret": string | undefined;
     }>(
       {
         type: "feedWebSubSubscriptions.verify",
@@ -1279,7 +1279,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                   ${feed.id},
                   ${new Date().toISOString()},
                   ${parameters["hub.callback"]},
-                  ${parameters["hub.secret"]}
+                  ${parameters["hub.secret"] ?? null}
                 );
               `,
             );
@@ -1289,7 +1289,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                 update "feedWebSubSubscriptions"
                 set
                   "createdAt" = ${new Date().toISOString()},
-                  "secret" = ${parameters["hub.secret"]}
+                  "secret" = ${parameters["hub.secret"] ?? null}
                 where "id" = ${feedWebSubSubscription.id};
               `,
             );
