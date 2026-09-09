@@ -40,7 +40,7 @@ export type Application = {
     ports: number[];
   };
   database: Database;
-  server: undefined | ReturnType<typeof server>;
+  webServer: undefined | ReturnType<typeof server>;
   layout: ({
     request,
     response,
@@ -86,7 +86,7 @@ export type Application = {
       };
     };
   };
-  email: undefined | SMTPServer;
+  emailServer: undefined | SMTPServer;
 };
 const application = {} as Application;
 application.version = "2.0.9";
@@ -117,7 +117,7 @@ application.applicationConfiguration.ports = Array.from(
   (value, index) => 18000 + index,
 );
 if (application.commandLineArguments.values.type === "server")
-  application.server = server({
+  application.webServer = server({
     port: Number(application.commandLineArguments.values.port),
     csrfProtectionExceptionPathname: new RegExp(
       "^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/websub$",
@@ -667,7 +667,7 @@ application.partials.feed = ({ feed, feedEntries }) =>
         `,
       )}
     </feed>`;
-application.server?.push({
+application.webServer?.push({
   method: "GET",
   pathname: "/",
   handler: (request, response) => {
@@ -834,7 +834,7 @@ application.server?.push({
     );
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "POST",
   pathname: "/feeds",
   handler: (
@@ -880,7 +880,7 @@ application.server?.push({
     else response.redirect!(`/feeds/${feed.publicId}`);
   },
 });
-application.server?.push({
+application.webServer?.push({
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)(?:$|/|\\.xml$)"),
   handler: (
     request: serverTypes.Request<
@@ -910,7 +910,7 @@ application.server?.push({
     response.setHeader("X-Robots-Tag", "none");
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "GET",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
@@ -1134,7 +1134,7 @@ application.server?.push({
     );
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "PATCH",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
@@ -1178,7 +1178,7 @@ application.server?.push({
     response.redirect!();
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "DELETE",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)$"),
   handler: (
@@ -1229,7 +1229,7 @@ application.server?.push({
     response.redirect!("/");
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "GET",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)\\.xml$"),
   handler: (
@@ -1300,7 +1300,7 @@ application.server?.push({
       );
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "GET",
   pathname: new RegExp(
     "^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/entries/(?<feedEntryPublicId>[A-Za-z0-9]+)\\.html$",
@@ -1341,7 +1341,7 @@ application.server?.push({
       .send(feedEntry.content);
   },
 });
-application.server?.push({
+application.webServer?.push({
   method: "POST",
   pathname: new RegExp("^/feeds/(?<feedPublicId>[A-Za-z0-9]+)/websub$"),
   handler: async (
@@ -1528,7 +1528,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
         else throw new Error();
       },
     );
-application.server?.push({
+application.webServer?.push({
   handler: (request, response) => {
     response.statusCode = 404;
     response.send(
@@ -1550,7 +1550,7 @@ application.server?.push({
     );
   },
 });
-application.server?.push({
+application.webServer?.push({
   error: true,
   handler: (request, response) => {
     response.send(
@@ -1583,7 +1583,7 @@ application.server?.push({
 });
 
 if (application.commandLineArguments.values.type === "email") {
-  application.email = new SMTPServer({
+  application.emailServer = new SMTPServer({
     name: application.userConfiguration.hostname,
     size: 2 ** 19,
     disabledCommands: ["AUTH"],
@@ -1819,9 +1819,9 @@ if (application.commandLineArguments.values.type === "email") {
       }
     },
   });
-  application.email.listen(25);
+  application.emailServer.listen(25);
   process.once("gracefulTermination", () => {
-    application.email!.close();
+    application.emailServer!.close();
   });
   for (const file of [
     application.userConfiguration.tls.key,
