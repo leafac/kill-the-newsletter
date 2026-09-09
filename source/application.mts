@@ -1852,93 +1852,100 @@ if (application.commandLineArguments.values.type === "initialize") {
     );
   });
 
-  for (let backgroundJobIndex = 0; backgroundJobIndex < 8; backgroundJobIndex++)
-    application.database.backgroundJobWorker(
-      {
-        type: "feedWebSubSubscriptions.dispatch",
-        timeout: 5 * 1000,
-        retries: 0,
-      },
-      async (job: {
-        feedId: number;
-        feedEntryId: number;
-        feedWebSubSubscriptionId: number;
-      }) => {
-        const feed = application.database.get<{
-          publicId: string;
-          title: string;
-          icon: string | null;
-          emailIcon: string | null;
-        }>(
-          sql`
-            select "publicId", "title", "icon", "emailIcon"
-            from "feeds"
-            where "id" = ${job.feedId};
-          `,
-        );
-        if (feed === undefined) return;
-        const feedEntry = application.database.get<{
-          id: number;
-          publicId: string;
-          createdAt: string;
-          author: string | null;
-          title: string;
-          content: string;
-        }>(
-          sql`
-            select "id", "publicId", "createdAt", "author", "title", "content"
-            from "feedEntries"
-            where "id" = ${job.feedEntryId};
-          `,
-        );
-        if (feedEntry === undefined) return;
-        const feedWebSubSubscription = application.database.get<{
-          id: number;
-          callback: string;
-          secret: string | null;
-        }>(
-          sql`
-            select "id", "callback", "secret"
-            from "feedWebSubSubscriptions"
-            where "id" = ${job.feedWebSubSubscriptionId};
-          `,
-        );
-        if (feedWebSubSubscription === undefined) return;
-        const body = application.partials.feed({
-          feed,
-          feedEntries: [feedEntry],
-        });
-        const response = await fetch(feedWebSubSubscription.callback, {
-          redirect: "manual",
-          method: "POST",
-          headers: {
-            "Content-Type": "application/atom+xml; charset=utf-8",
-            Link: `<https://${
-              application.userConfiguration.hostname
-            }/feeds/${feed.publicId}.xml>; rel="self", <https://${
-              application.userConfiguration.hostname
-            }/feeds/${feed.publicId}/websub>; rel="hub"`,
-            ...(typeof feedWebSubSubscription.secret === "string"
-              ? {
-                  "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
-                }
-              : {}),
-          },
-          body,
-        });
-        if (response.status === 410)
-          application.database.run(
+  setTimeout(() => {
+    for (
+      let backgroundJobIndex = 0;
+      backgroundJobIndex < 8;
+      backgroundJobIndex++
+    )
+      application.database.backgroundJobWorker(
+        {
+          type: "feedWebSubSubscriptions.dispatch",
+          timeout: 5 * 1000,
+          retries: 0,
+        },
+        async (job: {
+          feedId: number;
+          feedEntryId: number;
+          feedWebSubSubscriptionId: number;
+        }) => {
+          const feed = application.database.get<{
+            publicId: string;
+            title: string;
+            icon: string | null;
+            emailIcon: string | null;
+          }>(
             sql`
-              delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription.id};
+              select "publicId", "title", "icon", "emailIcon"
+              from "feeds"
+              where "id" = ${job.feedId};
             `,
           );
-        else if (String(response.status).startsWith("4"))
-          utilities.log(
-            "feedWebSubSubscriptions.dispatch",
-            "REQUEST ERROR",
-            String(response),
+          if (feed === undefined) return;
+          const feedEntry = application.database.get<{
+            id: number;
+            publicId: string;
+            createdAt: string;
+            author: string | null;
+            title: string;
+            content: string;
+          }>(
+            sql`
+              select "id", "publicId", "createdAt", "author", "title", "content"
+              from "feedEntries"
+              where "id" = ${job.feedEntryId};
+            `,
           );
-        else if (!response.ok) throw new Error(`Response: ${String(response)}`);
-      },
-    );
+          if (feedEntry === undefined) return;
+          const feedWebSubSubscription = application.database.get<{
+            id: number;
+            callback: string;
+            secret: string | null;
+          }>(
+            sql`
+              select "id", "callback", "secret"
+              from "feedWebSubSubscriptions"
+              where "id" = ${job.feedWebSubSubscriptionId};
+            `,
+          );
+          if (feedWebSubSubscription === undefined) return;
+          const body = application.partials.feed({
+            feed,
+            feedEntries: [feedEntry],
+          });
+          const response = await fetch(feedWebSubSubscription.callback, {
+            redirect: "manual",
+            method: "POST",
+            headers: {
+              "Content-Type": "application/atom+xml; charset=utf-8",
+              Link: `<https://${
+                application.userConfiguration.hostname
+              }/feeds/${feed.publicId}.xml>; rel="self", <https://${
+                application.userConfiguration.hostname
+              }/feeds/${feed.publicId}/websub>; rel="hub"`,
+              ...(typeof feedWebSubSubscription.secret === "string"
+                ? {
+                    "X-Hub-Signature": `sha256=${crypto.createHmac("sha256", feedWebSubSubscription.secret).update(body).digest("hex")}`,
+                  }
+                : {}),
+            },
+            body,
+          });
+          if (response.status === 410)
+            application.database.run(
+              sql`
+                delete from "feedWebSubSubscriptions" where "id" = ${feedWebSubSubscription.id};
+              `,
+            );
+          else if (String(response.status).startsWith("4"))
+            utilities.log(
+              "feedWebSubSubscriptions.dispatch",
+              "REQUEST ERROR",
+              String(response),
+            );
+          else if (!response.ok)
+            throw new Error(`Response: ${String(response)}`);
+        },
+      );
+  });
 }
