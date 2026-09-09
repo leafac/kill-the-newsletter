@@ -23,7 +23,7 @@ export type Application = {
   version: string;
   commandLineArguments: {
     values: {
-      type: "initialize" | "server" | "email" | "backgroundJobWorker";
+      type: "initialize" | "webServer" | "emailServer" | "backgroundJobWorker";
       port: undefined | string;
     };
     positionals: string[];
@@ -122,7 +122,7 @@ application.applicationConfiguration.ports = Array.from(
   },
   (value, index) => 18000 + index,
 );
-if (application.commandLineArguments.values.type === "server")
+if (application.commandLineArguments.values.type === "webServer")
   application.webServer = server({
     port: Number(application.commandLineArguments.values.port),
     csrfProtectionExceptionPathname: new RegExp(
@@ -1351,7 +1351,7 @@ application.webServer?.push({
   },
 });
 
-if (application.commandLineArguments.values.type === "email") {
+if (application.commandLineArguments.values.type === "emailServer") {
   application.emailServer = new SMTPServer({
     name: application.userConfiguration.hostname,
     size: 2 ** 19,

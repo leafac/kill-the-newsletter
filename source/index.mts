@@ -30,7 +30,7 @@ for (const port of application.applicationConfiguration.ports)
         path.join(import.meta.dirname, "application.mjs"),
         ...process.argv.slice(2),
         "--type",
-        "server",
+        "webServer",
         "--port",
         String(port),
       ],
@@ -72,7 +72,7 @@ node.childProcessKeepAlive(() =>
       path.join(import.meta.dirname, "application.mjs"),
       ...process.argv.slice(2),
       "--type",
-      "email",
+      "emailServer",
     ],
     {
       env: {
