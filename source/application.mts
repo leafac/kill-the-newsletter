@@ -985,11 +985,6 @@ application.webServer?.push({
           delete from "feedWebSubSubscriptions" where "feed" = ${request.state.feed!.id};
         `,
       );
-      application.database.run(
-        sql`
-          delete from "feedVisualizations" where "feed" = ${request.state.feed!.id};
-        `,
-      );
       for (const feedEntry of application.database.all<{ id: number }>(
         sql`
           select "id" from "feedEntries" where "feed" = ${request.state.feed!.id};
@@ -1030,41 +1025,6 @@ application.webServer?.push({
     response,
   ) => {
     if (request.state.feed === undefined) return;
-    if (
-      application.database.get<{ count: number }>(
-        sql`
-          select count(*) as "count"
-          from "feedVisualizations"
-          where
-            "feed" = ${request.state.feed.id} and
-            ${new Date(Date.now() - 60 * 60 * 1000).toISOString()} < "createdAt";
-      `,
-      )!.count > 10
-    ) {
-      response.statusCode = 429;
-      response.send(
-        application.layout({
-          request,
-          response,
-          head: html`<title>Rate limit · Kill the Newsletter!</title>`,
-          body: html`
-            <div>
-              <h2>Rate limit</h2>
-              <p>
-                This feed was visualized too often. Please return in one hour.
-              </p>
-            </div>
-          `,
-        }),
-      );
-      return;
-    }
-    application.database.run(
-      sql`
-        insert into "feedVisualizations" ("feed", "createdAt")
-        values (${request.state.feed.id}, ${new Date().toISOString()});
-      `,
-    );
     const feedEntries = application.database.all<{
       id: number;
       publicId: string;
@@ -1660,11 +1620,6 @@ if (application.commandLineArguments.values.type === "email") {
     }
     application.database.run(
       sql`
-        delete from "feedVisualizations" where "createdAt" < ${new Date(Date.now() - 60 * 60 * 1000).toISOString()};
-      `,
-    );
-    application.database.run(
-      sql`
         delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
       `,
     );
@@ -1946,6 +1901,11 @@ if (application.commandLineArguments.values.type === "initialize") {
       create index "index_feedWebSubSubscriptions_callback" on "feedWebSubSubscriptions" ("callback");
       create index "index_feedEntryEnclosureLinks_feedEntry" on "feedEntryEnclosureLinks" ("feedEntry");
       create index "index_feedEntryEnclosureLinks_feedEntryEnclosure" on "feedEntryEnclosureLinks" ("feedEntryEnclosure");
+    `,
+
+    sql`
+      drop table "feedVisualizations";
+      create index "index_feedEntries_createdAt" on "feedEntries" ("createdAt");
     `,
   );
 
