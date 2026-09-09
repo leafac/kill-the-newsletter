@@ -349,6 +349,7 @@ application.layout = ({ request, response, head, body }) => {
     </html>
   `;
 };
+
 application.partials.feed = ({ feed, feedEntries }) =>
   html`<?xml version="1.0" encoding="utf-8"?>
     <feed xmlns="http://www.w3.org/2005/Atom">
