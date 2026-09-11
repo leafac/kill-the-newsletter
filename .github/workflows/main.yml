@@ -29,15 +29,15 @@ jobs:
       - if: ${{ matrix.os == 'ubuntu' && startsWith(github.ref, 'refs/tags/v') }}
         run: |
           cat >> ~/.ssh/known_hosts << "EOF"
-            $ ssh-keyscan kill-the-newsletter.com
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
-            kill-the-newsletter.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFMYkjNwmcUiRukJuoAA7JYtTF1xG3HPEa/QzIdGY0pb
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
-            kill-the-newsletter.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCvUeZIIcFYMFzJAxqen3pWi0E4LP/V1vhaqs926jCxn4YqXAdBLdBaJ6cS6pq7cER0UrHqPXdGONQd0gyH3sFh3EJ/FJGaMvmhrWsfjM03vBDUWm84h7DId57TGgZCGClWdb2Mbhvxpl2Rw87Iiq+Wp//DDPfIl6QPTTwPF8b4V8Wx0Qv2pAXIZrO7eRrJpMaQPSUqaj2A94Hui1hVdl9jvfa/iYwvOguP8e4L9wI3b05ItHjg+v70GYbDCuSw045UAu5wfjlOHlJXi+h93gUSU2XmylTxssDW77agGpkIYDLeuxYxjhWAWJNbyGDiBYTjT1lNbFT4RWrJs9fURw0bc7zQCf74UUxkAinnfXllCgAroVlniJxSz9/87dWDvlRsIncz6SryX2g/lTSM8Yd290AqM2q2fvpCGJ0h6om71yNxsH1P5BaIZwJ74XhZwUVy1OK3th+OoZPLFMYwoi309188kdgWJ1CiJLkWQnoKjjiG7CD4rEaREWRThWPqb9k=
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
-            kill-the-newsletter.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBL8H/sc/goyCkg77Vj7Dr/Mf89yUUazhunpjiWGUzuLJclWt9R/JFWmRM7o1lQjVaFxE53CCbD8pLQCO4etApSs=
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
-            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.11
+            # $ ssh-keyscan kill-the-newsletter.com
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_10.2p1 Ubuntu-2ubuntu3.5
+            kill-the-newsletter.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBExsCv19jKNmLOz+o8qlq9X3ZIfufjM2S5VLGMRnMO+xzyf3sA8Vr4Mo5sDwzV7Le0dIdnrSXzytGLgqQPSpqzU=
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_10.2p1 Ubuntu-2ubuntu3.5
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_10.2p1 Ubuntu-2ubuntu3.5
+            kill-the-newsletter.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCjKY8D+tljrGKJT4SyYZqCMEOQbQUqpXrZzDZWE4GItcD80WDgpQV0uyf6ioObHN7CYkDfK+KVV1xS/dNpKEgjqzc40CKIPqu2CZCQs6uWbTNUlgRM4eal9dRsUEY+tj65BJX3IMsnIArrVHfQEwDfXUOB/O+5zeyBdQbCB7eWb6XJvEJfY8Ayt8Hx/UC4Xg7C4wevbv2iWbursH8jwy6RAYyLxngei7Mr81H8GQ/cOZo370YcwZjxv0MvWmhs2OCVojvYTYkYBpTQhtwzBTAsR+j8Ol6IbHGfd83DEucXzcG1OgID1SJ2/GymVORYQUPYUrrMTT8n7Nuwlg0fUfJlTSyOXa3RAC5xrRjCxNnDyArKlc+OEYe/eALLuoLLE9OhBey4P5P1yEqqbzDjX7WQyxIbMcfcrp7OXvGsAqsVVu/8BLfeVIuLIW2H0KVzZs3MSVBRza1DB3cgN5wJn+EpuQGBI4o+48qT+ihnrrSbxwflDAC93pRY/SxzfZK1f+0=
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_10.2p1 Ubuntu-2ubuntu3.5
+            kill-the-newsletter.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFV1haTYqLlxgtSrNPYC2BSkubvUL2l3pOfVK7BCA7L3
+            # kill-the-newsletter.com:22 SSH-2.0-OpenSSH_10.2p1 Ubuntu-2ubuntu3.5
           EOF
           rsync -a ./kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz root@kill-the-newsletter.com:/mnt/kill-the-newsletter/kill-the-newsletter--ubuntu--${{ github.ref_name }}.tar.gz
           ssh root@kill-the-newsletter.com << "EOF"
