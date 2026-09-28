@@ -1361,7 +1361,7 @@ application.webServer?.push({
 if (application.commandLineArguments.values.type === "emailServer") {
   application.emailServer = new SMTPServer({
     name: application.userConfiguration.hostname,
-    size: 2 ** 19,
+    size: 512 * 2 ** 10,
     disabledCommands: ["AUTH"],
     key: await fs.readFile(application.userConfiguration.tls.key, "utf-8"),
     cert: await fs.readFile(
@@ -1528,7 +1528,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
             while (deletedFeedEntries.length > 0) {
               const feedEntry = deletedFeedEntries.pop()!;
               feedLength += feedEntry.title.length + feedEntry.content.length;
-              if (feedLength > 2 ** 19) break;
+              if (512 * 2 ** 10 < feedLength) break;
             }
             for (const deletedFeedEntry of deletedFeedEntries) {
               application.database.run(
