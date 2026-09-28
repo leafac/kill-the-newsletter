@@ -16,7 +16,6 @@
     "@radically-straightforward/development": "^1.0.84",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^26.6.3",
-    "@types/nodemailer": "^8.0.2",
     "@types/smtp-server": "^3.5.13",
     "bootstrap-icons": "^1.13.1",
     "nodemailer": "^10.0.12",
