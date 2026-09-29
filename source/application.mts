@@ -1398,7 +1398,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
           address.address.match(utilities.emailRegExp) === null &&
           !(
             application.userConfiguration.environment === "development" &&
-            address.address.match(/^[a-z0-9._%+-=]+@localhost$/i) === null
+            address.address.match(/^[a-z0-9._%+-=]+@localhost$/i) !== null
           )
         )
           throw new Error();
