@@ -90,7 +90,7 @@ export type Application = {
 };
 
 const application = {} as Application;
-application.version = "2.1.1";
+application.version = "2.1.2";
 application.commandLineArguments = util.parseArgs({
   options: {
     type: { type: "string" },
