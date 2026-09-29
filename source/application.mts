@@ -1157,7 +1157,6 @@ application.webServer?.push({
             from "feedWebSubSubscriptions"
             where
               "feed" = ${request.state.feed.id} and
-              ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt" and
               "callback" != ${request.body["hub.callback"]};
           `,
         )!.count > 10)
@@ -1570,11 +1569,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 id: number;
               }>(
                 sql`
-                  select "id"
-                  from "feedWebSubSubscriptions"
-                  where
-                    "feed" = ${feed.id} and
-                    ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()} < "createdAt";
+                  select "id" from "feedWebSubSubscriptions" where "feed" = ${feed.id};
                 `,
               ))
                 application.database.backgroundJob({
@@ -1592,9 +1587,8 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 String(feed.publicId),
                 "ENTRY",
                 feedEntry.publicId,
-                session.envelope.mailFrom === false
-                  ? ""
-                  : session.envelope.mailFrom.address,
+                (session.envelope.mailFrom as smtpServer.SMTPServerAddress)
+                  .address,
                 "DELETED ENTRIES",
                 JSON.stringify(
                   deletedFeedEntries.map(
