@@ -1423,7 +1423,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
         session: smtpServer.SMTPServerSession & SMTPServerSessionState,
       ) => {
         try {
-          if (session.envelope.mailFrom !== false) throw new Error();
+          if (session.envelope.mailFrom === false) throw new Error();
           const email = await mailParser.simpleParser(emailStream);
           if (emailStream.sizeExceeded) throw new Error();
           const feedEntryEnclosures = new Array<{ id: number }>();
