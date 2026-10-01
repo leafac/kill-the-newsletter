@@ -653,7 +653,7 @@ application.webServer?.push({
               insert into "feeds" ("publicId", "title")
               values (
                 ${cryptoRandomString({
-                  length: 20,
+                  length: 40,
                   characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                 })},
                 ${request.body.title}
@@ -1445,7 +1445,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                       )
                       values (
                         ${cryptoRandomString({
-                          length: 20,
+                          length: 40,
                           characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                         })},
                         ${attachment.contentType},
@@ -1508,7 +1508,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                         )
                         values (
                           ${cryptoRandomString({
-                            length: 20,
+                            length: 40,
                             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                           })},
                           ${feed.id},
