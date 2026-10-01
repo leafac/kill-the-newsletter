@@ -1357,13 +1357,13 @@ application.webServer?.push({
 });
 
 if (application.commandLineArguments.values.type === "emailServer") {
-  type SMTPServerSessionState = {
-    state: {
-      feeds: {
+  type SMTPServerSessionStates = {
+    states: {
+      feed: {
         id: number;
         publicId: string;
-      }[];
-    };
+      };
+    }[];
   };
   application.emailServer = new smtpServer.SMTPServer({
     name: application.userConfiguration.hostname,
@@ -1377,9 +1377,9 @@ if (application.commandLineArguments.values.type === "emailServer") {
     onMailFrom: util.callbackify(
       async (
         address: smtpServer.SMTPServerAddress,
-        session: smtpServer.SMTPServerSession & SMTPServerSessionState,
+        session: smtpServer.SMTPServerSession & SMTPServerSessionStates,
       ) => {
-        session.state = { feeds: [] };
+        session.states = [];
         if (
           address.address.match(utilities.emailRegExp) === null ||
           ["blogtrottr.com", "feedrabbit.com"].some((hostname) =>
@@ -1392,7 +1392,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
     onRcptTo: util.callbackify(
       async (
         address: smtpServer.SMTPServerAddress,
-        session: smtpServer.SMTPServerSession & SMTPServerSessionState,
+        session: smtpServer.SMTPServerSession & SMTPServerSessionStates,
       ) => {
         if (
           address.address.match(utilities.emailRegExp) === null &&
@@ -1414,13 +1414,13 @@ if (application.commandLineArguments.values.type === "emailServer") {
           `,
         );
         if (feed === undefined) throw new Error();
-        session.state.feeds.push(feed);
+        session.states.push({ feed });
       },
     ),
     onData: util.callbackify(
       async (
         emailStream: smtpServer.SMTPServerDataStream,
-        session: smtpServer.SMTPServerSession & SMTPServerSessionState,
+        session: smtpServer.SMTPServerSession & SMTPServerSessionStates,
       ) => {
         try {
           if (session.envelope.mailFrom === false) throw new Error();
@@ -1481,13 +1481,13 @@ if (application.commandLineArguments.values.type === "emailServer") {
             );
             feedEntryEnclosures.push(feedEntryEnclosure);
           }
-          for (const feed of session.state.feeds)
+          for (const state of session.states)
             application.database.transaction(() => {
               application.database.run(
                 sql`
                   update "feeds"
                   set "emailIcon" = ${`https://${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address.split("@")[1]}/favicon.ico`}
-                  where "id" = ${feed.id};
+                  where "id" = ${state.feed.id};
                 `,
               );
               const feedEntry = application.database.get<{
@@ -1511,7 +1511,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                             length: 40,
                             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                           })},
-                          ${feed.id},
+                          ${state.feed.id},
                           ${new Date().toISOString()},
                           ${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address},
                           ${email.subject ?? "Untitled"},
@@ -1543,7 +1543,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 sql`
                   select "id", "publicId", "title", "content"
                   from "feedEntries"
-                  where "feed" = ${feed.id}
+                  where "feed" = ${state.feed.id}
                   order by "id" asc;
                 `,
               );
@@ -1569,13 +1569,13 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 id: number;
               }>(
                 sql`
-                  select "id" from "feedWebSubSubscriptions" where "feed" = ${feed.id};
+                  select "id" from "feedWebSubSubscriptions" where "feed" = ${state.feed.id};
                 `,
               ))
                 application.database.backgroundJob({
                   type: "feedWebSubSubscriptions.dispatch",
                   parameters: {
-                    feedId: feed.id,
+                    feedId: state.feed.id,
                     feedEntryId: feedEntry.id,
                     feedWebSubSubscriptionId: feedWebSubSubscription.id,
                   },
@@ -1584,7 +1584,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 "EMAIL",
                 "SUCCESS",
                 "FEED",
-                String(feed.publicId),
+                String(state.feed.publicId),
                 "ENTRY",
                 feedEntry.publicId,
                 (session.envelope.mailFrom as smtpServer.SMTPServerAddress)
