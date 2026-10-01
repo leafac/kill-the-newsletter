@@ -1515,7 +1515,13 @@ if (application.commandLineArguments.values.type === "emailServer") {
                           ${new Date().toISOString()},
                           ${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address},
                           ${email.subject ?? "Untitled"},
-                          ${typeof email.html === "string" ? email.html : typeof email.textAsHtml === "string" ? email.textAsHtml : "No content."}
+                          ${
+                            typeof email.html === "string"
+                              ? email.html
+                              : typeof email.textAsHtml === "string"
+                                ? email.textAsHtml
+                                : html`<div></div>`
+                          }
                         );
                       `,
                     ).lastInsertRowid
