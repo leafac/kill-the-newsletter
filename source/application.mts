@@ -1431,6 +1431,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
           if (emailStream.sizeExceeded) throw new Error();
           const feedEntryEnclosures = new Array<{ id: number }>();
           for (const attachment of email.attachments) {
+            const content = Buffer.from(attachment.content as ArrayBuffer);
             const feedEntryEnclosure = application.database.get<{
               id: number;
               publicId: string;
@@ -1452,7 +1453,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                           characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                         })},
                         ${attachment.mimeType},
-                        ${attachment.size},
+                        ${content.length},
                         ${
                           attachment.filename?.replaceAll(
                             /[^A-Za-z0-9_.-]/g,
@@ -1480,7 +1481,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                 feedEntryEnclosure.publicId,
                 feedEntryEnclosure.name,
               ),
-              attachment.content,
+              content,
             );
             feedEntryEnclosures.push(feedEntryEnclosure);
           }
