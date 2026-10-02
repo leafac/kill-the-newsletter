@@ -5,6 +5,7 @@ import url from "node:url";
 import fs from "node:fs/promises";
 import fsCallback from "node:fs";
 import crypto from "node:crypto";
+import stream from "node:stream";
 import server from "@radically-straightforward/server";
 import * as serverTypes from "@radically-straightforward/server";
 import sql, { Database } from "@radically-straightforward/sqlite";
@@ -1424,7 +1425,9 @@ if (application.commandLineArguments.values.type === "emailServer") {
       ) => {
         try {
           if (session.envelope.mailFrom === false) throw new Error();
-          const email = await PostalMime.parse(emailStream);
+          const email = await PostalMime.parse(
+            stream.Readable.toWeb(emailStream) as ReadableStream,
+          );
           if (emailStream.sizeExceeded) throw new Error();
           const feedEntryEnclosures = new Array<{ id: number }>();
           for (const attachment of email.attachments) {
