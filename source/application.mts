@@ -16,7 +16,7 @@ import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
 import smtpServer from "smtp-server";
-import * as mailParser from "mailparser";
+import PostalMime from "postal-mime";
 
 export type Application = {
   version: string;
@@ -1424,7 +1424,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
       ) => {
         try {
           if (session.envelope.mailFrom === false) throw new Error();
-          const email = await mailParser.simpleParser(emailStream);
+          const email = await PostalMime.parse(emailStream);
           if (emailStream.sizeExceeded) throw new Error();
           const feedEntryEnclosures = new Array<{ id: number }>();
           for (const attachment of email.attachments) {
@@ -1448,7 +1448,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                           length: 40,
                           characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                         })},
-                        ${attachment.contentType},
+                        ${attachment.mimeType},
                         ${attachment.size},
                         ${
                           attachment.filename?.replaceAll(
