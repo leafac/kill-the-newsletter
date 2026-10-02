@@ -1,5 +1,6 @@
 import path from "node:path";
 import nodemailer from "nodemailer";
+import html from "@radically-straightforward/html";
 
 await nodemailer
   .createTransport({
@@ -10,8 +11,17 @@ await nodemailer
     from: `"Example of Sender" <sender@example.com>`,
     to: `"Example of Recipient" <r5bsqg3w6gqrsv7m59f1@localhost>`,
     subject: "Example of a Newsletter Entry",
-    html: "<p>Hello <strong>World</strong></p>".repeat(2 ** 0 /* 13 */),
+    html: html`
+      <p>
+        Hello <strong>World</strong>
+        <img src="image@kill-the-newsletter.com" />
+      </p>
+    `.repeat(2 ** 0 /* 13 */),
     attachments: [
       { path: path.join(import.meta.dirname, "../static/favicon.ico") },
+      {
+        path: path.join(import.meta.dirname, "../static/apple-touch-icon.png"),
+        cid: "image@kill-the-newsletter.com",
+      },
     ],
   });
