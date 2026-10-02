@@ -1518,9 +1518,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                           ${
                             typeof email.html === "string"
                               ? email.html
-                              : typeof email.textAsHtml === "string"
-                                ? email.textAsHtml
-                                : html`<div></div>`
+                              : html`<pre>${email.text ?? ""}</pre>`
                           }
                         );
                       `,
