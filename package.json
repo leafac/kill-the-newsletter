@@ -8,6 +8,7 @@
   "dependencies": {
     "@radically-straightforward/production": "^1.0.83",
     "crypto-random-string": "^6.0.0",
+    "linkedom": "^0.18.13",
     "postal-mime": "^4.0.2",
     "smtp-server": "^3.19.16"
   },

@@ -18,6 +18,7 @@ import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
 import smtpServer from "smtp-server";
 import PostalMime from "postal-mime";
+import { DOMParser } from "linkedom";
 
 export type Application = {
   version: string;
@@ -1429,6 +1430,25 @@ if (application.commandLineArguments.values.type === "emailServer") {
             stream.Readable.toWeb(emailStream) as ReadableStream,
           );
           if (emailStream.sizeExceeded) throw new Error();
+          const emailBody =
+            typeof email.html === "string"
+              ? email.html
+              : html`<pre>${email.text ?? ""}</pre>`;
+          const emailBodyDOM = new DOMParser()
+            .parseFromString(
+              emailBody.trim().startsWith(`<!doctype`)
+                ? emailBody
+                : html`
+                    <!doctype html>
+                    <html>
+                      <body>
+                        $${emailBody}
+                      </body>
+                    </html>
+                  `,
+              "text/html",
+            )
+            .querySelector("html");
           const feedEntryEnclosures = new Array<{ id: number }>();
           for (const attachment of email.attachments) {
             const content = Buffer.from(attachment.content as ArrayBuffer);
@@ -1484,6 +1504,21 @@ if (application.commandLineArguments.values.type === "emailServer") {
               content,
             );
             feedEntryEnclosures.push(feedEntryEnclosure);
+            if (typeof attachment.contentId === "string")
+              for (const element of emailBodyDOM.querySelectorAll(
+                'img[src^="cid:"]',
+              ))
+                if (
+                  attachment.contentId.replaceAll(/^<|>$/g, "") ===
+                  element
+                    .getAttribute("src")!
+                    .replace(/^cid:/, "")
+                    .replaceAll(/^<|>$/g, "")
+                )
+                  element.setAttribute(
+                    "src",
+                    `/files/${feedEntryEnclosure.publicId}/${feedEntryEnclosure.name}`,
+                  );
           }
           for (const state of session.states)
             application.database.transaction(() => {
@@ -1519,11 +1554,10 @@ if (application.commandLineArguments.values.type === "emailServer") {
                           ${new Date().toISOString()},
                           ${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address},
                           ${email.subject ?? "Untitled"},
-                          ${
-                            typeof email.html === "string"
-                              ? email.html
-                              : html`<pre>${email.text ?? ""}</pre>`
-                          }
+                          ${html`
+                            <!doctype html>
+                            $${emailBodyDOM.outerHTML}
+                          `}
                         );
                       `,
                     ).lastInsertRowid
