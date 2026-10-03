@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.2 · 2026-10-03
+
+- Add support for inline images.
+
 ## 2.0.9 · 2026-01-12
 
 - Enable compression on the server, which should reduce data transfer costs.
