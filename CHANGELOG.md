@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.1.2 · 2026-10-03
+## 2.1.3 · 2026-10-03
 
 - Add support for inline images.
 
