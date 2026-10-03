@@ -1448,7 +1448,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                   `,
               "text/html",
             )
-            .querySelector("html");
+            .querySelector("html")!;
           const feedEntryEnclosures = new Array<{ id: number }>();
           for (const attachment of email.attachments) {
             const content = Buffer.from(attachment.content as ArrayBuffer);
