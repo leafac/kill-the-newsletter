@@ -14,7 +14,7 @@ await nodemailer
     html: html`
       <p>
         Hello <strong>World</strong>
-        <img src="image@kill-the-newsletter.com" />
+        <img src="cid:image@kill-the-newsletter.com" />
       </p>
     `.repeat(2 ** 0 /* 13 */),
     attachments: [
