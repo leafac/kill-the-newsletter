@@ -14,14 +14,14 @@ await nodemailer
     html: html`
       <p>
         Hello <strong>World</strong>
-        <img src="cid:image@kill-the-newsletter.com" />
+        <img src="cid:image@example.com" />
       </p>
     `.repeat(2 ** 0 /* 13 */),
     attachments: [
       { path: path.join(import.meta.dirname, "../static/favicon.ico") },
       {
         path: path.join(import.meta.dirname, "../static/apple-touch-icon.png"),
-        cid: "image@kill-the-newsletter.com",
+        cid: "image@example.com",
       },
     ],
   });
