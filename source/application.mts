@@ -1277,7 +1277,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                 )
                 values (
                   ${feed.id},
-                  ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
+                  ${Temporal.Now.instant().toString()},
                   ${parameters["hub.callback"]},
                   ${parameters["hub.secret"] ?? null}
                 );
@@ -1288,7 +1288,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
               sql`
                 update "feedWebSubSubscriptions"
                 set
-                  "createdAt" = ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
+                  "createdAt" = ${Temporal.Now.instant().toString()},
                   "secret" = ${parameters["hub.secret"] ?? null}
                 where "id" = ${feedWebSubSubscription.id};
               `,
@@ -1551,7 +1551,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                           })},
                           ${state.feed.id},
-                          ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
+                          ${Temporal.Now.instant().toString()},
                           ${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address},
                           ${email.subject ?? "Untitled"},
                           ${html`
@@ -1758,7 +1758,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
       sql`
         select "id"
         from "feedEntries"
-        where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 30 }).toInstant().toString({ fractionalSecondDigits: 3 })};
+        where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 30 }).toInstant().toString()};
       `,
     )) {
       application.database.run(
@@ -1803,7 +1803,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
 
     application.database.run(
       sql`
-        delete from "feedWebSubSubscriptions" where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 1 }).toInstant().toString({ fractionalSecondDigits: 3 })};
+        delete from "feedWebSubSubscriptions" where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 1 }).toInstant().toString()};
       `,
     );
   });
@@ -1882,7 +1882,7 @@ if (application.commandLineArguments.values.type === "initialize") {
             values (
               ${"fjdkqejwpk22"},
               ${feed.id},
-              ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
+              ${Temporal.Now.instant().toString()},
               ${"Example of a feed entry"},
               ${html`<p>Hello <strong>World</strong> <img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg" /></p>`}
             );
@@ -1894,7 +1894,7 @@ if (application.commandLineArguments.values.type === "initialize") {
             values (
               ${"fjrl1k4j234"},
               ${feed.id},
-              ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
+              ${Temporal.Now.instant().toString()},
               ${"Another example of a feed entry"},
               ${html`<p>Hello <strong>World</strong></p>`}
             );
