@@ -299,9 +299,8 @@ application.layout = ({ request, response, head, body }) => {
                     z-index: 1500;
                   `}"
                   javascript="${javascript`
-                    window.setTimeout(() => {
-                      this.remove();
-                    }, 5 * 1000);
+                    await utilities.sleep(5 * 1000);
+                    this.remove();
                   `}"
                 >
                   $${flash}
@@ -1208,7 +1207,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
     }>(
       {
         type: "feedWebSubSubscriptions.verify",
-        timeout: 5 * 1000,
+        timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"),
         retries: 0,
       },
       async (parameters) => {
@@ -1669,7 +1668,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
     }>(
       {
         type: "feedWebSubSubscriptions.dispatch",
-        timeout: 5 * 1000,
+        timeout: Temporal.Duration.from({ seconds: 5 }).total("milliseconds"),
         retries: 0,
       },
       async (parameters) => {
@@ -1751,62 +1750,65 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
       },
     );
 
-  node.setInterval({ duration: 60 * 60 * 1000 }, async () => {
-    for (const feedEntry of application.database.all<{
-      id: number;
-    }>(
-      sql`
-        select "id"
-        from "feedEntries"
-        where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 30 }).toInstant().toString()};
-      `,
-    )) {
-      application.database.run(
+  node.setInterval(
+    { duration: Temporal.Duration.from({ hours: 1 }).total("milliseconds") },
+    async () => {
+      for (const feedEntry of application.database.all<{
+        id: number;
+      }>(
         sql`
-          delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+          select "id"
+          from "feedEntries"
+          where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 30 }).toInstant().toString()};
         `,
-      );
-      application.database.run(
-        sql`
-          delete from "feedEntries" where "id" = ${feedEntry.id};
-        `,
-      );
-    }
+      )) {
+        application.database.run(
+          sql`
+            delete from "feedEntryEnclosureLinks" where "feedEntry" = ${feedEntry.id};
+          `,
+        );
+        application.database.run(
+          sql`
+            delete from "feedEntries" where "id" = ${feedEntry.id};
+          `,
+        );
+      }
 
-    for (const feedEntryEnclosure of application.database.all<{
-      id: number;
-      publicId: string;
-    }>(
-      sql`
-        select
-          "feedEntryEnclosures"."id" as "id",
-          "feedEntryEnclosures"."publicId" as "publicId"
-        from "feedEntryEnclosures"
-        left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
-        where "feedEntryEnclosureLinks"."id" is null;
-      `,
-    )) {
-      await fs.rm(
-        path.join(
-          application.userConfiguration.dataDirectory,
-          "files",
-          feedEntryEnclosure.publicId,
-        ),
-        { recursive: true, force: true },
-      );
+      for (const feedEntryEnclosure of application.database.all<{
+        id: number;
+        publicId: string;
+      }>(
+        sql`
+          select
+            "feedEntryEnclosures"."id" as "id",
+            "feedEntryEnclosures"."publicId" as "publicId"
+          from "feedEntryEnclosures"
+          left join "feedEntryEnclosureLinks" on "feedEntryEnclosures"."id" = "feedEntryEnclosureLinks"."feedEntryEnclosure"
+          where "feedEntryEnclosureLinks"."id" is null;
+        `,
+      )) {
+        await fs.rm(
+          path.join(
+            application.userConfiguration.dataDirectory,
+            "files",
+            feedEntryEnclosure.publicId,
+          ),
+          { recursive: true, force: true },
+        );
+        application.database.run(
+          sql`
+            delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
+          `,
+        );
+      }
+
       application.database.run(
         sql`
-          delete from "feedEntryEnclosures" where "id" = ${feedEntryEnclosure.id};
+          delete from "feedWebSubSubscriptions" where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 1 }).toInstant().toString()};
         `,
       );
-    }
-
-    application.database.run(
-      sql`
-        delete from "feedWebSubSubscriptions" where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 1 }).toInstant().toString()};
-      `,
-    );
-  });
+    },
+  );
 }
 
 if (application.commandLineArguments.values.type === "initialize") {
