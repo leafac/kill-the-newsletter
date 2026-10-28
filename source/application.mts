@@ -16,7 +16,7 @@ import * as utilities from "@radically-straightforward/utilities";
 import * as node from "@radically-straightforward/node";
 import * as caddy from "@radically-straightforward/caddy";
 import cryptoRandomString from "crypto-random-string";
-import smtpServer from "smtp-server";
+import * as smtpServer from "smtp-server";
 import PostalMime from "postal-mime";
 import { DOMParser } from "linkedom";
 
@@ -1277,7 +1277,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
                 )
                 values (
                   ${feed.id},
-                  ${new Date().toISOString()},
+                  ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
                   ${parameters["hub.callback"]},
                   ${parameters["hub.secret"] ?? null}
                 );
@@ -1288,7 +1288,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker")
               sql`
                 update "feedWebSubSubscriptions"
                 set
-                  "createdAt" = ${new Date().toISOString()},
+                  "createdAt" = ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
                   "secret" = ${parameters["hub.secret"] ?? null}
                 where "id" = ${feedWebSubSubscription.id};
               `,
@@ -1551,7 +1551,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
                             characters: "abcdefghijklmnopqrstuvwxyz0123456789",
                           })},
                           ${state.feed.id},
-                          ${new Date().toISOString()},
+                          ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
                           ${(session.envelope.mailFrom as smtpServer.SMTPServerAddress).address},
                           ${email.subject ?? "Untitled"},
                           ${html`
@@ -1758,7 +1758,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
       sql`
         select "id"
         from "feedEntries"
-        where "createdAt" < ${new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()};
+        where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 30 }).toInstant().toString({ fractionalSecondDigits: 3 })};
       `,
     )) {
       application.database.run(
@@ -1803,7 +1803,7 @@ if (application.commandLineArguments.values.type === "backgroundJobWorker") {
 
     application.database.run(
       sql`
-        delete from "feedWebSubSubscriptions" where "createdAt" < ${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()};
+        delete from "feedWebSubSubscriptions" where "createdAt" < ${Temporal.Now.zonedDateTimeISO().subtract({ days: 1 }).toInstant().toString({ fractionalSecondDigits: 3 })};
       `,
     );
   });
@@ -1882,7 +1882,7 @@ if (application.commandLineArguments.values.type === "initialize") {
             values (
               ${"fjdkqejwpk22"},
               ${feed.id},
-              ${new Date().toISOString()},
+              ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
               ${"Example of a feed entry"},
               ${html`<p>Hello <strong>World</strong> <img src="https://interactive-examples.mdn.mozilla.net/media/cc0-images/grapefruit-slice-332-332.jpg" /></p>`}
             );
@@ -1894,7 +1894,7 @@ if (application.commandLineArguments.values.type === "initialize") {
             values (
               ${"fjrl1k4j234"},
               ${feed.id},
-              ${new Date().toISOString()},
+              ${Temporal.Now.instant().toString({ fractionalSecondDigits: 3 })},
               ${"Another example of a feed entry"},
               ${html`<p>Hello <strong>World</strong></p>`}
             );
