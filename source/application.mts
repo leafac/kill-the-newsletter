@@ -1432,7 +1432,7 @@ if (application.commandLineArguments.values.type === "emailServer") {
           const emailBody =
             typeof email.html === "string"
               ? email.html
-              : html`<pre>${email.text ?? ""}</pre>`;
+              : html`<div>${email.text ?? ""}</div>`;
           const emailBodyDOM = new DOMParser()
             .parseFromString(
               emailBody.trim().startsWith(`<!doctype`)
